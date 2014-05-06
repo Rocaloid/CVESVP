@@ -1,0 +1,59 @@
+#define _Spectrum _C(CDSP2_Spectrum, _, _T1)
+#define F2B(F) (F * FFTSize / SampleRate)
+#define B2F(B) (((_T1)B) * ((_T1)SampleRate) / FFTSize)
+
+//Wavetave/src/Plugin_F0Marking.m
+RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq,
+    int SampleRate)
+{
+    int FFTSize = Sorc -> Size;
+    int F0 = F2B(MinFreq) + 1;
+    int UBound = F2B(MaxFreq);
+    int i;
+    
+    _Spectrum NewSorc;
+    RCall(_Spectrum, Ctor)(& NewSorc);
+    RCall(_Spectrum, Copy)(Sorc, & NewSorc);
+    RCall(_Spectrum, MagnConv)(& NewSorc, CDSP2_LogMagn);
+    /*
+    if(Sorc -> MagnType != CDSP2_LogMagn)
+        return 0;
+    
+    _T1* Magn = RCall(RAlloc, _T1)(Sorc -> Size / 2);
+    RCall(CDSP2_VCopy, _T1)(Magn, Sorc -> Magn, Sorc -> Size / 2);
+    */
+    
+    _T1* Magn = NewSorc.Magn;
+    _T1 MaxDiff = 0;
+    _T1 LeftMax = 0;
+    
+    RCall(CDSP2_VCMax, _T1)(Magn, Magn, - 3.0, NewSorc.Size / 2);
+    
+    for(i = F2B(MinFreq); i < UBound; i ++)
+    {
+        if(Magn[i] - Magn[i - 1] &&
+           Magn[i] > Magn[i + 1]
+        && Magn[i] - Magn[i - 2] > 0.5
+        && Magn[i] - Magn[i + 2] > 0.5)
+        {
+            LeftMax = RCall(CDSP2_VMaxElmt, _T1)(Magn, 0, F0);
+            if(Magn[i] - LeftMax > MaxDiff)
+            {
+                MaxDiff = Magn[i] - LeftMax;
+                F0 = i;
+            }
+        }
+    }
+    
+    RCall(_Spectrum, Dtor)(& NewSorc);
+    return F0;
+}
+
+RTFunc(_T1, CSVP_F0FromSpectrum, _Spectrum* Sorc, int MinFreq, int MaxFreq,
+    int SampleRate);
+
+RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position, int WinSize,
+    int MinFreq, int MaxFreq, int SampleRate);
+
+#undef  _Spectrum
+
