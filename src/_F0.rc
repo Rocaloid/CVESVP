@@ -64,7 +64,6 @@ RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,
     
     _T1 Phase1 = Sorc1 -> Phse[Bin];
     _T1 Phase2 = Sorc2 -> Phse[Bin];
-    printf("p1: %f, p2: %f\n", Phase1, Phase2);
     if(Phase2 < Phase1)
         Phase2 += 2 * M_PI;
     
@@ -73,7 +72,32 @@ RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,
 }
 
 RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position, int WinSize,
-    int MinFreq, int MaxFreq, int SampleRate);
+    int MinFreq, int MaxFreq, int SampleRate)
+{
+    _Spectrum Spec1, Spec2;
+    RCall(_Spectrum, CtorSize)(& Spec1, WinSize);
+    RCall(_Spectrum, CtorSize)(& Spec2, WinSize);
+    
+    Spec1.MagnType = CDSP2_LogMagn;
+    Spec2.MagnType = CDSP2_LogMagn;
+    Spec1.NoPhase = 0;
+    Spec2.NoPhase = 0;
+    
+    RCall(_Spectrum, FromWaveW)(& Spec1, Sorc, Position - WinSize / 2);
+    RCall(_Spectrum, FromWaveW)(& Spec2, Sorc, Position - WinSize / 2 + 1);
+    
+    int Bin = RCall(CSVP_F0FromSpectrumB, _T1)(& Spec1, MinFreq, MaxFreq,
+        SampleRate);
+    if(Bin < 2)
+        return 0;
+    
+    _T1 Ret = RCall(CSVP_F0FromSuccSpectrumAndBin, _T1)(& Spec1, & Spec2, 1,
+        Bin, SampleRate);
+    
+    RDelete(& Spec1, & Spec2);
+    
+    return Ret;
+}
 
 #undef  _Spectrum
 
