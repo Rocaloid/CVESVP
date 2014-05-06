@@ -36,7 +36,7 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq,
         && Magn[i] - Magn[i - 2] > 0.5
         && Magn[i] - Magn[i + 2] > 0.5)
         {
-            LeftMax = RCall(CDSP2_VMaxElmt, _T1)(Magn, 0, F0);
+            LeftMax = RCall(CDSP2_VMaxElmt, _T1)(Magn, F2B(MinFreq), i - 2);
             if(Magn[i] - LeftMax > MaxDiff)
             {
                 MaxDiff = Magn[i] - LeftMax;
@@ -50,7 +50,27 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq,
 }
 
 RTFunc(_T1, CSVP_F0FromSpectrum, _Spectrum* Sorc, int MinFreq, int MaxFreq,
-    int SampleRate);
+    int SampleRate)
+{
+    return RCall(CSVP_F0FromSpectrumB, _T1)(Sorc, MinFreq, MaxFreq, SampleRate)
+        * SampleRate / Sorc -> Size;
+}
+
+RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,
+    int HopSize, int Bin, int SampleRate)
+{
+    if(Sorc1 -> NoPhase == 1 || Sorc2 -> NoPhase == 1)
+        return 0;
+    
+    _T1 Phase1 = Sorc1 -> Phse[Bin];
+    _T1 Phase2 = Sorc2 -> Phse[Bin];
+    printf("p1: %f, p2: %f\n", Phase1, Phase2);
+    if(Phase2 < Phase1)
+        Phase2 += 2 * M_PI;
+    
+    _T1 Delta = Phase2 - Phase1;
+    return Delta / 2.0 / M_PI * SampleRate / HopSize;
+}
 
 RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position, int WinSize,
     int MinFreq, int MaxFreq, int SampleRate);
