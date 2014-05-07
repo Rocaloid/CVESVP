@@ -1,0 +1,112 @@
+#define _Spectrum _C(CDSP2_Spectrum, _, _T1)
+#define _IWave _C(CDSP2_IWave, _, _T1)
+#define _Wave _C(CDSP2_Wave, _, _T1)
+
+RCtor(_RTClassName)
+{
+    This -> HopSize = 0;
+    This -> FrameSize = 0;
+    This -> FrameNum = 0;
+    Array_Ctor(_Spectrum, This -> Frames);
+    
+    RInit(_RTClassName);
+}
+
+RDtor(_RTClassName)
+{
+    Array_ObjDtor(_Spectrum, This -> Frames);
+    Array_Dtor(_Spectrum, This -> Frames);
+}
+
+RTMethod(void, CSVP_STFTChain, CtorSize, int Num, int FrameSize)
+{
+    RCall(_RTClassName, Ctor)(This);
+    RCall(_RTClassName, Resize)(This, Num, FrameSize);
+}
+
+RTMethod(void, CSVP_STFTChain, Resize, int Num, int FrameSize)
+{
+    int i;
+    if(FrameSize != This -> FrameSize)
+    {
+        Array_ObjDtor(_Spectrum, This -> Frames);
+        Array_Resize(_Spectrum, This -> Frames, Num);
+        for(i = 0; i < Num; i ++)
+            RCall(_Spectrum, CtorSize)(This -> Frames + i, FrameSize);
+        This -> FrameSize = FrameSize;
+        This -> FrameNum = 0;
+        This -> Frames_Index = Num - 1;
+        return;
+    }
+    if(Num > This -> Frames_Index + 1)
+    {
+        Array_Resize(_Spectrum, This -> Frames, Num);
+        for(i = This -> Frames_Index + 1; i < Num; i ++)
+            RCall(_Spectrum, CtorSize)(This -> Frames + i, FrameSize);
+    }else
+    {
+        for(i = This -> Frames_Index; i >= Num; i --)
+            RCall(_Spectrum, Dtor)(This -> Frames + i);
+        Array_Resize(_Spectrum, This -> Frames, Num);
+        This -> FrameNum = Num < This -> FrameNum ? Num : This -> FrameNum;
+    }
+    This -> Frames_Index = Num - 1;
+}
+
+RTMethod(void, CSVP_STFTChain, FromWaveW, void* Sorc, int Start, int Length)
+{
+    int i;
+    This -> FrameNum = 0;
+    for(i = Start; i < Length; i += This -> HopSize)
+    {
+        RCall(_Spectrum, FromWaveW)(This -> Frames + This -> FrameNum,
+            Sorc, i - This -> FrameSize / 2);
+        This -> FrameNum ++;
+    }
+}
+
+RTMethod(void, CSVP_STFTChain, WFromWave, void* Sorc, _T1* Window, int Start,
+    int Length)
+{
+    _T1* TmpWindow = ((_Wave*)Sorc) -> Window;
+    ((_Wave*)Sorc) -> Window = Window;
+    RCall(_RTClassName, FromWaveW)(This, Sorc, Start, Length);
+    ((_Wave*)Sorc) -> Window = TmpWindow;
+}
+
+RTMethod(void, CSVP_STFTChain, ToWaveW, void* Dest, int Start, int Length)
+{
+    int i;
+    int Iter = 0;
+    _T1* Tmp = RCall(RAlloc, _T1)(This -> FrameSize);
+    _T1 WinFactor = RCall(CSVP_WinFactorFromWindow, _T1)
+        (((_Wave*)Dest) -> Window, This -> HopSize, This -> FrameSize);
+    
+    for(i = Start; i < Length; i += This -> HopSize)
+    {
+        RCall(_Spectrum, ToReal)(This -> Frames + Iter, Tmp);
+        RCall(CDSP2_VCMul, _T1)(Tmp, Tmp, WinFactor, This -> FrameSize);
+        RCall(_IWave, Add)(Dest, Tmp, i - This -> FrameSize / 2,
+            This -> FrameSize);
+        Iter ++;
+        if(Iter > This -> FrameNum) break;
+    }
+    RFree(Tmp);
+}
+
+RTMethod(void, CSVP_STFTChain, WToWave, void* Dest, _T1* Window, int Start,
+    int Length);
+
+RTFunc(_T1, CSVP_WinFactorFromWindow, _T1* Sorc, int HopSize, int Length)
+{
+    int i;
+    _T1 Amp = 0;
+    for(i = 0; i < Length / HopSize; i ++)
+        Amp += Sorc[i * HopSize];
+    return 1.0f / Amp;
+}
+
+#undef  _Wave
+#undef  _IWave
+#undef  _Spectrum
+

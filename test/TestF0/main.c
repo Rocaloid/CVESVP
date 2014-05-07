@@ -16,8 +16,15 @@ int main()
     CDSP2_Wave_Float_FromFile(& MyWave, & Path);
     
     int i;
+    float F0 = 0;
     for(i = 0; i < MyWave.Size; i += 500)
-        printf("%f\n", CSVP_F0FromWave_Float(& MyWave, i, 2048, 100, 1500, 48000));
+    {
+        float tmp = CSVP_F0FromWave_Float(& MyWave, i, 2048, 100,
+            1500, 48000);
+        printf("%f\n", tmp);
+        F0 = tmp;
+        //printf("%f at %f\n", tmp, (float)i / 48000);
+    }
     
     RDelete(& MyWave, & Path);
     RFree(wind);
