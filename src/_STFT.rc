@@ -8,6 +8,7 @@ RCtor(_RTClassName)
     This -> FrameSize = 0;
     This -> FrameNum = 0;
     Array_Ctor(_Spectrum, This -> Frames);
+    Array_Ctor(int, This -> Positions);
     
     RInit(_RTClassName);
 }
@@ -16,6 +17,7 @@ RDtor(_RTClassName)
 {
     Array_ObjDtor(_Spectrum, This -> Frames);
     Array_Dtor(_Spectrum, This -> Frames);
+    Array_Dtor(int, This -> Positions);
 }
 
 RTMethod(void, CSVP_STFTChain, CtorSize, int Num, int FrameSize)
@@ -31,6 +33,7 @@ RTMethod(void, CSVP_STFTChain, Resize, int Num, int FrameSize)
     {
         Array_ObjDtor(_Spectrum, This -> Frames);
         Array_Resize(_Spectrum, This -> Frames, Num);
+        Array_Resize(_Spectrum, This -> Positions, Num);
         for(i = 0; i < Num; i ++)
             RCall(_Spectrum, CtorSize)(This -> Frames + i, FrameSize);
         This -> FrameSize = FrameSize;
@@ -50,7 +53,16 @@ RTMethod(void, CSVP_STFTChain, Resize, int Num, int FrameSize)
         Array_Resize(_Spectrum, This -> Frames, Num);
         This -> FrameNum = Num < This -> FrameNum ? Num : This -> FrameNum;
     }
+    Array_Resize(_Spectrum, This -> Positions, Num);
     This -> Frames_Index = Num - 1;
+}
+
+RTMethod(void, CSVP_STFTChain, AddSpectrum, _Spectrum Sorc, int Position)
+{
+    int Index;
+    Array_IncFind(Index, int, This -> Positions, Position);
+    Array_Insert(_Spectrum, This -> Frames, Index, Sorc);
+    Array_Insert(int, This -> Positions, Index, Position);
 }
 
 RTMethod(void, CSVP_STFTChain, FromWaveW, void* Sorc, int Start, int Length)
@@ -61,6 +73,9 @@ RTMethod(void, CSVP_STFTChain, FromWaveW, void* Sorc, int Start, int Length)
     {
         RCall(_Spectrum, FromWaveW)(This -> Frames + This -> FrameNum,
             Sorc, i - This -> FrameSize / 2);
+        This -> Frames[This -> FrameNum].SampleRate = 
+            ((_Wave*)Sorc) -> SampleRate;
+        This -> Positions[This -> FrameNum] = i;
         This -> FrameNum ++;
     }
 }
@@ -91,11 +106,18 @@ RTMethod(void, CSVP_STFTChain, ToWaveW, void* Dest, int Start, int Length)
         Iter ++;
         if(Iter > This -> FrameNum) break;
     }
+    ((_Wave*)Dest) -> SampleRate = This -> Frames[0].SampleRate;
     RFree(Tmp);
 }
 
 RTMethod(void, CSVP_STFTChain, WToWave, void* Dest, _T1* Window, int Start,
-    int Length);
+    int Length)
+{
+    _T1* TmpWindow = ((_Wave*)Dest) -> Window;
+    ((_Wave*)Dest) -> Window = Window;
+    RCall(_RTClassName, ToWaveW)(This, Dest, Start, Length);
+    ((_Wave*)Dest) -> Window = TmpWindow;
+}
 
 RTFunc(_T1, CSVP_WinFactorFromWindow, _T1* Sorc, int HopSize, int Length)
 {

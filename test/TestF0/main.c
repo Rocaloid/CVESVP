@@ -19,8 +19,7 @@ int main()
     float F0 = 0;
     for(i = 0; i < MyWave.Size; i += 500)
     {
-        float tmp = CSVP_F0FromWave_Float(& MyWave, i, 2048, 100,
-            1500, 48000);
+        float tmp = CSVP_F0FromWave_Float(& MyWave, i, 2048, 100, 1500);
         printf("%f\n", tmp);
         F0 = tmp;
         //printf("%f at %f\n", tmp, (float)i / 48000);

@@ -26,8 +26,14 @@ int main()
     CSVP_STFTChain_Float_CtorSize(& SChain, 300000 / 256 * 1.5, 2048);
     SChain.HopSize = 256;
     
-    CSVP_STFTChain_Float_WFromWave(& SChain, & MyWave, wind2, 0, 300000);
-    CSVP_STFTChain_Float_ToWaveW(& SChain, & NewWave, 0, 300000);
+    CSVP_STFTChain_Float_WFromWave(& SChain, & MyWave, wind, 0, 300000);
+    CSVP_STFTChain_Float_WToWave(& SChain, & NewWave, wind2, 0, 300000);
+    
+    String_SetChars(& Path, "/tmp/test3.wav");
+    NewWave.SampleRate = 48000;
+    
+    CDSP2_Wave_Float_ToFile(& NewWave, & Path);
+    
     
     CSVP_STFTChain_Float_Dtor(& SChain);
     RDelete(& MyWave, & NewWave, & Path);
