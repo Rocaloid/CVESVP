@@ -1,0 +1,79 @@
+#define _STFTChain _C(CSVP_STFTChain, _, _T1)
+#define _Spectrum _C(CDSP2_Spectrum, _, _T1)
+
+RCtor(_RTClassName)
+{
+    RCall(_STFTChain, Ctor)(& This -> Chain);
+    This -> LastPosition = 0;
+    RInit(_RTClassName);
+}
+
+RDtor(_RTClassName)
+{
+    RCall(_STFTChain, Dtor)(& This -> Chain);
+}
+
+RTMethod(void, CSVP_STFTIterlyzer, CtorSize, int FrameSize)
+{
+    RCall(_STFTChain, CtorSize)(& This -> Chain, 10, FrameSize);
+    This -> LastPosition = 0;
+    RInit(_RTClassName);
+}
+
+RTMethod(void, CSVP_STFTIterlyzer, Resize, int FrameSize)
+{
+    RCall(_STFTChain, Resize)(& This -> Chain, 10, FrameSize);
+    RCall(_STFTChain, Reset)(& This -> Chain);
+    This -> LastPosition = 0;
+}
+
+RTMethod(void, CSVP_STFTIterlyzer, SetWave, void* Sorc)
+{
+    This -> Wave = Sorc;
+    This -> LastPosition = 0;
+    RCall(_STFTChain, Reset)(& This -> Chain);
+}
+
+RTMethod(void, CSVP_STFTIterlyzer, SetPosition, int Position)
+{
+    This -> LastPosition = Position;
+}
+
+RTMethod(void, CSVP_STFTIterlyzer, SetHopSize, int HopSize)
+{
+    RCall(_STFTChain, SetHopSize)(& This -> Chain, HopSize);
+}
+
+RTMethod(int , CSVP_STFTIterlyzer, GetPosition)
+{
+    return This -> LastPosition;
+}
+
+RTMethod(int , CSVP_STFTIterlyzer, GetHopSize)
+{
+    return RCall(_STFTChain, GetHopSize)(& This -> Chain);
+}
+
+RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position)
+{
+    int HopSize = RCall(_STFTChain, GetHopSize)(& This -> Chain);
+    int FrameSize = RCall(_STFTChain, GetFrameSize)(& This -> Chain);
+    _Spectrum Tmp;
+    while(This -> LastPosition < Position)
+    {
+        int Left = This -> LastPosition - FrameSize / 2;
+        RCall(_Spectrum, CtorSize)(& Tmp, FrameSize);
+        RCall(_Spectrum, FromWaveW)(& Tmp, This -> Wave, Left);
+        RCall(_STFTChain, AddSpectrum)(& This -> Chain, Tmp, Position);
+        This -> LastPosition += HopSize;
+    }
+}
+
+RTMethod(_Spectrum, CSVP_STFTIterlyzer, Extract, int Index)
+{
+    return RCall(_STFTChain, Extract)(& This -> Chain, Index);
+}
+
+#undef  _STFTChain
+#undef  _Spectrum
+

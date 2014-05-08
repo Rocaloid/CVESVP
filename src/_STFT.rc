@@ -57,12 +57,48 @@ RTMethod(void, CSVP_STFTChain, Resize, int Num, int FrameSize)
     This -> Frames_Index = Num - 1;
 }
 
+RTMethod(void, CSVP_STFTChain, Reset)
+{
+    This -> FrameNum = 0;
+}
+
+RTMethod(void, CSVP_STFTChain, SetHopSize, int HopSize)
+{
+    This -> HopSize = HopSize;
+}
+
+RTMethod(int , CSVP_STFTChain, GetHopSize)
+{
+    return This -> HopSize;
+}
+
+RTMethod(int , CSVP_STFTChain, GetFrameSize)
+{
+    return This -> FrameSize;
+}
+
+RTMethod(int , CSVP_STFTChain, GetFrameNum)
+{
+    return This -> FrameNum;
+}
+
 RTMethod(void, CSVP_STFTChain, AddSpectrum, _Spectrum Sorc, int Position)
 {
     int Index;
     Array_IncFind(Index, int, This -> Positions, Position);
     Array_Insert(_Spectrum, This -> Frames, Index, Sorc);
     Array_Insert(int, This -> Positions, Index, Position);
+    This -> FrameNum ++;
+
+}
+
+RTMethod(_Spectrum, CSVP_STFTChain, Extract, int Index)
+{
+    _Spectrum Ret = This -> Frames[Index];
+    Array_Remove(_Spectrum, This -> Frames, Index);
+    Array_Remove(int, This -> Positions, Index);
+    This -> FrameNum --;
+    return Ret;
 }
 
 RTMethod(void, CSVP_STFTChain, FromWaveW, void* Sorc, int Start, int Length)
@@ -104,7 +140,7 @@ RTMethod(void, CSVP_STFTChain, ToWaveW, void* Dest, int Start, int Length)
         RCall(_IWave, Add)(Dest, Tmp, i - This -> FrameSize / 2,
             This -> FrameSize);
         Iter ++;
-        if(Iter > This -> FrameNum) break;
+        if(Iter >= This -> FrameNum) break;
     }
     ((_Wave*)Dest) -> SampleRate = This -> Frames[0].SampleRate;
     RFree(Tmp);

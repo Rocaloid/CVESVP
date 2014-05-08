@@ -6,6 +6,8 @@
 
 #if 0
 #include "_STFT.h"
+#include "_STFTItersizer.h"
+#include "_STFTIterlyzer.h"
 #endif
 
 #ifdef __CSVP_Install
@@ -15,6 +17,42 @@
 #endif
 
 #define _ClassName CSVP_STFTChain_
+#define _Attr 1
+
+#define _T1 Float
+#include <RUtil2/Core/RTemplate.h>
+
+#define _T1 Double
+#include <RUtil2/Core/RTemplate.h>
+
+//-----
+#include <RUtil2.h>
+
+#ifdef __CSVP_Install
+#define _RTAddress "CVESVP/_STFTIterlyzer.h"
+#else
+#define _RTAddress "_STFTIterlyzer.h"
+#endif
+
+#define _ClassName CSVP_STFTIterlyzer_
+#define _Attr 1
+
+#define _T1 Float
+#include <RUtil2/Core/RTemplate.h>
+
+#define _T1 Double
+#include <RUtil2/Core/RTemplate.h>
+
+//-----
+#include <RUtil2.h>
+
+#ifdef __CSVP_Install
+#define _RTAddress "CVESVP/_STFTItersizer.h"
+#else
+#define _RTAddress "_STFTItersizer.h"
+#endif
+
+#define _ClassName CSVP_STFTItersizer_
 #define _Attr 1
 
 #define _T1 Float
