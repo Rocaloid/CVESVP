@@ -22,7 +22,7 @@ RTMethod(int , CSVP_STFTIterlyzer, GetHopSize);
 
 RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position);
 
-RTMethod(_Spectrum, CSVP_STFTIterlyzer, Extract, int Index);
+RTMethod(int , CSVP_STFTIterlyzer, Extract, _Spectrum* Dest, int Index);
 
 #undef  _STFTChain
 #undef  _Spectrum

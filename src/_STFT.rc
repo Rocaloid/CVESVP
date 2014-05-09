@@ -82,19 +82,22 @@ RTMethod(int , CSVP_STFTChain, GetFrameNum)
     return This -> FrameNum;
 }
 
-RTMethod(void, CSVP_STFTChain, AddSpectrum, _Spectrum Sorc, int Position)
+RTMethod(void, CSVP_STFTChain, AddSpectrum, _Spectrum* Sorc, int Position)
 {
     int Index;
     Array_IncFind(Index, int, This -> Positions, Position);
-    Array_Insert(_Spectrum, This -> Frames, Index, Sorc);
+    Array_InsertNull(_Spectrum, This -> Frames, Index);
+    RCall(_Spectrum, Ctor)(This -> Frames + Index);
+    RCall(_Spectrum, Copy)(Sorc, This -> Frames + Index);
     Array_Insert(int, This -> Positions, Index, Position);
     This -> FrameNum ++;
-
 }
 
-RTMethod(_Spectrum, CSVP_STFTChain, Extract, int Index)
+RTMethod(int , CSVP_STFTChain, Extract, _Spectrum* Dest, int Index)
 {
-    _Spectrum Ret = This -> Frames[Index];
+    int Ret = This -> Positions[Index];
+    RCall(_Spectrum, Copy)(This -> Frames + Index, Dest);
+    RCall(_Spectrum, Dtor)(This -> Frames + Index);
     Array_Remove(_Spectrum, This -> Frames, Index);
     Array_Remove(int, This -> Positions, Index);
     This -> FrameNum --;

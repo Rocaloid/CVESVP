@@ -21,8 +21,8 @@ RTMethod(int , CSVP_STFTChain, GetFrameSize);
 RTMethod(int , CSVP_STFTChain, GetFrameNum);
 RTMethod(void, CSVP_STFTChain, Reset);
 
-RTMethod(void, CSVP_STFTChain, AddSpectrum, _Spectrum Sorc, int Position);
-RTMethod(_Spectrum, CSVP_STFTChain, Extract, int Index);
+RTMethod(void, CSVP_STFTChain, AddSpectrum, _Spectrum* Sorc, int Position);
+RTMethod(int , CSVP_STFTChain, Extract, _Spectrum* Dest, int Index);
 
 RTMethod(void, CSVP_STFTChain, FromWaveW, void* Sorc, int Start, int Length);
 RTMethod(void, CSVP_STFTChain, WFromWave, void* Sorc, _T1* Window, int Start,

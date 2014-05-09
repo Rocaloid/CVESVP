@@ -59,19 +59,20 @@ RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position)
     int HopSize = RCall(_STFTChain, GetHopSize)(& This -> Chain);
     int FrameSize = RCall(_STFTChain, GetFrameSize)(& This -> Chain);
     _Spectrum Tmp;
+    RCall(_Spectrum, CtorSize)(& Tmp, FrameSize);
     while(This -> LastPosition < Position)
     {
         int Left = This -> LastPosition - FrameSize / 2;
-        RCall(_Spectrum, CtorSize)(& Tmp, FrameSize);
         RCall(_Spectrum, FromWaveW)(& Tmp, This -> Wave, Left);
-        RCall(_STFTChain, AddSpectrum)(& This -> Chain, Tmp, Position);
+        RCall(_STFTChain, AddSpectrum)(& This -> Chain, & Tmp, Position);
         This -> LastPosition += HopSize;
     }
+    RCall(_Spectrum, Dtor)(& Tmp);
 }
 
-RTMethod(_Spectrum, CSVP_STFTIterlyzer, Extract, int Index)
+RTMethod(int , CSVP_STFTIterlyzer, Extract, _Spectrum* Dest, int Index)
 {
-    return RCall(_STFTChain, Extract)(& This -> Chain, Index);
+    return RCall(_STFTChain, Extract)(& This -> Chain, Dest, Index);
 }
 
 #undef  _STFTChain

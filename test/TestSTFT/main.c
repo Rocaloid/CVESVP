@@ -37,7 +37,10 @@ int main()
     CSVP_STFTIterlyzer_Float_SetPosition(& DyAna, 200000);
     
     CSVP_STFTIterlyzer_Float_IterNextTo(& DyAna, 230000);
-    CDSP2_Spectrum_Float tmp = CSVP_STFTIterlyzer_Float_Extract(& DyAna, 100);
+    
+    CDSP2_Spectrum_Float tmp;
+    CDSP2_Spectrum_Float_Ctor(& tmp);
+    CSVP_STFTIterlyzer_Float_Extract(& DyAna, & tmp, 100);
     RDelete(& tmp);
     CSVP_STFTIterlyzer_Float_IterNextTo(& DyAna, 400000);
     
