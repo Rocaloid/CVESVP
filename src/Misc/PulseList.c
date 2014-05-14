@@ -18,7 +18,7 @@ void CSVP_PulseList_CtorSize(First, int Size)
 {
     Array_Ctor(int, This -> Pulses);
     Array_Resize(int, This -> Pulses, Size);
-    RInit(CSVP_PulseList);    
+    RInit(CSVP_PulseList);
 }
 
 void CSVP_PulseList_Resize(First, int Size)
@@ -30,6 +30,7 @@ void CSVP_PulseList_From(First, CSVP_PulseList* Sorc)
 {
     int Size = Sorc -> Pulses_Index + 1;
     Array_Resize(int, This -> Pulses, Size);
+    This -> Pulses_Index = Sorc -> Pulses_Index;
     //TODO: CDSP2_VCopy_Int interface
     RFNL_VCopy_Gnrc_Int(This -> Pulses, Sorc -> Pulses, Size);
 }
@@ -47,17 +48,19 @@ int  CSVP_PulseList_Fetch(First, int Index)
 int  CSVP_PulseList_IndexBefore(First, int Position)
 {
     int i;
+    if(This -> Pulses_Index < 0) return - 1;
     if(Position < This -> Pulses[0]) return - 1;
     Array_IncFind(i, int, This -> Pulses, Position);
-    return i;
+    return i - 1;
 }
 
 int  CSVP_PulseList_IndexAfter(First, int Position)
 {
     int i;
+    if(This -> Pulses_Index < 0) return 0;
     if(Position < This -> Pulses[0]) return 0;
     Array_IncFind(i, int, This -> Pulses, Position);
-    return i + 1;
+    return i;
 }
 
 int  CSVP_PulseList_Extract(First, int Index)
@@ -77,6 +80,16 @@ int  CSVP_PulseList_ExtractAfter(First, int Position)
 {
     return CSVP_PulseList_Extract(This,
         CSVP_PulseList_IndexAfter(This, Position));
+}
+
+void CSVP_PulseList_RemoveIndex(First, int Index)
+{
+    Array_Remove(int, This -> Pulses, Index);
+}
+
+void CSVP_PulseList_RemoveIndexRange(First, int LIndex, int HIndex)
+{
+    Array_RemoveRange(int, This -> Pulses, LIndex, HIndex);
 }
 
 void CSVP_PulseList_RemoveRange(First, int LPosition, int HPosition)

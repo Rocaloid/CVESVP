@@ -1,10 +1,13 @@
 #define _List_Spectrum _C(CSVP_List_Spectrum, _, _T1)
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
+#define _Wave _C(CDSP2_Wave, _, _T1)
+#define _IWave _C(CDSP2_IWave, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 
 RCtor(_RTClassName)
 {
     RCall(_STFTIterlyzer, Ctor)((_STFTIterlyzer*)This);
+    This -> WinFactor = 0;
     RInit(_RTClassName);
 }
 
@@ -16,6 +19,7 @@ RDtor(_RTClassName)
 RTMethod(void, CSVP_STFTItersizer, CtorSize, int FrameSize)
 {
     RCall(_STFTIterlyzer, CtorSize)((_STFTIterlyzer*)This, FrameSize);
+    This -> WinFactor = 0;
 }
 
 RTMethod(void, CSVP_STFTItersizer, Resize, int FrameSize)
@@ -26,16 +30,25 @@ RTMethod(void, CSVP_STFTItersizer, Resize, int FrameSize)
 RTMethod(void, CSVP_STFTItersizer, From, _RTClassName* Sorc)
 {
     RCall(_STFTIterlyzer, From)((_STFTIterlyzer*)This, Sorc);
+    This -> WinFactor = Sorc -> WinFactor;
 }
 
 RTMethod(void, CSVP_STFTItersizer, FromIterlyzer, _STFTIterlyzer* Sorc)
 {
-    RCall(_STFTIterlyzer, From)((_STFTIterlyzer*)This, (_RTClassName*)Sorc);    
+    RCall(_STFTIterlyzer, From)((_STFTIterlyzer*)This, (_RTClassName*)Sorc);
+    This -> WinFactor = RCall(CSVP_WinFactorFromWindow, _T1)
+        (((_Wave*)This -> Wave) -> Window,
+         RCall(_RTClassName, GetHopSize)(This),
+         RCall(_RTClassName, GetFrameSize)(This));
 }
 
 RTMethod(void, CSVP_STFTItersizer, SetWave, void* Sorc)
 {
     RCall(_STFTIterlyzer, SetWave)((_STFTIterlyzer*)This, Sorc);
+    This -> WinFactor = RCall(CSVP_WinFactorFromWindow, _T1)
+        (((_Wave*)This -> Wave) -> Window,
+         RCall(_RTClassName, GetHopSize)(This),
+         RCall(_RTClassName, GetFrameSize)(This));
 }
 
 RTMethod(void, CSVP_STFTItersizer, SetPosition, int Position)
@@ -62,11 +75,12 @@ RTMethod(int , CSVP_STFTItersizer, GetFrameSize)
 {
     return RCall(_STFTIterlyzer, GetFrameSize)((_STFTIterlyzer*)This);
 }
+
 RTMethod(void, CSVP_STFTItersizer, RepositionFrom, int Position)
 {
     int i;
     int p = Position;
-    int FrameNum = This -> PulseList.Pulses_Index;
+    int FrameNum = This -> PulseList.Pulses_Index + 1;
     for(i = 0; i < FrameNum; i ++)
     {
         This -> PulseList.Pulses[i] = p;
@@ -74,29 +88,83 @@ RTMethod(void, CSVP_STFTItersizer, RepositionFrom, int Position)
     }
 }
 
-RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position)
+RTMethod(static void, CSVP_STFTItersizer, _RenderRange, int LIndex, int HIndex)
 {
     int i;
+    int FrameSize = RCall(_RTClassName, GetFrameSize)(This);
+    _Spectrum TmpSpec;
+    _T1* Tmp = RCall(RAlloc, _T1)(FrameSize);
+    RCall(_Spectrum, CtorSize)(& TmpSpec, FrameSize);
+    
+    //Bound check
+    LIndex = LIndex < 0 ? 0 : LIndex;
+    HIndex = HIndex > This -> PulseList.Pulses_Index ?
+        This -> PulseList.Pulses_Index : HIndex;
+
+    for(i = LIndex; i <= HIndex; i ++)
+    {
+        int p = This -> PulseList.Pulses[i];
+        RCall(_List_Spectrum, Fetch)(& This -> SpecList, & TmpSpec, i);
+        RCall(_Spectrum, ToReal)(& TmpSpec, Tmp);
+        RCall(CDSP2_VCMul, _T1)(Tmp, Tmp, This -> WinFactor, FrameSize);
+        RCall(_IWave, Add)(This -> Wave, Tmp, p - FrameSize / 2, FrameSize);
+    }
+    RCall(_Spectrum, Dtor)(& TmpSpec);
+    RFree(Tmp);
+    CSVP_PulseList_RemoveIndexRange(& This -> PulseList, LIndex, HIndex);
+    RCall(_List_Spectrum, RemoveRange)(& This -> SpecList, LIndex, HIndex);
+}
+
+RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position)
+{
     int LIndex = CSVP_PulseList_IndexAfter(& This -> PulseList, 
         This -> LastPosition);
     int HIndex = CSVP_PulseList_IndexBefore(& This -> PulseList, Position);
-    int FrameSize = RCall(_RTClassName, GetFrameSize)(This);
     
-    _Spectrum TmpSpec;
-    RCall(_Spectrum, CtorSize)(& TmpSpec, FrameSize);
-    for(i = LIndex; i <= HIndex; i ++)
-    {
-        
-    }
-    RCall(_Spectrum, Dtor)(& TmpSpec);
+    RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
+    
     This -> LastPosition = Position;
 }
 
-RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position);
+RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position)
+{
+    int LIndex = CSVP_PulseList_IndexAfter(& This -> PulseList, Position);
+    int HIndex = CSVP_PulseList_IndexBefore(& This -> PulseList,
+        This -> LastPosition);
+    
+    RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
+    
+    This -> LastPosition = Position;
+}
 
-RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position);
+RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position)
+{
+    int i = CSVP_PulseList_IndexAfter(& This -> PulseList, Position);
+    Array_Insert(int, This -> PulseList.Pulses, i, Position);
+    RCall(_List_Spectrum, Add)(& This -> SpecList, Sorc, i);
+}
+
+//As a compromise for fewer memory operations, this function is somehow ugly.
+RTMethod(int , CSVP_STFTItersizer, ExtractFrom, _STFTIterlyzer* Sorc)
+{
+    int FrameSize = RCall(_RTClassName, GetFrameSize)(This);
+    while(Sorc -> PulseList.Pulses_Index >= 0)
+    {
+        int p = Sorc -> PulseList.Pulses[0];
+        int i = CSVP_PulseList_IndexAfter(& This -> PulseList, p);
+        Array_Insert(int, This -> PulseList.Pulses, i, p);
+        Array_InsertNull(_Spectrum, This -> SpecList.Frames, i);
+        RCall(_Spectrum, CtorSize)(This -> SpecList.Frames + i, FrameSize);
+        RCall(_List_Spectrum, Extract)(& Sorc -> SpecList, 
+            This -> SpecList.Frames + i, 0);
+        CSVP_PulseList_RemoveIndex(& Sorc -> PulseList, 0);
+    }
+    This -> SpecList.FrameNum = This -> PulseList.Pulses_Index + 1;
+}
 
 #undef  _List_Spectrum
 #undef  _Spectrum
+#undef  _Wave
+#undef  _IWave
 #undef  _STFTIterlyzer
 

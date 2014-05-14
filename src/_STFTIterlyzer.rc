@@ -24,7 +24,7 @@ RTMethod(void, CSVP_STFTIterlyzer, CtorSize, int FrameSize)
     This -> LastPosition = 0;
     RCall(_List_Spectrum, CtorSize)(& This -> SpecList, 0, FrameSize);
     RCall(CSVP_PulseList, Ctor)(& This -> PulseList);
-    RInit(_RTClassName); 
+    RInit(_RTClassName);
 }
 
 RTMethod(void, CSVP_STFTIterlyzer, Resize, int FrameSize)
@@ -47,8 +47,6 @@ RTMethod(void, CSVP_STFTIterlyzer, SetWave, void* Sorc)
 {
     This -> Wave = Sorc;
     This -> LastPosition = 0;
-    RCall(_List_Spectrum, Clear)(& This -> SpecList);
-    RCall(CSVP_PulseList, Clear)(& This -> PulseList);
 }
 
 RTMethod(void, CSVP_STFTIterlyzer, SetPosition, int Position)

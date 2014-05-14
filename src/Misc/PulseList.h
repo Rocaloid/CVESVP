@@ -24,6 +24,8 @@ int  CSVP_PulseList_IndexAfter(First, int Position);
 int  CSVP_PulseList_Extract(First, int Index);
 int  CSVP_PulseList_ExtractBefore(First, int Position);
 int  CSVP_PulseList_ExtractAfter(First, int Position);
+void CSVP_PulseList_RemoveIndex(First, int Index);
+void CSVP_PulseList_RemoveIndexRange(First, int LIndex, int HIndex);
 void CSVP_PulseList_RemoveRange(First, int LPosition, int HPosition);
 
 int  CSVP_PulseList_Add(First, int Position);

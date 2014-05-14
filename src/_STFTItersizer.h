@@ -14,6 +14,7 @@ RClass(_RTClassName)
     //Private
     void* Wave;
     int LastPosition;
+    _T1 WinFactor;
 };
 
 RTMethod(void, CSVP_STFTItersizer, CtorSize, int FrameSize);
@@ -34,6 +35,7 @@ RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position);
 RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position);
 
 RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position);
+RTMethod(int , CSVP_STFTItersizer, ExtractFrom, _STFTIterlyzer* Sorc);
 
 #undef  _List_Spectrum
 #undef  _Spectrum

@@ -7,12 +7,19 @@ RClass(MyType)
 
     //Public
     Array_Define(_T2, Frames);
+    #ifndef _CSVP_NOSIZE
     int FrameSize;
+    #endif
     int FrameNum;
 };
 
+#ifndef _CSVP_NOSIZE
 RTMethod(void, MyName, CtorSize, int FrameNum, int FrameSize);
 RTMethod(void, MyName, Resize, int FrameNum, int FrameSize);
+#else
+RTMethod(void, MyName, CtorSize, int FrameNum);
+RTMethod(void, MyName, Resize, int FrameNum);
+#endif
 RTMethod(void, MyName, From, MyType* Sorc);
 RTMethod(void, MyName, Clear);
 
