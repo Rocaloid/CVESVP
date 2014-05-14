@@ -14,7 +14,7 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq)
     
     _Spectrum NewSorc;
     RCall(_Spectrum, Ctor)(& NewSorc);
-    RCall(_Spectrum, Copy)(Sorc, & NewSorc);
+    RCall(_Spectrum, From)(& NewSorc, Sorc);
     RCall(_Spectrum, MagnConv)(& NewSorc, CDSP2_LogMagn);
     /*
     if(Sorc -> MagnType != CDSP2_LogMagn)

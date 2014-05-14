@@ -4,6 +4,7 @@
 int main()
 {
     CDSP2_SetArch(CDSP2_Arch_Gnrc);
+    
     CDSP2_Wave_Float MyWave;
     CDSP2_Wave_Float_Ctor(& MyWave);
     
@@ -11,7 +12,7 @@ int main()
     CDSP2_GenHanning_Float(wind, 2048);
     CDSP2_Wave_Float_SetWindow(& MyWave, wind, 2048);
     
-    String_FromChars(Path, "/tmp/test.wav");
+    String_FromChars(Path, "/tmp/testx.wav");
     
     CDSP2_Wave_Float_FromFile(& MyWave, & Path);
     

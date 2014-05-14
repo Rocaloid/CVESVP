@@ -19,41 +19,32 @@ int main()
     CDSP2_Wave_Float_SetWindow(& NewWave, wind, 2048);
     
     String_FromChars(Path, "/tmp/test.wav");
-    
     CDSP2_Wave_Float_FromFile(& MyWave, & Path);
-    /*
-    CSVP_STFTChain_Float SChain;
-    CSVP_STFTChain_Float_CtorSize(& SChain, 300000 / 256 * 1.5, 2048);
-    CSVP_STFTChain_Float_SetHopSize(& SChain, 256);
     
-    CSVP_STFTChain_Float_WFromWave(& SChain, & MyWave, wind, 0, 300000);
-    CSVP_STFTChain_Float_WToWave(& SChain, & NewWave, wind2, 0, 300000);
-    */
-    
+    //-----
     CSVP_STFTIterlyzer_Float DyAna;
     CSVP_STFTIterlyzer_Float_CtorSize(& DyAna, 2048);
-    CSVP_STFTIterlyzer_Float_SetWave(& DyAna, & MyWave);
     CSVP_STFTIterlyzer_Float_SetHopSize(& DyAna, 256);
-    CSVP_STFTIterlyzer_Float_SetPosition(& DyAna, 200000);
+    CSVP_STFTIterlyzer_Float_SetWave(& DyAna, & MyWave);
+    CSVP_STFTIterlyzer_Float_SetPosition(& DyAna, 100000);
     
-    CSVP_STFTIterlyzer_Float_IterNextTo(& DyAna, 230000);
+    CSVP_STFTIterlyzer_Float_IterNextTo(& DyAna, 150000);
+    CSVP_STFTIterlyzer_Float_SetPosition(& DyAna, 100000);
+    CSVP_STFTIterlyzer_Float_IterPrevTo(& DyAna, 50000);
     
-    CDSP2_Spectrum_Float tmp;
-    CDSP2_Spectrum_Float_Ctor(& tmp);
-    CSVP_STFTIterlyzer_Float_Extract(& DyAna, & tmp, 100);
-    RDelete(& tmp);
-    CSVP_STFTIterlyzer_Float_IterNextTo(& DyAna, 400000);
-    
-    CSVP_STFTChain_Float_ToWaveW(& DyAna.Chain, & NewWave, 0, 200000);
+    //int i;
+    //for(i = 0; i < 1024; i ++)
+    //    printf("%f\n", log(DyAna.SpecList.Frames[500].Magn[i]));
+    int i;
+    for(i = 0; i <= DyAna.PulseList.Pulses_Index; i ++)
+            printf("%d\n", DyAna.PulseList.Pulses[i]);
     
     CSVP_STFTIterlyzer_Float_Dtor(& DyAna);
+    //-----
     
     String_SetChars(& Path, "/tmp/test3.wav");
-    
     CDSP2_Wave_Float_ToFile(& NewWave, & Path);
     
-    
-    //CSVP_STFTChain_Float_Dtor(& SChain);
     RDelete(& MyWave, & NewWave, & Path);
     RFree(wind);
     RFree(wind2);
