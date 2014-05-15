@@ -3,8 +3,8 @@
 #include <RUtil2.h>
 
 #if 0
-#include "_STFTIterlyzer.rc"
-#include "_STFTItersizer.rc"
+#include "Iterator/_STFTIterlyzer.rc"
+#include "Iterator/_STFTItersizer.rc"
 #endif
 
 //-----
@@ -12,9 +12,9 @@
 #include <RUtil2.h>
 
 #ifdef __CSVP_Install
-#define _RTAddress "CVESVP/_STFTIterlyzer.rc"
+#define _RTAddress "CVESVP/Iterator/_STFTIterlyzer.rc"
 #else
-#define _RTAddress "_STFTIterlyzer.rc"
+#define _RTAddress "Iterator/_STFTIterlyzer.rc"
 #endif
 
 #define _ClassName CSVP_STFTIterlyzer_
@@ -32,9 +32,9 @@
 #include <RUtil2.h>
 
 #ifdef __CSVP_Install
-#define _RTAddress "CVESVP/_STFTItersizer.rc"
+#define _RTAddress "CVESVP/Iterator/_STFTItersizer.rc"
 #else
-#define _RTAddress "_STFTItersizer.rc"
+#define _RTAddress "Iterator/_STFTItersizer.rc"
 #endif
 
 #define _ClassName CSVP_STFTItersizer_
