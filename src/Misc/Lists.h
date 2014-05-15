@@ -2,6 +2,7 @@
 #define CVESVP_LISTS_H
 
 #include <CVEDSP2.h>
+#include "Structure/DataFrame.h"
 
 #if 0
 #include "_List.h"

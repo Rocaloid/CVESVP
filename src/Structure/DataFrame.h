@@ -1,10 +1,10 @@
-#ifndef CSVP_PSOLA_H
-#define CSVP_PSOLA_H
+#ifndef CSVP_DATAFRAME_H
+#define CSVP_DATAFRAME_H
 
 #include <RUtil2.h>
-/*
+
 #if 0
-#include "Structure/_DataFrame.h"
+#include "_DataFrame.h"
 #endif
 
 #ifdef __CSVP_Install
@@ -21,6 +21,6 @@
 
 #define _T1 Double
 #include <RUtil2/Core/RTemplate.h>
-*/
+
 #endif
 

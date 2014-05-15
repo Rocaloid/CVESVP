@@ -1,0 +1,34 @@
+RCtor(_RTClassName)
+{
+    This -> Data = NULL;
+    This -> Size = 0;
+    RInit(_RTClassName);
+}
+
+RDtor(_RTClassName)
+{
+    free(This -> Data);
+}
+
+RTMethod(void, CSVP_DataFrame, CtorSize, int Size)
+{
+    This -> Data = RCall(RAlloc, _T1)(Size);
+    This -> Size = Size;
+    RInit(_RTClassName);    
+}
+
+RTMethod(void, CSVP_DataFrame, Resize, int Size)
+{
+    if(This -> Size != Size)
+    {
+        This -> Data = (_T1*)realloc(This -> Data, Size * sizeof(_T1));
+        This -> Size = Size;
+    }
+}
+
+RTMethod(void, CSVP_DataFrame, From, _RTClassName* Sorc)
+{
+    RCall(_RTClassName, Resize)(This, Sorc -> Size);
+    RCall(CDSP2_VCopy, _T1)(This -> Data, Sorc -> Data, This -> Size);
+}
+
