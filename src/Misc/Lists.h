@@ -27,7 +27,7 @@
 #define _T1 Double
 #include <RUtil2/Core/RTemplate.h>
 
-#include "PulseList.h"
+#include "List_Int.h"
 
 #endif
 

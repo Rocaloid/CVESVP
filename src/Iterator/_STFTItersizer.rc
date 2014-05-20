@@ -80,10 +80,10 @@ RTMethod(void, CSVP_STFTItersizer, RepositionFrom, int Position)
 {
     int i;
     int p = Position;
-    int FrameNum = This -> PulseList.Pulses_Index + 1;
+    int FrameNum = This -> PulseList.Frames_Index + 1;
     for(i = 0; i < FrameNum; i ++)
     {
-        This -> PulseList.Pulses[i] = p;
+        This -> PulseList.Frames[i] = p;
         p += This -> HopSize;
     }
 }
@@ -98,12 +98,12 @@ RTMethod(static void, CSVP_STFTItersizer, _RenderRange, int LIndex, int HIndex)
     
     //Bound check
     LIndex = LIndex < 0 ? 0 : LIndex;
-    HIndex = HIndex > This -> PulseList.Pulses_Index ?
-        This -> PulseList.Pulses_Index : HIndex;
+    HIndex = HIndex > This -> PulseList.Frames_Index ?
+        This -> PulseList.Frames_Index : HIndex;
 
     for(i = LIndex; i <= HIndex; i ++)
     {
-        int p = This -> PulseList.Pulses[i];
+        int p = This -> PulseList.Frames[i];
         RCall(_List_Spectrum, Fetch)(& This -> SpecList, & TmpSpec, i);
         RCall(_Spectrum, ToReal)(& TmpSpec, Tmp);
         RCall(CDSP2_VCMul, _T1)(Tmp, Tmp, This -> WinFactor, FrameSize);
@@ -111,15 +111,15 @@ RTMethod(static void, CSVP_STFTItersizer, _RenderRange, int LIndex, int HIndex)
     }
     RCall(_Spectrum, Dtor)(& TmpSpec);
     RFree(Tmp);
-    CSVP_PulseList_RemoveIndexRange(& This -> PulseList, LIndex, HIndex);
+    CSVP_List_Int_RemoveRange(& This -> PulseList, LIndex, HIndex);
     RCall(_List_Spectrum, RemoveRange)(& This -> SpecList, LIndex, HIndex);
 }
 
 RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position)
 {
-    int LIndex = CSVP_PulseList_IndexAfter(& This -> PulseList, 
+    int LIndex = CSVP_List_Int_IndexAfter(& This -> PulseList, 
         This -> LastPosition);
-    int HIndex = CSVP_PulseList_IndexBefore(& This -> PulseList, Position);
+    int HIndex = CSVP_List_Int_IndexBefore(& This -> PulseList, Position);
     
     RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
     
@@ -128,8 +128,8 @@ RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position)
 {
-    int LIndex = CSVP_PulseList_IndexAfter(& This -> PulseList, Position);
-    int HIndex = CSVP_PulseList_IndexBefore(& This -> PulseList,
+    int LIndex = CSVP_List_Int_IndexAfter(& This -> PulseList, Position);
+    int HIndex = CSVP_List_Int_IndexBefore(& This -> PulseList,
         This -> LastPosition);
     
     RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
@@ -139,8 +139,8 @@ RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position)
 
 RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position)
 {
-    int i = CSVP_PulseList_IndexAfter(& This -> PulseList, Position);
-    Array_Insert(int, This -> PulseList.Pulses, i, Position);
+    int i = CSVP_List_Int_IndexAfter(& This -> PulseList, Position);
+    Array_Insert(int, This -> PulseList.Frames, i, Position);
     RCall(_List_Spectrum, Add)(& This -> SpecList, Sorc, i);
 }
 
@@ -148,18 +148,18 @@ RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position)
 RTMethod(int , CSVP_STFTItersizer, ExtractFrom, _STFTIterlyzer* Sorc)
 {
     int FrameSize = RCall(_RTClassName, GetFrameSize)(This);
-    while(Sorc -> PulseList.Pulses_Index >= 0)
+    while(Sorc -> PulseList.Frames_Index >= 0)
     {
-        int p = Sorc -> PulseList.Pulses[0];
-        int i = CSVP_PulseList_IndexAfter(& This -> PulseList, p);
-        Array_Insert(int, This -> PulseList.Pulses, i, p);
+        int p = Sorc -> PulseList.Frames[0];
+        int i = CSVP_List_Int_IndexAfter(& This -> PulseList, p);
+        Array_Insert(int, This -> PulseList.Frames, i, p);
         Array_InsertNull(_Spectrum, This -> SpecList.Frames, i);
         RCall(_Spectrum, CtorSize)(This -> SpecList.Frames + i, FrameSize);
         RCall(_List_Spectrum, Extract)(& Sorc -> SpecList, 
             This -> SpecList.Frames + i, 0);
-        CSVP_PulseList_RemoveIndex(& Sorc -> PulseList, 0);
+        CSVP_List_Int_Remove(& Sorc -> PulseList, 0);
     }
-    This -> SpecList.FrameNum = This -> PulseList.Pulses_Index + 1;
+    This -> SpecList.FrameNum = This -> PulseList.Frames_Index + 1;
 }
 
 #undef  _List_Spectrum

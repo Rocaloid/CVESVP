@@ -1,4 +1,5 @@
 #define _List_Spectrum _C(CSVP_List_Spectrum, _, _T1)
+#define _List_Int CSVP_List_Int
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 
@@ -9,7 +10,7 @@ RClass(_RTClassName)
     //Public
     int HopSize;
     _List_Spectrum SpecList;
-    CSVP_PulseList PulseList;
+    _List_Int PulseList;
     
     //Private
     void* Wave;
@@ -38,6 +39,7 @@ RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position);
 RTMethod(int , CSVP_STFTItersizer, ExtractFrom, _STFTIterlyzer* Sorc);
 
 #undef  _List_Spectrum
+#undef  _List_Int
 #undef  _Spectrum
 #undef  _STFTIterlyzer
 
