@@ -14,8 +14,17 @@ target_link_libraries(TestSTFT RFNL)
 target_link_libraries(TestSTFT RUtil2)
 target_link_libraries(TestSTFT m)
 
+aux_source_directory(./TestPSOLA Test3)
+add_executable(TestPSOLA ${Test3})
+target_link_libraries(TestPSOLA CVESVP)
+target_link_libraries(TestPSOLA CVEDSP2)
+target_link_libraries(TestPSOLA RFNL)
+target_link_libraries(TestPSOLA RUtil2)
+target_link_libraries(TestPSOLA m)
+
 add_test(TestF0 TestF0)
 add_test(TestSTFT TestSTFT)
+add_test(TestPSOLA TestPSOLA)
 
 get_filename_component(TestDir "." ABSOLUTE)
 get_filename_component(TopDir ${CMAKE_SOURCE_DIR} ABSOLUTE)

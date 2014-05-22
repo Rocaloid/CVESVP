@@ -41,7 +41,7 @@ int main()
         CSVP_STFTIterlyzer_Float_IterNextTo(& DyAna, i);
         CSVP_STFTItersizer_Float_ExtractFrom(& DySyn, & DyAna);
     }
-    for(i = 0; i <= DySyn.PulseList.Pulses_Index; i ++)
+    for(i = 0; i <= DySyn.PulseList.Frames_Index; i ++)
     {
         int j;
         for(j = 80; j < 150; j ++)

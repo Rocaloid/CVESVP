@@ -12,7 +12,7 @@ int main()
     CDSP2_GenHanning_Float(wind, 2048);
     CDSP2_Wave_Float_SetWindow(& MyWave, wind, 2048);
     
-    String_FromChars(Path, "/tmp/testx.wav");
+    String_FromChars(Path, "/tmp/test.wav");
     
     CDSP2_Wave_Float_FromFile(& MyWave, & Path);
     
@@ -20,7 +20,7 @@ int main()
     float F0 = 0;
     for(i = 0; i < MyWave.Size; i += 500)
     {
-        float tmp = CSVP_F0FromWave_Float(& MyWave, i, 2048, 100, 1500);
+        float tmp = CSVP_F0FromWave_Float(& MyWave, i, 100, 1500);
         printf("%f\n", tmp);
         F0 = tmp;
         //printf("%f at %f\n", tmp, (float)i / 48000);

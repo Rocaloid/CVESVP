@@ -32,10 +32,10 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq)
     
     for(i = F2B(MinFreq); i < UBound; i ++)
     {
-        if(Magn[i] - Magn[i - 1] &&
-           Magn[i] > Magn[i + 1]
-        && Magn[i] - Magn[i - F2B(MinFreq / 2)] > 0.2
-        && Magn[i] - Magn[i + F2B(MinFreq / 2)] > 0.2)
+        if(Magn[i] > Magn[i - 1] &&
+           Magn[i] > Magn[i + 1] &&
+           Magn[i] > Magn[i - 2] &&
+           Magn[i] > Magn[i + 2])
         {
             LeftMax = RCall(CDSP2_VMaxElmt, _T1)(Magn, F2B(MinFreq), i - 2);
             if(Magn[i] - LeftMax > MaxDiff)
@@ -73,10 +73,29 @@ RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,
     return Delta / 2.0 / M_PI * SampleRate / HopSize;
 }
 
-RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position, int WinSize,
+RTFunc(int, CSVP_F0FromWaveB, void* Sorc, int Position,
+    int MinFreq, int MaxFreq)
+{
+    _Spectrum Spec;
+    int WinSize = ((_Wave*)Sorc) -> WinSize;
+    RCall(_Spectrum, CtorSize)(& Spec, WinSize);
+    
+    int SampleRate = ((_Wave*)Sorc) -> SampleRate;
+    Spec.MagnType = CDSP2_LogMagn;
+    Spec.NoPhase = 1;
+    RCall(_Spectrum, FromWaveW)(& Spec, Sorc, Position - WinSize / 2);
+    
+    int Ret = RCall(CSVP_F0FromSpectrumB, _T1)(& Spec, MinFreq, MaxFreq);
+    RDelete(& Spec);
+    
+    return Ret;
+}
+
+RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position,
     int MinFreq, int MaxFreq)
 {
     _Spectrum Spec1, Spec2;
+    int WinSize = ((_Wave*)Sorc) -> WinSize;
     RCall(_Spectrum, CtorSize)(& Spec1, WinSize);
     RCall(_Spectrum, CtorSize)(& Spec2, WinSize);
     

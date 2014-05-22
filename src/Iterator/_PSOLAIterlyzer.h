@@ -12,6 +12,7 @@ RClass(_RTClassName)
     
     //Private
     void* Wave;
+    _T1* Window;
     _InfWave* LPFWave;
     _STFTIterlyzer* Sublyzer;
     _STFTItersizer* Subsizer;
@@ -20,11 +21,10 @@ RClass(_RTClassName)
     
     int PeakSign;
     int RefPeriod;
+    int InitPeriod;
     _T1 LPF;
 };
 
-RTMethod(void, CSVP_PSOLAIterlyzer, CtorSize, int FrameSize);
-RTMethod(void, CSVP_PSOLAIterlyzer, Resize, int FrameSize);
 RTMethod(void, CSVP_PSOLAIterlyzer, From, _RTClassName* Sorc);
 
 RTMethod(void, CSVP_PSOLAIterlyzer, SetWave, void* Sorc);

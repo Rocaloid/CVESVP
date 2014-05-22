@@ -1,0 +1,140 @@
+#define _InfWave _C(CDSP2_InfWave, _, _T1)
+#define _IWave _C(CDSP2_IWave, _, _T1)
+#define _Wave _C(CDSP2_Wave, _, _T1)
+#define _List_Int CSVP_List_Int
+#define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
+#define _STFTItersizer _C(CSVP_STFTItersizer, _, _T1)
+
+RCtor(_RTClassName)
+{
+    This -> LPFWave = RAlloc_Class(_InfWave, 1);
+    This -> Sublyzer = RAlloc_Class(_STFTIterlyzer, 1);
+    This -> Subsizer = RAlloc_Class(_STFTItersizer, 1);
+    This -> Window = RCall(RAlloc, _T1)(512);
+    RCall(CDSP2_GenHanning, _T1)(This -> Window, 512);
+    
+    RCall(_List_Int, Ctor)(& This -> PulseList);
+    RCall(_InfWave, CtorSize)(This -> LPFWave, 10000);
+    RCall(_InfWave, SetWindow)(This -> LPFWave, This -> Window, 512);
+    RCall(_STFTIterlyzer, CtorSize)(This -> Sublyzer, 512);
+    RCall(_STFTItersizer, CtorSize)(This -> Subsizer, 512);
+    RCall(_STFTIterlyzer, SetHopSize)(This -> Sublyzer, 256);
+    RCall(_STFTItersizer, SetHopSize)(This -> Subsizer, 256);
+    RCall(_STFTItersizer, SetWave)(This -> Subsizer, This -> LPFWave);
+    
+    This -> LastPosition = 0;
+    This -> InitPosition = 0;
+    This -> PeakSign = 1;
+    This -> RefPeriod = 0;
+    This -> InitPeriod = 0;
+    This -> LPF = 1500;
+    
+    RInit(_RTClassName);
+}
+
+RDtor(_RTClassName)
+{
+    RCall(_List_Int, Dtor)(& This -> PulseList);
+    RCall(_InfWave, Dtor)(This -> LPFWave);
+    RCall(_STFTIterlyzer, Dtor)(This -> Sublyzer);
+    RCall(_STFTItersizer, Dtor)(This -> Subsizer);
+    
+    RFree(This -> Window);
+    RFree(This -> LPFWave);
+    RFree(This -> Sublyzer);
+    RFree(This -> Subsizer);
+}
+
+RTMethod(void, CSVP_PSOLAIterlyzer, From, _RTClassName* Sorc)
+{
+    RCall(_List_Int, From)(& This -> PulseList, & Sorc -> PulseList);
+    RCall(_InfWave, From)(This -> LPFWave, Sorc -> LPFWave);
+    RCall(_STFTIterlyzer, From)(This -> Sublyzer, Sorc -> Sublyzer);
+    RCall(_STFTItersizer, From)(This -> Subsizer, Sorc -> Subsizer);
+    
+    This -> LastPosition = Sorc -> LastPosition;
+    This -> InitPosition = Sorc -> InitPosition;
+    This -> PeakSign = Sorc -> PeakSign;
+    This -> RefPeriod = Sorc -> RefPeriod;
+    This -> LPF = Sorc -> LPF;
+}
+
+RTMethod(void, CSVP_PSOLAIterlyzer, SetWave, void* Sorc)
+{
+    This -> Wave = Sorc;
+    ((_Wave*)This -> LPFWave) -> SampleRate = ((_Wave*)Sorc) -> SampleRate;
+    RCall(_STFTIterlyzer, SetWave)(This -> Sublyzer, This -> Wave);
+}
+
+RTMethod(void, CSVP_PSOLAIterlyzer, SetPosition, int Position)
+{
+    This -> LastPosition = Position;
+    This -> InitPosition = Position;
+    RCall(_InfWave, Relocate)(This -> LPFWave, Position);
+    RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer, Position);
+    RCall(_STFTItersizer, SetPosition)(This -> Subsizer, Position);
+}
+
+RTMethod(int , CSVP_PSOLAIterlyzer, GetPosition)
+{
+    return This -> LastPosition;
+}
+
+RTMethod(void, CSVP_PSOLAIterlyzer, SetRefFreq, _T1 Freq)
+{
+    This -> RefPeriod = ((_Wave*)This -> Wave) -> SampleRate / Freq;
+    if(This -> LastPosition == This -> InitPosition)
+        This -> InitPeriod = This -> RefPeriod;
+}
+
+RTMethod(void, CSVP_PSOLAIterlyzer, SetLPF, _T1 Freq)
+{
+    This -> LPF = Freq;
+}
+
+RTMethod(void, CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
+{
+    _List_Int FundBins;
+    int SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
+    _T1* Hann = RCall(RAlloc, _T1)(1024);
+    RCall(_List_Int, Ctor)(& FundBins);
+    RCall(CDSP2_GenHanning, _T1)(Hann, 1024);
+    
+    _T1* OrigWind = ((_Wave*)This -> Wave) -> Window;
+    int  OrigSize = ((_Wave*)This -> Wave) -> WinSize;
+    RCall(_IWave, SetWindow)(This -> Wave, Hann, 1024);
+    
+    //Find the median fundamental frequency.
+    int p = This -> InitPosition;
+    while(p < Position)
+    {
+        int Bin = RCall(CSVP_F0FromWaveB, _T1)(This -> Wave, p, 50, 1500);
+        RCall(_List_Int, Add)(& FundBins, Bin);
+        p += 512;
+    }
+    int BMed = FundBins.Frames[FundBins.Frames_Index / 2];
+    int FMed = BMed * SampleRate / 1024;
+    
+    //Find the period.
+    _T1 Freq = RCall(CSVP_F0FromWave, _T1)(This -> Wave, This -> InitPosition,
+        FMed * 0.8, FMed * 1.2);
+    This -> InitPeriod = (int)(SampleRate / Freq);
+    
+    RFree(Hann);
+    RCall(_List_Int, Dtor)(& FundBins);
+    RCall(_IWave, SetWindow)(This -> Wave, OrigWind, OrigSize);
+}
+
+RTMethod(void, CSVP_PSOLAIterlyzer, IterNextTo, int Position);
+RTMethod(void, CSVP_PSOLAIterlyzer, PrevTo, int Position);
+
+RTMethod(int , CSVP_PSOLAIterlyzer, Extract, int Index);
+RTMethod(int , CSVP_PSOLAIterlyzer, Fetch, int Index);
+
+#undef  _InfWave
+#undef  _Wave
+#undef  _IWave
+#undef  _List_Int
+#undef  _STFTIterlyzer
+#undef  _STFTItersizer
+
