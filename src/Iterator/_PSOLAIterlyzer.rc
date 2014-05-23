@@ -120,6 +120,25 @@ RTMethod(void, CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
         FMed * 0.8, FMed * 1.2);
     This -> InitPeriod = (int)(SampleRate / Freq);
     
+    //LPF Freq = 2rd harmonic
+    This -> LPF = Freq * 3.5;
+    
+    //Find the sign of peak.
+    int SearchSize = This -> InitPeriod * 1.5;
+    int MaxCount = 0;
+    p = This -> InitPosition;
+    _T1* Data = RCall(_IWave, GetUnsafePtr)(This -> Wave);
+    while(p < Position)
+    {
+        _T1 Max, Min;
+        Max = RCall(CDSP2_VMaxElmt, _T1)(Data, p, p + SearchSize);
+        Min = RCall(CDSP2_VMinElmt, _T1)(Data, p, p + SearchSize);
+        MaxCount += Max > Min ? 1 : - 1;
+        p += 512;
+    }
+    This -> PeakSign = MaxCount >= 0 ? 1 : - 1;
+    printf("MC: %d, PS: %d\n", MaxCount, This -> PeakSign);
+    
     RFree(Hann);
     RCall(_List_Int, Dtor)(& FundBins);
     RCall(_IWave, SetWindow)(This -> Wave, OrigWind, OrigSize);

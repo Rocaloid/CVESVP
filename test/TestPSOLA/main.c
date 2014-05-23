@@ -26,7 +26,7 @@ int main()
     RCall(Wave, FromFile)(& InWave, & Path);
     RCall(PSOLAIterlyzer, SetWave)(& PAna, & InWave);
     RCall(PSOLAIterlyzer, SetPosition)(& PAna, 20000);
-    RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, 30000);
+    RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, InWave.Size - 500);
     
     RFree(HannWind);
     RDelete(& InWave, & OutWave, & Path, & PAna);
