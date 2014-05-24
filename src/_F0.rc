@@ -30,7 +30,8 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq)
     
     RCall(CDSP2_VCMax, _T1)(Magn, Magn, - 3.0, NewSorc.Size / 2);
     
-    for(i = F2B(MinFreq); i < UBound; i ++)
+    int Right = F2B(MinFreq) < 2 ? 2 : F2B(MinFreq);
+    for(i = Right; i < UBound; i ++)
     {
         if(Magn[i] > Magn[i - 1] &&
            Magn[i] > Magn[i + 1] &&

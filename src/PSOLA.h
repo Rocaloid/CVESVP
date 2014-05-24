@@ -11,6 +11,9 @@
 #include "Iterator/_PSOLAItersizer.h"
 #endif
 
+#define CSVP_PSOLAIterlyzer_LPFSTFTSize 512
+#define CSVP_PSOLAIterlyzer_LPFHopSize 256
+
 #ifdef __CSVP_Install
 #define _RTAddress "CVESVP/Iterator/_PSOLAIterlyzer.h"
 #else

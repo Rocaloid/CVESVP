@@ -21,12 +21,15 @@ int main()
     RCall(Wave, SetWindow)(& OutWave, HannWind, 2048);
     
     RNew(PSOLAIterlyzer, & PAna);
-    String_SetChars(& Path, "/tmp/test.wav");
+    String_SetChars(& Path, "/tmp/xxx.wav");
+    
     
     RCall(Wave, FromFile)(& InWave, & Path);
     RCall(PSOLAIterlyzer, SetWave)(& PAna, & InWave);
-    RCall(PSOLAIterlyzer, SetPosition)(& PAna, 20000);
-    RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, InWave.Size - 500);
+    RCall(PSOLAIterlyzer, SetPosition)(& PAna, 43000);
+    RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, 45000);
+    
+    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 274000);
     
     RFree(HannWind);
     RDelete(& InWave, & OutWave, & Path, & PAna);
