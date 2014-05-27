@@ -9,6 +9,16 @@
 #define LPFSIZE CSVP_PSOLAIterlyzer_LPFSTFTSize
 #define LPFHOP  CSVP_PSOLAIterlyzer_LPFHopSize
 
+#define _CheckMembers(Name) \
+    CDSP2_If_Debug_Check \
+    ( \
+        if(This -> Wave == NULL) \
+            RDebugPrint(_RTClassName, _S(Name) ": require wave."); \
+        if(This -> RefPeriod == 0) \
+            RDebugPrint(_RTClassName, _S(Name) ": require reference " \
+                "frequency."); \
+    )
+
 RCtor(_RTClassName)
 {
     This -> LPFWave = RAlloc_Class(_InfWave, 1);
@@ -72,6 +82,12 @@ RTMethod(void, CSVP_PSOLAIterlyzer, SetWave, void* Sorc)
 
 RTMethod(void, CSVP_PSOLAIterlyzer, SetPosition, int Position)
 {
+    CDSP2_If_Debug_Check
+    (
+        if(This -> Wave == NULL)
+            RDebugPrint(_RTClassName, "SetPosition: inproper call sequence"
+                "(Wave not set yet).");
+    )
     This -> LastPosition = Position;
     This -> InitPosition = Position;
     RCall(_InfWave, Relocate)(This -> LPFWave, Position - 1024);
@@ -86,6 +102,12 @@ RTMethod(int , CSVP_PSOLAIterlyzer, GetPosition)
 
 RTMethod(void, CSVP_PSOLAIterlyzer, SetRefFreq, _T1 Freq)
 {
+    CDSP2_If_Debug_Check
+    (
+        if(This -> Wave == NULL)
+            RDebugPrint(_RTClassName, "SetRefFreq: inproper call sequence"
+                "(Wave not set yet).");
+    )
     This -> RefPeriod = ((_Wave*)This -> Wave) -> SampleRate / Freq;
     if(This -> LastPosition == This -> InitPosition)
         This -> InitPeriod = This -> RefPeriod;
@@ -219,6 +241,13 @@ RTMethod(static void, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
 
 RTMethod(void, CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
 {
+    CDSP2_If_Debug_Check
+    (
+        if(This -> Wave == NULL)
+            RDebugPrint(_RTClassName, "PreAnalysisTo: inproper call sequence"
+                "(Wave not set yet).");
+    )
+    
     _List_Int FundBins;
     int SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     _T1* Hann = RCall(RAlloc, _T1)(2048);
@@ -286,6 +315,8 @@ RTMethod(void, CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
 
 RTMethod(void, CSVP_PSOLAIterlyzer, IterNextTo, int Position)
 {
+    _CheckMembers(IterNextTo);
+    
     int IterHopSize = LPFSIZE + 512;
     while(This -> LastPosition < Position - IterHopSize)
     {

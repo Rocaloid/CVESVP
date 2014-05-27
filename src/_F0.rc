@@ -61,8 +61,21 @@ RTFunc(_T1, CSVP_F0FromSpectrum, _Spectrum* Sorc, int MinFreq, int MaxFreq)
 RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,
     int HopSize, int Bin)
 {
-    if(Sorc1 -> NoPhase == 1 || Sorc2 -> NoPhase == 1)
-        return 0;
+    CDSP2_If_Debug_Check
+    (
+        if(Sorc1 -> NoPhase == 1 || Sorc2 -> NoPhase == 1)
+        {
+            RDebugPrint(CSVP_F0FromSuccSpectrumAndBin,
+                ": expected phase data in source spectrums.");
+            return 0;
+        }
+        if(Sorc1 -> Size != Sorc2 -> Size)
+        {
+            RDebugPrint(CSVP_F0FromSuccSpectrumAndBin,
+                ": unmatched size of spectrums.");
+            return 0;
+        }
+    )
     
     int SampleRate = Sorc1 -> SampleRate;
     _T1 Phase1 = Sorc1 -> Phse[Bin];

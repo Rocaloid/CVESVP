@@ -4,6 +4,7 @@
 int main()
 {
     CDSP2_SetArch(CDSP2_Arch_Gnrc);
+    CDSP2_SetDebugOn(CDSP2_Debug_Check);
     
     
     CDSP2_Wave_Float MyWave, NewWave;
@@ -15,7 +16,7 @@ int main()
     CDSP2_Wave_Float_SetWindow(& MyWave, wind, 2048);
     CDSP2_Wave_Float_SetWindow(& NewWave, wind, 2048);
     
-    String_FromChars(Path, "/tmp/test.wav");
+    String_FromChars(Path, "/tmp/a.wav");
     CDSP2_Wave_Float_FromFile(& MyWave, & Path);
     
     //**********
