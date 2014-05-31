@@ -192,13 +192,9 @@ RTMethod(static void, CSVP_PSOLAIterlyzer, _LowPassTo, int Position)
     
     int FrameSize = RCall(_STFTIterlyzer, GetFrameSize)(This -> Sublyzer);
     int SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
-    int LPFBin = This -> LPF * FrameSize / SampleRate;
     _List_Spectrum* DestSpec = & This -> Sublyzer -> SpecList;
-    for(i = 0; i <= DestSpec -> Frames_Index; i ++)
-    {
-        RCall(CDSP2_VSet, _T1)(DestSpec -> Frames[i].Magn + LPFBin, 0,
-            FrameSize / 2 + 1 - LPFBin);
-    }
+    
+    RCall(CSVP_LSpecLowPass, _T1)(DestSpec, This -> LPF);
     RCall(_STFTItersizer, ExtractFrom)(This -> Subsizer, This -> Sublyzer);
     RCall(_STFTItersizer, IterNextTo)(This -> Subsizer, Position);
     
@@ -231,9 +227,9 @@ RTMethod(static void, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
         This -> RefPeriod = IdealNext - This -> LastPosition;
         This -> LastPosition = IdealNext;
         
-        /*
+        
         printf("%f %f\n", (_T1)IdealNext / SampleRate,
-            (_T1)IdealNext / SampleRate);*/
+            (_T1)IdealNext / SampleRate);
         
         RCall(_List_Int, Add)(& This -> PulseList, This -> LastPosition);
     }
@@ -329,7 +325,97 @@ RTMethod(void, CSVP_PSOLAIterlyzer, IterNextTo, int Position)
     RCall(_RTClassName, _SubIterNextTo)(This, Position);
 }
 
-RTMethod(void, CSVP_PSOLAIterlyzer, PrevTo, int Position);
+RTMethod(void, CSVP_PSOLAIterlyzer, PrevTo, int Position)
+{
+    _CheckMembers(PrevTo);
+    CDSP2_If_Debug_Check
+    (
+        if(Position > This -> InitPosition)
+            RDebugPrint(_RTClassName, "PrevTo: destination position later than "
+                "the initial position.");
+    )
+    
+    _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
+    
+    //Set up a temporary buffer for backward low-pass filtering.
+    _InfWave LPFWave;
+    _STFTItersizer LPFItersizer;
+    int ExtSize = 1024;
+    RCall(_InfWave, CtorSize)(& LPFWave,
+        This -> InitPosition - Position + ExtSize * 5);
+    RCall(_InfWave, Relocate)(& LPFWave, Position - ExtSize * 3);
+    RCall(_InfWave, SetWindow)(& LPFWave, This -> Window, LPFSIZE);
+    RCall(_STFTItersizer, CtorSize)(& LPFItersizer, LPFSIZE);
+    RCall(_STFTItersizer, SetHopSize)(& LPFItersizer, LPFHOP);
+    RCall(_STFTItersizer, SetWave)(& LPFItersizer, & LPFWave);
+    RCall(_STFTItersizer, SetPosition)(& LPFItersizer, Position - ExtSize);
+    
+    //Set the operating window to my own window.
+    _T1* OrigWind = ((_Wave*)This -> Wave) -> Window;
+    int  OrigSize = ((_Wave*)This -> Wave) -> WinSize;
+    RCall(_IWave, SetWindow)(This -> Wave, This -> Window, LPFSIZE);
+    
+    //Set iterlyzer position.
+    int OrigPosition = RCall(_STFTIterlyzer, GetPosition)(This -> Sublyzer);
+    RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer,
+        OrigPosition + ExtSize);
+    
+    //Set LPF and RefPeriod
+    int LPF = SampleRate / This -> InitPeriod * 5.5;
+    int RefPeriod = This -> InitPeriod;
+    
+    //Initial LowPass
+    RCall(_STFTIterlyzer, IterPrevTo)(This -> Sublyzer, OrigPosition - 2048);
+    RCall(CSVP_LSpecLowPass, _T1)(& This -> Sublyzer -> SpecList, LPF);
+    RCall(_STFTItersizer, ExtractFrom)(& LPFItersizer, This -> Sublyzer);
+    RCall(_STFTItersizer, IterPrevTo)(& LPFItersizer, OrigPosition - 2048);
+    
+    //Backward Iterlyzer Process
+    int LastPosition = This -> InitPosition;
+    while(LastPosition > Position)
+    {
+        //LowPass Iteration
+        RCall(_STFTIterlyzer, IterPrevTo)(This -> Sublyzer,
+            LastPosition - 2048);
+        RCall(CSVP_LSpecLowPass, _T1)(& This -> Sublyzer -> SpecList, LPF);
+        RCall(_STFTItersizer, ExtractFrom)(& LPFItersizer, This -> Sublyzer);
+        RCall(_STFTItersizer, IterPrevTo)(& LPFItersizer,
+            LastPosition - 2048);
+        
+        _T1 Freq = SampleRate / RefPeriod;
+        Freq = RCall(CSVP_F0FromWave, _T1)(This -> Wave,
+            LastPosition + RefPeriod, Freq * 0.7, Freq * 1.4);
+        int NewPeriod = SampleRate / Freq;
+        
+        if(abs(NewPeriod - RefPeriod) < 20)
+        {
+            LPF = Freq * 5.5;
+            RefPeriod = NewPeriod;
+        }
+        
+        int IdealPrev = RCall(_RTClassName, _MaxCorrelation)(This,
+            & LPFWave, LastPosition, RefPeriod, - 1.0, 0.3);
+        IdealPrev = RCall(_RTClassName, _PeakAt)(This, & LPFWave,
+            IdealPrev, 10);
+        RefPeriod = LastPosition - IdealPrev;
+        LastPosition = IdealPrev;
+        
+        printf("%f %f\n", (_T1)LastPosition / SampleRate, (_T1)LastPosition / SampleRate);
+    }
+    
+    //Low pass
+    RCall(_STFTIterlyzer, IterNextTo)(This -> Sublyzer,
+        This -> InitPosition + ExtSize);
+    RCall(_STFTItersizer, ExtractFrom)(& LPFItersizer, This -> Sublyzer);
+    RCall(_STFTItersizer, IterNextTo)(& LPFItersizer,
+        This -> InitPosition + ExtSize);
+    
+    //Restore iterlyzer position and window.
+    RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer, OrigPosition);
+    RCall(_InfWave, Dtor)(& LPFWave);
+    RCall(_STFTItersizer, Dtor)(& LPFItersizer);
+    RCall(_IWave, SetWindow)(This -> Wave, OrigWind, OrigSize);
+}
 
 RTMethod(int , CSVP_PSOLAIterlyzer, Extract, int Index);
 RTMethod(int , CSVP_PSOLAIterlyzer, Fetch, int Index);

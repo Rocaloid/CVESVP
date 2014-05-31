@@ -31,6 +31,8 @@ int main()
     RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, 45000);
     
     RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 274000);
+    RCall(PSOLAIterlyzer, PrevTo)(& PAna, 20000);
+    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 517000);
     
     RFree(HannWind);
     RDelete(& InWave, & OutWave, & Path, & PAna);

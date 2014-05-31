@@ -16,13 +16,6 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq)
     RCall(_Spectrum, Ctor)(& NewSorc);
     RCall(_Spectrum, From)(& NewSorc, Sorc);
     RCall(_Spectrum, MagnConv)(& NewSorc, CDSP2_LogMagn);
-    /*
-    if(Sorc -> MagnType != CDSP2_LogMagn)
-        return 0;
-    
-    _T1* Magn = RCall(RAlloc, _T1)(Sorc -> Size / 2);
-    RCall(CDSP2_VCopy, _T1)(Magn, Sorc -> Magn, Sorc -> Size / 2);
-    */
     
     _T1* Magn = NewSorc.Magn;
     _T1 MaxDiff = 0;
@@ -124,7 +117,10 @@ RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position,
     
     int Bin = RCall(CSVP_F0FromSpectrumB, _T1)(& Spec1, MinFreq, MaxFreq);
     if(Bin < 2)
+    {
+        RDelete(& Spec1, & Spec2);
         return 0;
+    }
     
     _T1 Ret = RCall(CSVP_F0FromSuccSpectrumAndBin, _T1)(& Spec1, & Spec2, 1,
         Bin);

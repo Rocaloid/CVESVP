@@ -1,18 +1,13 @@
-#include "F0.h"
-#include "PSOLA.h"
 #include "SpecManipulation.h"
-
 #include <RUtil2.h>
 
 #if 0
-#include "Iterator/_PSOLAIterlyzer.rc"
+#include "_SpecFilter.rc"
 #endif
 
-#include <RUtil2.h>
+#define _RTAddress "_SpecFilter.rc"
 
-#define _RTAddress "Iterator/_PSOLAIterlyzer.rc"
-
-#define _ClassName CSVP_PSOLAIterlyzer_
+#define _ClassName _
 #define _Attr 1
 
 #define _T1 Float
