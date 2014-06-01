@@ -34,6 +34,14 @@ int main()
     RCall(PSOLAIterlyzer, PrevTo)(& PAna, 20000);
     RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 517000);
     
+    int i;
+    for(i = 0; i <= PAna.PulseList.Frames_Index; i ++)
+    {
+        int p = RCall(PSOLAIterlyzer, Fetch)(& PAna, i);
+        printf("%f %f\n", (float)p / InWave.SampleRate
+                        , (float)p / InWave.SampleRate);
+    }
+    
     RFree(HannWind);
     RDelete(& InWave, & OutWave, & Path, & PAna);
     return 0;
