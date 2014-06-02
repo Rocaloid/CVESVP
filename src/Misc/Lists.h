@@ -9,6 +9,8 @@
 #include "_TypeList.h"
 #endif
 
+#include "List_Int.h"
+
 //-----
 #include <RUtil2.h>
 
@@ -26,8 +28,6 @@
 
 #define _T1 Double
 #include <RUtil2/Core/RTemplate.h>
-
-#include "List_Int.h"
 
 #endif
 

@@ -1,6 +1,7 @@
 #ifndef CSVP_DATAFRAME_H
 #define CSVP_DATAFRAME_H
 
+#include <CVEDSP2.h>
 #include <RUtil2.h>
 
 #if 0

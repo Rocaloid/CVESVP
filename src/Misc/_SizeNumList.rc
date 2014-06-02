@@ -58,11 +58,13 @@ RTMethod(void, MyName, Resize, int FrameNum)
     {
         Array_Resize(_T2, This -> Frames, FrameNum);
         for(i = This -> Frames_Index + 1; i < FrameNum; i ++)
-        #ifdef _CSVP_NOSIZE
+        {
+        #ifndef _CSVP_NOSIZE
             RCall(_T2, CtorSize)(This -> Frames + i, FrameSize);
         #else
             RCall(_T2, Ctor)(This -> Frames + i);
         #endif
+        }
     }else
     {
         for(i = This -> Frames_Index; i >= FrameNum; i --)
@@ -82,10 +84,15 @@ RTMethod(void, MyName, From, MyType* Sorc)
     #else
     RCall(MyType, Resize)(This, Sorc -> FrameNum);
     #endif
+    This -> Frames_Index = Sorc -> Frames_Index;
     for(i = 0; i < Sorc -> FrameNum; i ++)
+    {
         RCall(_T2, From)(This -> Frames + i, Sorc -> Frames + i);
+    }
     This -> FrameNum = Sorc -> FrameNum;
+    #ifndef _CSVP_NOSIZE
     This -> FrameSize = Sorc -> FrameSize;
+    #endif
 }
 
 RTMethod(void, MyName, Clear)
@@ -130,7 +137,7 @@ RTMethod(void, MyName, Add, _T2* Sorc, int Index)
     #ifndef _CSVP_NOSIZE
     RCall(_T2, CtorSize)(This -> Frames + Index, This -> FrameSize);
     #else
-    RCall(_T2, CtorSize)(This -> Frames + Index);
+    RCall(_T2, Ctor)(This -> Frames + Index);
     #endif
     RCall(_T2, From)(This -> Frames + Index, Sorc);
     This -> FrameNum = This -> Frames_Index + 1;

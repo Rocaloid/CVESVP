@@ -16,18 +16,17 @@ RClass(_RTClassName)
     int LastPosition;
 };
 
-RTMethod(void, CSVP_PSOLAItersizer, CtorSize, int FrameSize);
-RTMethod(void, CSVP_PSOLAItersizer, Resize, int FrameSize);
 RTMethod(void, CSVP_PSOLAItersizer, From, _RTClassName* Sorc);
 
 RTMethod(void, CSVP_PSOLAItersizer, SetWave, void* Sorc);
-RTMethod(void, CSVP_PSOLAItersizer, SetSorcWave, void* Sorc);
+RTMethod(void, CSVP_PSOLAItersizer, SetWindow, _FWindow* Sorc);
 RTMethod(void, CSVP_PSOLAItersizer, SetPosition, int Position);
 RTMethod(int , CSVP_PSOLAItersizer, GetPosition);
 
 RTMethod(void, CSVP_PSOLAItersizer, RepositionFrom, int Position);
 
 RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position);
+RTMethod(void, CSVP_PSOLAItersizer, IterPrevTo, int Position);
 
 RTMethod(void, CSVP_PSOLAItersizer, Add, int Position, _List_DataFrame* Sorc);
 
