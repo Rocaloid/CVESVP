@@ -78,6 +78,10 @@ int main()
     RCall(PSOLAItersizer, SetWindow)(& PSyn, & DyWin);
     RCall(PSOLAItersizer, SetPosition)(& PSyn, 0);
     
+    RCall(PSOLAItersizer, IterNextTo)(& PSyn, 100000);
+    RCall(PSOLAItersizer, IterNextTo)(& PSyn, 200000);
+    RCall(PSOLAItersizer, IterNextTo)(& PSyn, 300000);
+    RCall(PSOLAItersizer, IterNextTo)(& PSyn, 500000);
     RCall(PSOLAItersizer, IterNextTo)(& PSyn, 1000000);
     
     String_SetChars(& Path, "/tmp/out.wav");

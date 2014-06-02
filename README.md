@@ -8,7 +8,7 @@ Todo & Plan List
 
 - [x] Spectrum filter utilities
 - [x] Implement `PSOLAIterlyzer`(in: `Wave`, out: `PulseList`)
-- [ ] Implement `PSOLAItersizer`(in: `Position` `DataFrame`, out: `Wave`)
+- [x] Implement `PSOLAItersizer`(in: `Position` `DataFrame`, out: `Wave`)
 - [ ] Implement `VOTFromWave` based on `STFTIterlyzer`(in: `Wave`, out: `Position`)
 - [ ] Implement `Sinusoid` structure and `List_Sinusoid` and `Sinusoid_ToReal`
 - [ ] Implement `HNMFrame` `HNMContour` structure and `List_HNMFrame`

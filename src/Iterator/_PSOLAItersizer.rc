@@ -4,6 +4,18 @@
 #define _DataFrame _C(CSVP_DataFrame, _, _T1)
 #define _IWave _C(CDSP2_IWave, _, _T1)
 
+#define _CheckMembers(Name) \
+    CDSP2_If_Debug_Check \
+    ( \
+        if(This -> Wave == NULL) \
+            RDebugPrint(_RTClassName, _S(Name) ": require wave.") \
+        if(This -> Window == NULL) \
+            RDebugPrint(_RTClassName, _S(Name) ": require fast window.") \
+        if(This -> DataList.FrameNum != This -> PulseList.Frames_Index + 1) \
+            RDebugPrint(_RTClassName, _S(Name) ": unmatching number of pulses" \
+                " and data frames."); \
+    )
+
 RCtor(_RTClassName)
 {
     RCall(_List_DataFrame, Ctor)(& This -> DataList);
@@ -82,6 +94,7 @@ RTMethod(static void, CSVP_PSOLAItersizer, _RenderRange, int LIndex, int HIndex)
 
 RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position)
 {
+    _CheckMembers(IterNextTo);
     int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         This -> LastPosition);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList, Position);
@@ -93,6 +106,7 @@ RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_PSOLAItersizer, IterPrevTo, int Position)
 {
+    _CheckMembers(IterPrevTo);
     int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList, Position);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList,
         This -> LastPosition);
