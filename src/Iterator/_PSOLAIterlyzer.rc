@@ -202,8 +202,9 @@ RTMethod(static void, CSVP_PSOLAIterlyzer, _LowPassTo, int Position)
     RCall(_IWave, SetWindow)(This -> Wave, OrigWind, OrigSize);
 }
 
-RTMethod(static void, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
+RTMethod(static int, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
 {
+    int Ret = 1;
     _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     RCall(_RTClassName, _LowPassTo)(This, Position);
     
@@ -211,6 +212,12 @@ RTMethod(static void, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
     while(This -> LastPosition < Position - LPFSIZE)
     {
         _T1 Freq = SampleRate / This -> RefPeriod;
+        if(Freq < 50 || Freq > 1500)
+        {
+            Ret = 0;
+            break;
+        }
+        
         Freq = RCall(CSVP_F0FromWave, _T1)(This -> Wave, 
             This -> LastPosition + This -> RefPeriod, Freq * 0.7, Freq * 1.4);
         int NewPeriod = SampleRate / Freq;
@@ -229,10 +236,13 @@ RTMethod(static void, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
         
         /*
         printf("%f %f\n", (_T1)IdealNext / SampleRate,
-            (_T1)IdealNext / SampleRate);*/
+            (_T1)IdealNext / SampleRate);
+        */
         
         RCall(_List_Int, Add)(& This -> PulseList, This -> LastPosition);
     }
+    
+    return Ret;
 }
 
 RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
@@ -259,7 +269,7 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
         
         //Error: Improper range.
         if(Freq < 50 || Freq > 2000)
-            return 0;
+            goto OnError;
         
         This -> InitPeriod = (int)(SampleRate / Freq);
         This -> RefPeriod = (int)(SampleRate / Freq);
@@ -298,27 +308,38 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
     
     RFree(Hann);
     RCall(_IWave, SetWindow)(This -> Wave, OrigWind, OrigSize);
-    
     return 1;
+    
+    OnError:
+    RFree(Hann);
+    RCall(_IWave, SetWindow)(This -> Wave, OrigWind, OrigSize);
+    return 0;
 }
 
-RTMethod(void, CSVP_PSOLAIterlyzer, IterNextTo, int Position)
+RTMethod(int , CSVP_PSOLAIterlyzer, IterNextTo, int Position)
 {
     _CheckMembers(IterNextTo);
     
+    int Ret = 1;
     int IterHopSize = LPFSIZE + 512;
     while(This -> LastPosition < Position - IterHopSize)
     {
-        RCall(_RTClassName, _SubIterNextTo)(This,
+        Ret = RCall(_RTClassName, _SubIterNextTo)(This,
             This -> LastPosition + IterHopSize);
+        if(Ret != 1)
+            goto End;
+        
         RCall(_InfWave, Submit)(This -> LPFWave,
             This -> LastPosition - 2048);
         RCall(_InfWave, Throw)(This -> LPFWave);
     }
-    RCall(_RTClassName, _SubIterNextTo)(This, Position);
+    Ret = RCall(_RTClassName, _SubIterNextTo)(This, Position);
+    
+    End:
+    return Ret;
 }
 
-RTMethod(void, CSVP_PSOLAIterlyzer, PrevTo, int Position)
+RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
 {
     _CheckMembers(PrevTo);
     CDSP2_If_Debug_Check
@@ -328,6 +349,7 @@ RTMethod(void, CSVP_PSOLAIterlyzer, PrevTo, int Position)
                 "the initial position.");
     )
     
+    int Ret = 1;
     _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     
     //Set up a temporary buffer for backward low-pass filtering.
@@ -378,6 +400,12 @@ RTMethod(void, CSVP_PSOLAIterlyzer, PrevTo, int Position)
             LastPosition - 2048);
         
         _T1 Freq = SampleRate / RefPeriod;
+        if(Freq < 50 || Freq > 1500)
+        {
+            Ret = 0;
+            break;
+        }
+        
         Freq = RCall(CSVP_F0FromWave, _T1)(This -> Wave,
             LastPosition + RefPeriod, Freq * 0.7, Freq * 1.4);
         int NewPeriod = SampleRate / Freq;
@@ -412,6 +440,8 @@ RTMethod(void, CSVP_PSOLAIterlyzer, PrevTo, int Position)
     RCall(_InfWave, Dtor)(& LPFWave);
     RCall(_STFTItersizer, Dtor)(& LPFItersizer);
     RCall(_IWave, SetWindow)(This -> Wave, OrigWind, OrigSize);
+    
+    return Ret;
 }
 
 RTMethod(int , CSVP_PSOLAIterlyzer, Extract, int Index)

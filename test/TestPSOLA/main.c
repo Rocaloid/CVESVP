@@ -30,17 +30,16 @@ int main()
     RCall(Wave, SetWindow)(& OutWave, HannWind, 2048);
     
     RNew(PSOLAIterlyzer, & PAna);
-    String_SetChars(& Path, "/tmp/a2.wav");
+    String_SetChars(& Path, "/tmp/a3.wav");
     
     
     RCall(Wave, FromFile)(& InWave, & Path);
     RCall(PSOLAIterlyzer, SetWave)(& PAna, & InWave);
-    RCall(PSOLAIterlyzer, SetPosition)(& PAna, 15500);
-    RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, 45000);
+    RCall(PSOLAIterlyzer, SetPosition)(& PAna, 51513);
+    RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, 57183);
     
-    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 50000);
-    RCall(PSOLAIterlyzer, PrevTo)(& PAna, 2000);
-    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 45000);
+    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 65421);
+    RCall(PSOLAIterlyzer, PrevTo)(& PAna, 40786);
     
     /*
     int i;

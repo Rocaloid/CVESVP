@@ -35,8 +35,8 @@ RTMethod(void, CSVP_PSOLAIterlyzer, SetLPF, _T1 Freq);
 
 RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position);
 
-RTMethod(void, CSVP_PSOLAIterlyzer, IterNextTo, int Position);
-RTMethod(void, CSVP_PSOLAIterlyzer, PrevTo, int Position);
+RTMethod(int , CSVP_PSOLAIterlyzer, IterNextTo, int Position);
+RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position);
 
 RTMethod(int , CSVP_PSOLAIterlyzer, Extract, int Index);
 RTMethod(int , CSVP_PSOLAIterlyzer, Fetch, int Index);

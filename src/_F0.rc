@@ -134,6 +134,7 @@ RTFunc(int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition, int RPosition,
     int MinFreq, int MaxFreq)
 {
     int p = 0;
+    int Ret = 1;
     CSVP_List_Int FundBins;
     RCall(CSVP_List_Int, Ctor)(& FundBins);
     
@@ -148,13 +149,12 @@ RTFunc(int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition, int RPosition,
     
     //No valid result yielded.
     if(FundBins.Frames_Index < 0)
-        return 0;
-    
-    int BMed = FundBins.Frames[FundBins.Frames_Index / 2]; 
+        Ret = 0;
+    else
+        Ret = FundBins.Frames[FundBins.Frames_Index / 2]; 
     
     RCall(CSVP_List_Int, Dtor)(& FundBins);
-    
-    return BMed;
+    return Ret;
 }
 
 RTFunc(_T1, CSVP_SecureF0FromWave, void* Sorc, int Center, 
