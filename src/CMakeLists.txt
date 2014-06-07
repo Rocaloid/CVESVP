@@ -23,5 +23,8 @@ install(FILES ${Header_ROOT}
 install(FILES Include/CVESVP.h
               DESTINATION /usr/include/)
 
-install(TARGETS CVESVP LIBRARY DESTINATION /usr/lib)
-
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    install(TARGETS CVESVP LIBRARY DESTINATION /usr/lib64)
+else(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    install(TARGETS CVESVP LIBRARY DESTINATION /usr/lib)
+endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
