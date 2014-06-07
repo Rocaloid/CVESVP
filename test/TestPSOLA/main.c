@@ -30,17 +30,17 @@ int main()
     RCall(Wave, SetWindow)(& OutWave, HannWind, 2048);
     
     RNew(PSOLAIterlyzer, & PAna);
-    String_SetChars(& Path, "/tmp/a.wav");
+    String_SetChars(& Path, "/tmp/a2.wav");
     
     
     RCall(Wave, FromFile)(& InWave, & Path);
     RCall(PSOLAIterlyzer, SetWave)(& PAna, & InWave);
-    RCall(PSOLAIterlyzer, SetPosition)(& PAna, 43000);
+    RCall(PSOLAIterlyzer, SetPosition)(& PAna, 15500);
     RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, 45000);
     
-    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 274000);
-    RCall(PSOLAIterlyzer, PrevTo)(& PAna, 20000);
-    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 517000);
+    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 50000);
+    RCall(PSOLAIterlyzer, PrevTo)(& PAna, 2000);
+    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 45000);
     
     /*
     int i;
@@ -63,7 +63,7 @@ int main()
     int i;
     for(i = 0; i <= PSyn.PulseList.Frames_Index; i ++)
     {
-        PSyn.PulseList.Frames[i] /= 1.5;
+        PSyn.PulseList.Frames[i] /= 2;
     }
     
     FWindow_T DyWin;
@@ -79,10 +79,6 @@ int main()
     RCall(PSOLAItersizer, SetPosition)(& PSyn, 0);
     
     RCall(PSOLAItersizer, IterNextTo)(& PSyn, 100000);
-    RCall(PSOLAItersizer, IterNextTo)(& PSyn, 200000);
-    RCall(PSOLAItersizer, IterNextTo)(& PSyn, 300000);
-    RCall(PSOLAItersizer, IterNextTo)(& PSyn, 500000);
-    RCall(PSOLAItersizer, IterNextTo)(& PSyn, 1000000);
     
     String_SetChars(& Path, "/tmp/out.wav");
     RCall(Wave, ToFile)(& OutWave, & Path);

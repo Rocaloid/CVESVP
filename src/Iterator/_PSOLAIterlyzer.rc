@@ -235,7 +235,7 @@ RTMethod(static void, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
     }
 }
 
-RTMethod(void, CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
+RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
 {
     CDSP2_If_Debug_Check
     (
@@ -244,10 +244,8 @@ RTMethod(void, CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
                 "(Wave not set yet).");
     )
     
-    _List_Int FundBins;
     int SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     _T1* Hann = RCall(RAlloc, _T1)(2048);
-    RCall(_List_Int, Ctor)(& FundBins);
     RCall(CDSP2_GenHanning, _T1)(Hann, 2048);
     
     _T1* OrigWind = ((_Wave*)This -> Wave) -> Window;
@@ -255,20 +253,14 @@ RTMethod(void, CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
     RCall(_IWave, SetWindow)(This -> Wave, Hann, 2048);
     
     {
-        //Find the median fundamental frequency.
-        int p = This -> InitPosition;
-        while(p < Position)
-        {
-            int Bin = RCall(CSVP_F0FromWaveB, _T1)(This -> Wave, p, 50, 1500);
-            RCall(_List_Int, Add)(& FundBins, Bin);
-            p += 512;
-        }
-        int BMed = FundBins.Frames[FundBins.Frames_Index / 2];
-        int FMed = BMed * SampleRate / 2048;
-    
-        //Find the period.
-        _T1 Freq = RCall(CSVP_F0FromWave, _T1)(This -> Wave,
-            This -> InitPosition, FMed * 0.8, FMed * 1.2);
+        //Find the fundamental frequency.
+        _T1 Freq = RCall(CSVP_SecureF0FromWave, _T1)(This -> Wave,
+            This -> InitPosition, This -> InitPosition, Position, 50, 1500);
+        
+        //Error: Improper range.
+        if(Freq < 50 || Freq > 2000)
+            return 0;
+        
         This -> InitPeriod = (int)(SampleRate / Freq);
         This -> RefPeriod = (int)(SampleRate / Freq);
         
@@ -305,8 +297,9 @@ RTMethod(void, CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
     }
     
     RFree(Hann);
-    RCall(_List_Int, Dtor)(& FundBins);
     RCall(_IWave, SetWindow)(This -> Wave, OrigWind, OrigSize);
+    
+    return 1;
 }
 
 RTMethod(void, CSVP_PSOLAIterlyzer, IterNextTo, int Position)

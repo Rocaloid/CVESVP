@@ -11,5 +11,10 @@ RTFunc(int, CSVP_F0FromWaveB, void* Sorc, int Position,
 RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position,
     int MinFreq, int MaxFreq);
 
+RTFunc(int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition, int RPosition, 
+    int MinFreq, int MaxFreq);
+RTFunc(_T1, CSVP_SecureF0FromWave, void* Sorc, int Center, 
+    int LPosition, int RPosition, int MinFreq, int MaxFreq);
+
 #undef  _Spectrum
 

@@ -2,6 +2,8 @@
 #define CVESVP_F0_H
 
 #include <CVEDSP2.h>
+#include "Misc/List_Int.h"
+
 #include <RUtil2.h>
 
 #if 0
