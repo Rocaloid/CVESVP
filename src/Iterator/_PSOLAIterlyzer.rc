@@ -42,6 +42,7 @@ RCtor(_RTClassName)
     This -> RefPeriod = 0;
     This -> InitPeriod = 0;
     This -> LPF = 1500;
+    This -> Boundary = 0;
     
     RInit(_RTClassName);
 }
@@ -116,6 +117,11 @@ RTMethod(void, CSVP_PSOLAIterlyzer, SetRefFreq, _T1 Freq)
 RTMethod(void, CSVP_PSOLAIterlyzer, SetLPF, _T1 Freq)
 {
     This -> LPF = Freq;
+}
+
+RTMethod(void, CSVP_PSOLAIterlyzer, SetBound, _T1 Position)
+{
+    This -> Boundary = Position;
 }
 
 RTMethod(static int , CSVP_PSOLAIterlyzer, _PeakAt, void* Wave,
@@ -267,8 +273,9 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
         _T1 Freq = RCall(CSVP_SecureF0FromWave, _T1)(This -> Wave,
             This -> InitPosition, This -> InitPosition, Position, 50, 1500);
         
+        printf("%f\n", Freq);
         //Error: Improper range.
-        if(Freq < 50 || Freq > 2000)
+        if(! (Freq > 50 && Freq < 2000))
             goto OnError;
         
         This -> InitPeriod = (int)(SampleRate / Freq);
@@ -391,6 +398,13 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
     {
         RCall(_List_Int, Add)(& This -> PulseList, LastPosition);
         
+        //Beyond analysis boundary.
+        if(LastPosition < This -> Boundary)
+        {
+            LastPosition -= This -> RefPeriod;
+            continue;
+        }
+        
         //LowPass Iteration
         RCall(_STFTIterlyzer, IterPrevTo)(This -> Sublyzer,
             LastPosition - 2048);
@@ -400,7 +414,7 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
             LastPosition - 2048);
         
         _T1 Freq = SampleRate / RefPeriod;
-        if(Freq < 50 || Freq > 1500)
+        if(! (Freq > 50 && Freq < 2000))
         {
             Ret = 0;
             break;

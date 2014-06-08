@@ -18,6 +18,7 @@ RClass(_RTClassName)
     _STFTItersizer* Subsizer;
     int LastPosition;
     int InitPosition;
+    int Boundary;
     
     int PeakSign;
     int RefPeriod;
@@ -32,6 +33,7 @@ RTMethod(void, CSVP_PSOLAIterlyzer, SetPosition, int Position);
 RTMethod(int , CSVP_PSOLAIterlyzer, GetPosition);
 RTMethod(void, CSVP_PSOLAIterlyzer, SetRefFreq, _T1 Freq);
 RTMethod(void, CSVP_PSOLAIterlyzer, SetLPF, _T1 Freq);
+RTMethod(void, CSVP_PSOLAIterlyzer, SetBound, _T1 Position);
 
 RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position);
 

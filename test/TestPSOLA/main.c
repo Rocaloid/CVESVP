@@ -1,5 +1,6 @@
 #include "PSOLA.h"
 #include "Misc/Lists.h"
+#include "EndPoint.h"
 
 #define Wave CDSP2_Wave_Float
 #define InfWave CDSP2_InfWave_Float
@@ -30,16 +31,31 @@ int main()
     RCall(Wave, SetWindow)(& OutWave, HannWind, 2048);
     
     RNew(PSOLAIterlyzer, & PAna);
-    String_SetChars(& Path, "/tmp/a3.wav");
-    
-    
+    String_SetChars(& Path, "/tmp/to-1.wsp");
     RCall(Wave, FromFile)(& InWave, & Path);
-    RCall(PSOLAIterlyzer, SetWave)(& PAna, & InWave);
-    RCall(PSOLAIterlyzer, SetPosition)(& PAna, 51513);
-    RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, 57183);
     
-    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 65421);
-    RCall(PSOLAIterlyzer, PrevTo)(& PAna, 40786);
+    CSVP_VOTFromWaveAfter_Float(& InWave, 50, 20000);
+    
+    RCall(PSOLAIterlyzer, SetWave)(& PAna, & InWave);
+    RCall(PSOLAIterlyzer, SetPosition)(& PAna, 13000);
+    RCall(PSOLAIterlyzer, SetBound)(& PAna, 11500);
+    if(! RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, 15000))
+    {
+        printf("Preanalysis failed.\n");
+        return 1;
+    }
+    
+    if(! RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 31500))
+    {
+        printf("Forward analysis failed.\n");
+        return 1;
+    }
+    
+    if(! RCall(PSOLAIterlyzer, PrevTo)(& PAna, 3000))
+    {
+        printf("Backward analysis failed.\n");
+        return 1;
+    }
     
     /*
     int i;
@@ -60,9 +76,9 @@ int main()
     RCall(List_Int, From)(& PSyn.PulseList, & PAna.PulseList);
     
     int i;
-    for(i = 0; i <= PSyn.PulseList.Frames_Index; i ++)
+    for(i = 1; i <= PSyn.PulseList.Frames_Index; i ++)
     {
-        PSyn.PulseList.Frames[i] /= 2;
+        PSyn.PulseList.Frames[i] *= 0.7;
     }
     
     FWindow_T DyWin;
@@ -81,7 +97,7 @@ int main()
     
     String_SetChars(& Path, "/tmp/out.wav");
     RCall(Wave, ToFile)(& OutWave, & Path);
-    
+        
     RFree(HannWind);
     RDelete(& InWave, & OutWave, & Path, & PAna, & PSyn, & PSOLAFrame, & DyWin);
     return 0;

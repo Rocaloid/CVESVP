@@ -28,8 +28,8 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq)
     {
         if(Magn[i] > Magn[i - 1] &&
            Magn[i] > Magn[i + 1] &&
-           Magn[i] > Magn[i - 2] &&
-           Magn[i] > Magn[i + 2])
+           Magn[i - 1] > Magn[i - 2] &&
+           Magn[i + 1] > Magn[i + 2])
         {
             LeftMax = RCall(CDSP2_VMaxElmt, _T1)(Magn, F2B(MinFreq), i - 2);
             if(Magn[i] - LeftMax > MaxDiff)
