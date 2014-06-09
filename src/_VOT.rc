@@ -2,7 +2,7 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 
-RTFunc(int, CSVP_VOTFromWaveAfter, void* Sorc, int Position, int RBound)
+RTFunc(int, CSVP_VOTFromWave, void* Sorc, int LBound, int RBound)
 {
     _STFTIterlyzer Sublyzer;
     
@@ -16,13 +16,13 @@ RTFunc(int, CSVP_VOTFromWaveAfter, void* Sorc, int Position, int RBound)
     RCall(_STFTIterlyzer, CtorSize)(& Sublyzer, SIZE_FFT);
     RCall(_STFTIterlyzer, SetWave)(& Sublyzer, Sorc);
     RCall(_STFTIterlyzer, SetHopSize)(& Sublyzer, SIZE_HOP);
-    RCall(_STFTIterlyzer, SetPosition)(& Sublyzer, Position);
+    RCall(_STFTIterlyzer, SetPosition)(& Sublyzer, LBound);
     
     RCall(_STFTIterlyzer, IterNextTo)(& Sublyzer, RBound);
     
     int i;
     int SampleRate = ((_Wave*)Sorc) -> SampleRate;
-    int LBin = 60 * SIZE_FFT / SampleRate;
+    int LBin = 200 * SIZE_FFT / SampleRate;
     int HBin = 1500 * SIZE_FFT / SampleRate;
     Array_Gtor(_T1, PowerList);
     Array_Gtor(_T1, PowerAcc);
@@ -52,6 +52,7 @@ RTFunc(int, CSVP_VOTFromWaveAfter, void* Sorc, int Position, int RBound)
     
     RCall(CDSP2_VSub, _T1)(PowerList, PowerAccR, PowerAcc, l);
     
+    //TODO: Implement VMaxIndex, VMinIndex, VMaxEI, VMinEI in RFNL.
     int MaxIndex = 0;
     _T1 Max = PowerList[0];
     for(i = 1; i < l; i ++)
@@ -64,7 +65,7 @@ RTFunc(int, CSVP_VOTFromWaveAfter, void* Sorc, int Position, int RBound)
     //for(i = 0; i < l; i ++)
     //    printf("%f\n", PowerList[i]);
     
-    printf("%d\n", Sublyzer.PulseList.Frames[MaxIndex]);
+    int Ret = Sublyzer.PulseList.Frames[MaxIndex];
     
     Array_Dtor(_T1, PowerList);
     Array_Dtor(_T1, PowerAcc);
@@ -75,11 +76,24 @@ RTFunc(int, CSVP_VOTFromWaveAfter, void* Sorc, int Position, int RBound)
     RCall(_Wave, SetWindow)(Sorc, OrigWind, OrigSize);
     RCall(_STFTIterlyzer, Dtor)(& Sublyzer);
     
-    return Sublyzer.PulseList.Frames[MaxIndex];
+    return Ret;
 }
 
-RTFunc(int, CSVP_OnsetFromWaveAfter, void* Sorc, _T1 Threshold, int Position,
-    int RBound);
+RTFunc(int, CSVP_OnsetFromWave, void* Sorc, _T1 Threshold, int LBound,
+    int RBound)
+{
+    int i;
+    
+    _T1* WPtr = RCall(_Wave, GetUnsafePtr)(Sorc);
+    for(i = LBound; i < RBound + 1; i ++)
+    {
+        if(WPtr[i] > Threshold)
+            break;
+    }
+    if(i > RBound) return - 1;
+    
+    return i;
+}
 
 #undef  _STFTIterlyzer
 #undef  _Wave

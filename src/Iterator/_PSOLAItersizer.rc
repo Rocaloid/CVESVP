@@ -67,7 +67,7 @@ RTMethod(int , CSVP_PSOLAItersizer, GetPosition)
 RTMethod(void, CSVP_PSOLAItersizer, RepositionFrom, int Position)
 {
     int i;
-    int Offset = Position - RCall(_List_Int, Fetch)(& This -> PulseList, 0);
+    int Offset = Position - This -> PulseList.Frames[0];
     for(i = 0; i <= This -> PulseList.Frames_Index; i ++)
         This -> PulseList.Frames[i] += Offset;
 }

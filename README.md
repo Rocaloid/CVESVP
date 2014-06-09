@@ -9,7 +9,7 @@ Todo & Plan List
 - [x] Spectrum filter utilities
 - [x] Implement `PSOLAIterlyzer`(in: `Wave`, out: `PulseList`)
 - [x] Implement `PSOLAItersizer`(in: `Position` `DataFrame`, out: `Wave`)
-- [ ] Implement `VOTFromWave` based on `STFTIterlyzer`(in: `Wave`, out: `Position`)
+- [x] Implement `VOTFromWave` based on `STFTIterlyzer`(in: `Wave`, out: `Position`)
 - [ ] Implement `Sinusoid` structure and `List_Sinusoid` and `Sinusoid_ToReal`
 - [ ] Implement `HNMFrame` `HNMContour` structure and `List_HNMFrame`
 - [ ] Implement `SinusoidIterlyzer`(in: `Wave`, out: `List_Sinusoid`)
@@ -27,4 +27,5 @@ Todo & Plan List
 - [ ] EpR fitting algorithm
 - [ ] EpR manipulating utilities
 - [ ] PSOLA manipulating utilities
+- [ ] Implement `VMaxIndex`, `VMinIndex`, `VMaxEI`, `VMinEI` in RFNL.
 

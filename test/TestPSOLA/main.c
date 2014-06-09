@@ -19,7 +19,6 @@ int main()
     
     String Path;
     Wave InWave, OutWave;
-    PSOLAIterlyzer PAna;
     float* HannWind = RAlloc_Float(2048);
     
     RNew(Wave, & InWave, & OutWave);
@@ -29,42 +28,98 @@ int main()
     RCall(Wave, Resize)(& OutWave, 1000000);
     RCall(Wave, SetWindow)(& InWave, HannWind, 2048);
     RCall(Wave, SetWindow)(& OutWave, HannWind, 2048);
+    /*
+    char* Paths[23] = 
+        {
+            
+            "/tmp/t/ta1.wsp", 
+            "/tmp/t/te-0.wsp", 
+            "/tmp/t/te-1.wsp", 
+            "/tmp/t/te0.wsp", 
+            "/tmp/t/te1.wsp", 
+            "/tmp/t/ti1.wsp", 
+            "/tmp/t/to-0.wsp",
+            "/tmp/t/to-1.wsp", 
+            "/tmp/t/to0.wsp", 
+            "/tmp/t/tu1.wsp",
+            
+            "/tmp/ch/ch_r0.wsp", 
+            "/tmp/ch/cha0.wsp", 
+            "/tmp/ch/che-0.wsp", 
+            "/tmp/ch/che0.wsp", 
+            "/tmp/ch/che1.wsp",
+            "/tmp/ch/cho-0.wsp", 
+            "/tmp/ch/cho0.wsp",
+            
+            "/tmp/p/pa0.wsp",
+            "/tmp/p/pe-0.wsp",
+            "/tmp/p/pe0.wsp",
+            "/tmp/p/pi0.wsp",
+            "/tmp/p/po-0.wsp",
+            "/tmp/p/po0.wsp"
+        };
     
-    RNew(PSOLAIterlyzer, & PAna);
-    String_SetChars(& Path, "/tmp/to-1.wsp");
+    int VOTs[23] = {10022, 11878, 12167, 12745, 11356,
+                    13957, 12653, 11141, 13459, 14024,
+                    14473, 13518, 13528, 15481, 16585, 14130, 15735, 
+                    13893, 13019, 13662, 12861, 11492, 12261};
+    
+    int i;
+    int a = 0;
+    int m = 0;
+    for(i = 0; i < 23; i ++)
+    {
+        String_SetChars(& Path, Paths[i]);
+        RCall(Wave, FromFile)(& InWave, & Path);
+        int VOT = CSVP_VOTFromWave_Float(& InWave, 50, 20000);
+        int e = abs(VOT - VOTs[i]);
+        a += e;
+        if(e > m) m = e;
+        printf("%s: %d %d %d\n", Paths[i], VOT - VOTs[i], VOT,
+            CSVP_OnsetFromWave_Float(& InWave, 0.0005, 50, 20000));
+    }
+    printf("avg: %f, max: %d\n", (float)a / 23.0, m);
+    */
+    
+    String_SetChars(& Path, "/tmp/p/pa0.wsp");
     RCall(Wave, FromFile)(& InWave, & Path);
     
-    CSVP_VOTFromWaveAfter_Float(& InWave, 50, 20000);
+    int VOT = CSVP_VOTFromWave_Float(& InWave, 0, InWave.Size / 2);
+    int Onset = CSVP_OnsetFromWave_Float(& InWave, 0.0005, 0, InWave.Size);
     
+    PSOLAIterlyzer PAna;
+    RNew(PSOLAIterlyzer, & PAna);
     RCall(PSOLAIterlyzer, SetWave)(& PAna, & InWave);
-    RCall(PSOLAIterlyzer, SetPosition)(& PAna, 13000);
-    RCall(PSOLAIterlyzer, SetBound)(& PAna, 11500);
-    if(! RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, 15000))
+    RCall(PSOLAIterlyzer, SetPosition)(& PAna, VOT + 2000);
+    RCall(PSOLAIterlyzer, SetBound)(& PAna, VOT);
+    if(! RCall(PSOLAIterlyzer, PreAnalysisTo)(& PAna, VOT + 6000))
     {
         printf("Preanalysis failed.\n");
         return 1;
     }
     
-    if(! RCall(PSOLAIterlyzer, IterNextTo)(& PAna, 31500))
+    if(! RCall(PSOLAIterlyzer, IterNextTo)(& PAna, InWave.Size))
     {
         printf("Forward analysis failed.\n");
         return 1;
     }
     
-    if(! RCall(PSOLAIterlyzer, PrevTo)(& PAna, 3000))
+    if(! RCall(PSOLAIterlyzer, PrevTo)(& PAna, Onset))
     {
         printf("Backward analysis failed.\n");
         return 1;
     }
     
-    /*
+    
     int i;
+    /*
     for(i = 0; i <= PAna.PulseList.Frames_Index; i ++)
     {
         int p = RCall(PSOLAIterlyzer, Fetch)(& PAna, i);
         printf("%f %f\n", (float)p / InWave.SampleRate
                         , (float)p / InWave.SampleRate);
     }*/
+    
     
     List_DataFrame PSOLAFrame;
     RCall(List_DataFrame, Ctor)(& PSOLAFrame);
@@ -75,8 +130,7 @@ int main()
     RCall(List_DataFrame, From)(& PSyn.DataList, & PSOLAFrame);
     RCall(List_Int, From)(& PSyn.PulseList, & PAna.PulseList);
     
-    int i;
-    for(i = 1; i <= PSyn.PulseList.Frames_Index; i ++)
+    for(i = 0; i <= PSyn.PulseList.Frames_Index; i ++)
     {
         PSyn.PulseList.Frames[i] *= 0.7;
     }
@@ -92,13 +146,15 @@ int main()
     RCall(PSOLAItersizer, SetWave)(& PSyn, & OutWave);
     RCall(PSOLAItersizer, SetWindow)(& PSyn, & DyWin);
     RCall(PSOLAItersizer, SetPosition)(& PSyn, 0);
+    RCall(PSOLAItersizer, RepositionFrom)(& PSyn, 0);
     
     RCall(PSOLAItersizer, IterNextTo)(& PSyn, 100000);
     
     String_SetChars(& Path, "/tmp/out.wav");
     RCall(Wave, ToFile)(& OutWave, & Path);
-        
+    
     RFree(HannWind);
+    //RDelete(& InWave, & OutWave, & Path);
     RDelete(& InWave, & OutWave, & Path, & PAna, & PSyn, & PSOLAFrame, & DyWin);
     return 0;
 }

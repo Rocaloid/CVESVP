@@ -273,7 +273,8 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
         _T1 Freq = RCall(CSVP_SecureF0FromWave, _T1)(This -> Wave,
             This -> InitPosition, This -> InitPosition, Position, 50, 1500);
         
-        printf("%f\n", Freq);
+        //printf("%f\n", Freq);
+        
         //Error: Improper range.
         if(! (Freq > 50 && Freq < 2000))
             goto OnError;

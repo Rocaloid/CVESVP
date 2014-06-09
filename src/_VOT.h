@@ -1,4 +1,4 @@
-RTFunc(int, CSVP_VOTFromWaveAfter, void* Sorc, int Position, int RBound);
-RTFunc(int, CSVP_OnsetFromWaveAfter, void* Sorc, _T1 Threshold, int Position,
+RTFunc(int, CSVP_VOTFromWave, void* Sorc, int LBound, int RBound);
+RTFunc(int, CSVP_OnsetFromWave, void* Sorc, _T1 Threshold, int LBound,
     int RBound);
 
