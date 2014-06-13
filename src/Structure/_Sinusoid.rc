@@ -1,0 +1,70 @@
+/*
+RClass(_RTClassName)
+{
+    RInherit(RObject);
+
+    //Public
+    int Size;
+    Array_Define(_T1, Freq);
+    Array_Define(_T1, Ampl);
+};
+
+RTMethod(void, CSVP_Sinusoid, CtorSize, int Size);
+RTMethod(void, CSVP_Sinusoid, Resize, int Size);
+RTMethod(void, CSVP_Sinusoid, From, _RTClassName* Sorc);
+
+RTMethod(void, CSVP_Sinusoid, ToReal, _T1* Dest, int Size);
+*/
+
+RCtor(_RTClassName)
+{
+    This -> Size = 0;
+    Array_Ctor(_T1, This -> Freq);
+    Array_Ctor(_T1, This -> Ampl);
+    
+    RInit(_RTClassName);
+}
+
+RDtor(_RTClassName)
+{
+    Array_Ctor(_T1, This -> Freq);
+    Array_Ctor(_T1, This -> Ampl);
+}
+
+RTMethod(void, CSVP_Sinusoid, CtorSize, int Size)
+{
+    This -> Size = Size;
+    Array_Resize(_T1, This -> Freq, Size);
+    Array_Resize(_T1, This -> Ampl, Size);
+    This -> Freq_Index = Size - 1;
+    This -> Ampl_Index = Size - 1;
+    
+    RCall(CDSP2_VSet, _T1)(This -> Freq, 0, Size);
+    RCall(CDSP2_VSet, _T1)(This -> Ampl, 0, Size);
+    
+    RInit(_RTClassName);
+}
+
+RTMethod(void, CSVP_Sinusoid, Resize, int Size)
+{
+    if(Size != This -> Size)
+    {
+        This -> Size = Size;
+        Array_Resize(_T1, This -> Freq, Size);
+        Array_Resize(_T1, This -> Ampl, Size);
+        This -> Freq_Index = Size - 1;
+        This -> Ampl_Index = Size - 1;
+    }
+    
+    RCall(CDSP2_VSet, _T1)(This -> Freq, 0, Size);
+    RCall(CDSP2_VSet, _T1)(This -> Ampl, 0, Size);
+}
+
+RTMethod(void, CSVP_Sinusoid, From, _RTClassName* Sorc)
+{
+    RCall(_RTClassName, Resize)(This, Sorc -> Size);
+    
+    RCall(CDSP2_VCopy, _T1)(This -> Freq, Sorc -> Freq, Sorc -> Size);
+    RCall(CDSP2_VCopy, _T1)(This -> Ampl, Sorc -> Ampl, Sorc -> Size);
+}
+

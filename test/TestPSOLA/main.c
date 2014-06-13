@@ -25,7 +25,7 @@ int main()
     RNew(String, & Path);
     CDSP2_GenHanning_Float(HannWind, 2048);
     
-    RCall(Wave, Resize)(& OutWave, 1000000);
+    RCall(Wave, Resize)(& OutWave, 100000);
     RCall(Wave, SetWindow)(& InWave, HannWind, 2048);
     RCall(Wave, SetWindow)(& OutWave, HannWind, 2048);
     /*
@@ -84,11 +84,11 @@ int main()
     #ifdef __WIN32__
     String_SetChars(& Path, "C:\\xxx.wav");
     #else
-    String_SetChars(& Path, "/tmp/praat.wav");
+    String_SetChars(& Path, "/tmp/t15/zhuang.wav");
     #endif
     RCall(Wave, FromFile)(& InWave, & Path);
     
-    int VOT = CSVP_VOTFromWave_Float(& InWave, 0, 13200);
+    int VOT = CSVP_VOTFromWave_Float(& InWave, 0, InWave.Size / 2);
     int Onset = CSVP_OnsetFromWave_Float(& InWave, 0.0005, 0, InWave.Size);
     
     PSOLAIterlyzer PAna;
@@ -130,9 +130,10 @@ int main()
     RCall(List_DataFrame, From)(& PSyn.DataList, & PSOLAFrame);
     RCall(List_Int, From)(& PSyn.PulseList, & PAna.PulseList);
     
-    for(i = 0; i <= PSyn.PulseList.Frames_Index; i ++)
+    for(i = 1; i <= PSyn.PulseList.Frames_Index; i ++)
     {
-        PSyn.PulseList.Frames[i] *= 0.5;
+        PSyn.PulseList.Frames[i] = PSyn.PulseList.Frames[i - 1] + 
+            (PAna.PulseList.Frames[i] - PAna.PulseList.Frames[i - 1]) * 3;
     }
     
     FWindow_T DyWin;

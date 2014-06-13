@@ -3,6 +3,7 @@
 
 #include <CVEDSP2.h>
 #include "Structure/DataFrame.h"
+#include "Structure/HNMFrame.h"
 
 #if 0
 #include "_List.h"
