@@ -81,7 +81,11 @@ int main()
     printf("avg: %f, max: %d\n", (float)a / 23.0, m);
     */
     
+    #ifdef __WIN32__
+    String_SetChars(& Path, "C:\\xxx.wav");
+    #else
     String_SetChars(& Path, "/tmp/p/pa0.wsp");
+    #endif
     RCall(Wave, FromFile)(& InWave, & Path);
     
     int VOT = CSVP_VOTFromWave_Float(& InWave, 0, InWave.Size / 2);
@@ -132,7 +136,7 @@ int main()
     
     for(i = 0; i <= PSyn.PulseList.Frames_Index; i ++)
     {
-        PSyn.PulseList.Frames[i] *= 0.7;
+        PSyn.PulseList.Frames[i] *= 0.5;
     }
     
     FWindow_T DyWin;
@@ -148,9 +152,12 @@ int main()
     RCall(PSOLAItersizer, SetPosition)(& PSyn, 0);
     RCall(PSOLAItersizer, RepositionFrom)(& PSyn, 0);
     
-    RCall(PSOLAItersizer, IterNextTo)(& PSyn, 100000);
-    
+    RCall(PSOLAItersizer, IterNextTo)(& PSyn, InWave.Size);
+    #ifdef __WIN32__
+    String_SetChars(& Path, "C:\\out.wav");
+    #else
     String_SetChars(& Path, "/tmp/out.wav");
+    #endif
     RCall(Wave, ToFile)(& OutWave, & Path);
     
     RFree(HannWind);

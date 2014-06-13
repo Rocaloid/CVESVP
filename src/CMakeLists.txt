@@ -7,6 +7,9 @@ set(CMAKE_C_FLAGS "-Ofast -I${TopDir}/src")
 
 add_library(CVESVP SHARED ${SRC_LIST})
 include_directories(CVESVP PUBLIC "${CMAKE_SOURCE_DIR}/src")
+target_link_libraries(CVESVP CVEDSP2)
+target_link_libraries(CVESVP RFNL)
+target_link_libraries(CVESVP m)
 
 file(GLOB Header_Misc "Misc/*.h")
 file(GLOB Header_EpR "EpR/*.h")
@@ -23,8 +26,16 @@ install(FILES ${Header_ROOT}
 install(FILES Include/CVESVP.h
               DESTINATION /usr/include/)
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    install(TARGETS CVESVP LIBRARY DESTINATION /usr/lib64)
-else(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    install(TARGETS CVESVP LIBRARY DESTINATION /usr/lib)
-endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+if(CYGWIN OR WIN32)
+    message(STATUS "You are compiling this project as COFF.")
+    install(TARGETS CVESVP DESTINATION /usr/lib)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(STATUS "You are compiling this project as 64bit.")
+    install(TARGETS CVESVP DESTINATION /usr/lib64)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    message(STATUS "You are compiling this project as 32bit.")
+    install(TARGETS CVESVP DESTINATION /usr/lib)
+else()
+    message(FATAL_ERROR "Your system is unsupported!")
+endif()
+
