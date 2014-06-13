@@ -84,11 +84,11 @@ int main()
     #ifdef __WIN32__
     String_SetChars(& Path, "C:\\xxx.wav");
     #else
-    String_SetChars(& Path, "/tmp/p/pa0.wsp");
+    String_SetChars(& Path, "/tmp/praat.wav");
     #endif
     RCall(Wave, FromFile)(& InWave, & Path);
     
-    int VOT = CSVP_VOTFromWave_Float(& InWave, 0, InWave.Size / 2);
+    int VOT = CSVP_VOTFromWave_Float(& InWave, 0, 13200);
     int Onset = CSVP_OnsetFromWave_Float(& InWave, 0.0005, 0, InWave.Size);
     
     PSOLAIterlyzer PAna;
@@ -102,27 +102,23 @@ int main()
         return 1;
     }
     
-    if(! RCall(PSOLAIterlyzer, IterNextTo)(& PAna, InWave.Size))
-    {
-        printf("Forward analysis failed.\n");
-        return 1;
-    }
+    RCall(PSOLAIterlyzer, IterNextTo)(& PAna, InWave.Size);
     
     if(! RCall(PSOLAIterlyzer, PrevTo)(& PAna, Onset))
     {
         printf("Backward analysis failed.\n");
-        return 1;
+        //return 1;
     }
     
     
     int i;
-    /*
+    
     for(i = 0; i <= PAna.PulseList.Frames_Index; i ++)
     {
         int p = RCall(PSOLAIterlyzer, Fetch)(& PAna, i);
         printf("%f %f\n", (float)p / InWave.SampleRate
                         , (float)p / InWave.SampleRate);
-    }*/
+    }
     
     
     List_DataFrame PSOLAFrame;

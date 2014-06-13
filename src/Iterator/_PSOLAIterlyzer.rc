@@ -19,6 +19,13 @@
                 "frequency."); \
     )
 
+#define _ACMax _C(_CSVP_ACMax, _, _T1)
+typedef struct
+{
+    int MaxPos;
+    _T1 Max;
+} _ACMax;
+
 RCtor(_RTClassName)
 {
     This -> LPFWave = RAlloc_Class(_InfWave, 1);
@@ -156,9 +163,11 @@ RTMethod(static int , CSVP_PSOLAIterlyzer, _PeakAt, void* Wave,
     return PeakPos;
 }
 
-RTMethod(static int , CSVP_PSOLAIterlyzer, _MaxCorrelation, void* Wave,
+RTMethod(static _ACMax, CSVP_PSOLAIterlyzer, _MaxCorrelation, void* Wave,
     int Center, int Period, _T1 Offset, _T1 Range)
 {
+    _ACMax Ret;    
+    
     _T1* Data = RCall(_IWave, GetUnsafePtr)(Wave);
     _T1* MulD = RCall(RAlloc, _T1)(Period * 2);
     
@@ -181,8 +190,10 @@ RTMethod(static int , CSVP_PSOLAIterlyzer, _MaxCorrelation, void* Wave,
         }
     }
     
+    Ret.Max = Max;
+    Ret.MaxPos = MaxPos;
     RFree(MulD);
-    return MaxPos;
+    return Ret;
 }
 
 RTMethod(static void, CSVP_PSOLAIterlyzer, _LowPassTo, int Position)
@@ -218,11 +229,6 @@ RTMethod(static int, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
     while(This -> LastPosition < Position - LPFSIZE)
     {
         _T1 Freq = SampleRate / This -> RefPeriod;
-        if(Freq < 50 || Freq > 1500)
-        {
-            Ret = 0;
-            break;
-        }
         
         Freq = RCall(CSVP_F0FromWave, _T1)(This -> Wave, 
             This -> LastPosition + This -> RefPeriod, Freq * 0.7, Freq * 1.4);
@@ -233,10 +239,18 @@ RTMethod(static int, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
             This -> RefPeriod = NewPeriod;
         }
         
-        int IdealNext = RCall(_RTClassName, _MaxCorrelation)(This,
+        _ACMax AutoCorr = RCall(_RTClassName, _MaxCorrelation)(This,
             This -> LPFWave, This -> LastPosition, This -> RefPeriod, 1.0, 0.3);
-        IdealNext = RCall(_RTClassName, _PeakAt)(This, This -> LPFWave,
-            IdealNext, 10);
+        int IdealNext = RCall(_RTClassName, _PeakAt)(This, This -> LPFWave,
+            AutoCorr.MaxPos, 10);
+        
+        Freq = SampleRate / (IdealNext - This -> LastPosition);
+        if((! (Freq > 50 && Freq < 1500)) || AutoCorr.Max < 0.01)
+        {
+            Ret = 0;
+            break;
+        }
+        
         This -> RefPeriod = IdealNext - This -> LastPosition;
         This -> LastPosition = IdealNext;
         
@@ -334,12 +348,12 @@ RTMethod(int , CSVP_PSOLAIterlyzer, IterNextTo, int Position)
     {
         Ret = RCall(_RTClassName, _SubIterNextTo)(This,
             This -> LastPosition + IterHopSize);
-        if(Ret != 1)
-            goto End;
         
         RCall(_InfWave, Submit)(This -> LPFWave,
             This -> LastPosition - 2048);
         RCall(_InfWave, Throw)(This -> LPFWave);
+        if(Ret != 1)
+            goto End;
     }
     Ret = RCall(_RTClassName, _SubIterNextTo)(This, Position);
     
@@ -402,7 +416,7 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
         //Beyond analysis boundary.
         if(LastPosition < This -> Boundary)
         {
-            LastPosition -= This -> RefPeriod;
+            LastPosition -= RefPeriod;
             continue;
         }
         
@@ -415,11 +429,6 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
             LastPosition - 2048);
         
         _T1 Freq = SampleRate / RefPeriod;
-        if(! (Freq > 50 && Freq < 2000))
-        {
-            Ret = 0;
-            break;
-        }
         
         Freq = RCall(CSVP_F0FromWave, _T1)(This -> Wave,
             LastPosition + RefPeriod, Freq * 0.7, Freq * 1.4);
@@ -431,10 +440,18 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
             RefPeriod = NewPeriod;
         }
         
-        int IdealPrev = RCall(_RTClassName, _MaxCorrelation)(This,
+        _ACMax AutoCorr = RCall(_RTClassName, _MaxCorrelation)(This,
             & LPFWave, LastPosition, RefPeriod, - 1.0, 0.3);
-        IdealPrev = RCall(_RTClassName, _PeakAt)(This, & LPFWave,
-            IdealPrev, 10);
+        int IdealPrev = RCall(_RTClassName, _PeakAt)(This, & LPFWave,
+            AutoCorr.MaxPos, 10);
+        
+        Freq = SampleRate / (LastPosition - IdealPrev);
+        if(! (Freq > 50 && Freq < 1500))
+        {
+            Ret = 0;
+            break;
+        }
+        
         RefPeriod = LastPosition - IdealPrev;
         LastPosition = IdealPrev;
         
@@ -468,6 +485,8 @@ RTMethod(int , CSVP_PSOLAIterlyzer, Fetch, int Index)
 {
     return RCall(_List_Int, Fetch)(& This -> PulseList, Index);
 }
+
+#undef  _ACMax
 
 #undef  _InfWave
 #undef  _Wave
