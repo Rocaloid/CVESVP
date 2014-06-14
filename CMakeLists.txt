@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.4)
 project(CVESVP)
 
-add_definitions(-std=c99 -Wall)
+add_definitions(-std=gnu99 -Wall)
 
 enable_testing()
 
