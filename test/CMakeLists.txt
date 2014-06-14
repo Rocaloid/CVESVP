@@ -19,6 +19,13 @@ target_link_libraries(TestPSOLA CVEDSP2)
 target_link_libraries(TestPSOLA RFNL)
 target_link_libraries(TestPSOLA m)
 
+aux_source_directory(./TestSMS Test4)
+add_executable(TestSMS ${Test4})
+target_link_libraries(TestSMS CVESVP)
+target_link_libraries(TestSMS CVEDSP2)
+target_link_libraries(TestSMS RFNL)
+target_link_libraries(TestSMS m)
+
 add_test(TestF0 TestF0)
 add_test(TestSTFT TestSTFT)
 add_test(TestPSOLA TestPSOLA)

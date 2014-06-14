@@ -1,20 +1,4 @@
-/*
-RClass(_RTClassName)
-{
-    RInherit(RObject);
-
-    //Public
-    int Size;
-    Array_Define(_T1, Freq);
-    Array_Define(_T1, Ampl);
-};
-
-RTMethod(void, CSVP_Sinusoid, CtorSize, int Size);
-RTMethod(void, CSVP_Sinusoid, Resize, int Size);
-RTMethod(void, CSVP_Sinusoid, From, _RTClassName* Sorc);
-
-RTMethod(void, CSVP_Sinusoid, ToReal, _T1* Dest, int Size);
-*/
+#define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 
 RCtor(_RTClassName)
 {
@@ -27,13 +11,15 @@ RCtor(_RTClassName)
 
 RDtor(_RTClassName)
 {
-    Array_Ctor(_T1, This -> Freq);
-    Array_Ctor(_T1, This -> Ampl);
+    Array_Dtor(_T1, This -> Freq);
+    Array_Dtor(_T1, This -> Ampl);
 }
 
 RTMethod(void, CSVP_Sinusoid, CtorSize, int Size)
 {
     This -> Size = Size;
+    Array_Ctor(_T1, This -> Freq);
+    Array_Ctor(_T1, This -> Ampl);
     Array_Resize(_T1, This -> Freq, Size);
     Array_Resize(_T1, This -> Ampl, Size);
     This -> Freq_Index = Size - 1;
@@ -67,4 +53,55 @@ RTMethod(void, CSVP_Sinusoid, From, _RTClassName* Sorc)
     RCall(CDSP2_VCopy, _T1)(This -> Freq, Sorc -> Freq, Sorc -> Size);
     RCall(CDSP2_VCopy, _T1)(This -> Ampl, Sorc -> Ampl, Sorc -> Size);
 }
+
+RTMethod(void, CSVP_Sinusoid, ToReal, _T1* Dest, int Size, int SampleRate)
+{
+    _T1 k = 2.0 * M_PI / (_T1)SampleRate;
+    int N = This -> Size;
+    
+    int i, j;
+    RCall(CDSP2_VSet, _T1)(Dest, 0, Size);
+    
+    //For each sinusoid
+    for(i = 0; i < N; i ++)
+    {
+        _T1 Ampl = exp(This -> Ampl[i]);
+        _T1 Freq = This -> Freq[i] * k;
+        
+        _T1 X[4], Y[4];
+        //For each sample
+        for(j = 0; j < Size - 3; j += 4)
+        {
+            X   [    0]  = (_T1)(j + 0) * Freq;
+            X   [    1]  = (_T1)(j + 1) * Freq;
+            X   [    2]  = (_T1)(j + 2) * Freq;
+            X   [    3]  = (_T1)(j + 3) * Freq;
+            
+            RCall(RFNL_Pk4PCos_Gnrc, _T1)(Y, X);
+            
+            Dest[j + 0] += Y[0] * Ampl;
+            Dest[j + 1] += Y[1] * Ampl;
+            Dest[j + 2] += Y[2] * Ampl;
+            Dest[j + 3] += Y[3] * Ampl;
+        }
+        for(; j < Size; j ++)
+        {
+            Dest[j] += Ampl * RCall(RFNL_PCos_Gnrc, _T1)((_T1)j * Freq);
+        }
+    }
+}
+
+RTMethod(void, CSVP_Sinusoid, ToSpectrum, _Spectrum* Dest)
+{
+    int Size = Dest -> Size;
+    int SampleRate = Dest -> SampleRate;
+    _T1* Tmp = RCall(RAlloc, _T1)(Size);
+    RCall(_RTClassName, ToReal)(This, Tmp, Size, SampleRate);
+    //TODO: Static window generation to speed up.
+    RCall(CDSP2_Hanning, _T1)(Tmp, Tmp, Size);
+    RCall(_Spectrum, FromReal)(Dest, Tmp);
+    RFree(Tmp);
+}
+
+#undef  _Spectrum
 
