@@ -16,25 +16,31 @@ file(GLOB Header_EpR "EpR/*.h")
 file(GLOB Header_Misc "Structure/*.h")
 file(GLOB Header_ROOT "./*.h")
 install(FILES ${Header_Misc}
-              DESTINATION /usr/include/CVESVP/Misc)
+              DESTINATION ${CMAKE_INSTALL_PREFIX}/include/CVESVP/Misc)
 install(FILES ${Header_EpR}
-              DESTINATION /usr/include/CVESVP/EpR)
+              DESTINATION ${CMAKE_INSTALL_PREFIX}/include/CVESVP/EpR)
 install(FILES ${Header_Structure}
-              DESTINATION /usr/include/CVESVP/Structure)
+              DESTINATION ${CMAKE_INSTALL_PREFIX}/include/CVESVP/Structure)
 install(FILES ${Header_ROOT}
-              DESTINATION /usr/include/CVESVP)
+              DESTINATION ${CMAKE_INSTALL_PREFIX}/include/CVESVP)
 install(FILES Include/CVESVP.h
-              DESTINATION /usr/include/)
+              DESTINATION ${CMAKE_INSTALL_PREFIX}/include/)
 
 if(CYGWIN OR WIN32)
     message(STATUS "You are compiling this project as COFF.")
-    install(TARGETS CVESVP DESTINATION /usr/lib)
+    install(TARGETS CVESVP LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+                           ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+                           RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(STATUS "You are compiling this project as 64bit.")
-    install(TARGETS CVESVP DESTINATION /usr/lib64)
+    install(TARGETS CVESVP LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib64
+                           ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib64
+                           RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     message(STATUS "You are compiling this project as 32bit.")
-    install(TARGETS CVESVP DESTINATION /usr/lib)
+    install(TARGETS CVESVP LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+                           ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+                           RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 else()
     message(FATAL_ERROR "Your system is unsupported!")
 endif()
