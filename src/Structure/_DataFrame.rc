@@ -37,6 +37,11 @@ RTMethod(void, CSVP_DataFrame, From, _RTClassName* Sorc)
     RCall(CDSP2_VCopy, _T1)(This -> Data, Sorc -> Data, Sorc -> Size);
 }
 
+RTMethod(void, CSVP_DataFrame, Clear)
+{
+    RCall(CDSP2_VSet, _T1)(This -> Data, 0, This -> Size);
+}
+
 RTMethod(void, CSVP_DataFrame, FromWave, void* Sorc, int Center, int HalfWidth)
 {
     int Size = HalfWidth * 2;

@@ -25,9 +25,6 @@ RTMethod(void, CSVP_Sinusoid, CtorSize, int Size)
     This -> Freq_Index = Size - 1;
     This -> Ampl_Index = Size - 1;
     
-    RCall(CDSP2_VSet, _T1)(This -> Freq, 0, Size);
-    RCall(CDSP2_VSet, _T1)(This -> Ampl, 0, Size);
-    
     RInit(_RTClassName);
 }
 
@@ -41,9 +38,6 @@ RTMethod(void, CSVP_Sinusoid, Resize, int Size)
         This -> Freq_Index = Size - 1;
         This -> Ampl_Index = Size - 1;
     }
-    
-    RCall(CDSP2_VSet, _T1)(This -> Freq, 0, Size);
-    RCall(CDSP2_VSet, _T1)(This -> Ampl, 0, Size);
 }
 
 RTMethod(void, CSVP_Sinusoid, From, _RTClassName* Sorc)
@@ -52,6 +46,12 @@ RTMethod(void, CSVP_Sinusoid, From, _RTClassName* Sorc)
     
     RCall(CDSP2_VCopy, _T1)(This -> Freq, Sorc -> Freq, Sorc -> Size);
     RCall(CDSP2_VCopy, _T1)(This -> Ampl, Sorc -> Ampl, Sorc -> Size);
+}
+
+RTMethod(void, CSVP_Sinusoid, Clear)
+{
+    RCall(CDSP2_VSet, _T1)(This -> Freq, 0, This -> Size);
+    RCall(CDSP2_VSet, _T1)(This -> Ampl, 0, This -> Size);
 }
 
 RTMethod(void, CSVP_Sinusoid, ToReal, _T1* Dest, int Size, int SampleRate)

@@ -14,6 +14,8 @@ RTMethod(void, CSVP_Sinusoid, CtorSize, int Size);
 RTMethod(void, CSVP_Sinusoid, Resize, int Size);
 RTMethod(void, CSVP_Sinusoid, From, _RTClassName* Sorc);
 
+RTMethod(void, CSVP_Sinusoid, Clear);
+
 RTMethod(void, CSVP_Sinusoid, ToReal, _T1* Dest, int Size, int SampleRate);
 RTMethod(void, CSVP_Sinusoid, ToSpectrum, _Spectrum* Dest);
 

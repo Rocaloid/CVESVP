@@ -11,7 +11,7 @@ Todo & Plan List
 - [x] Implement `PSOLAItersizer`(in: `Position` `DataFrame`, out: `Wave`)
 - [x] Implement `VOTFromWave` based on `STFTIterlyzer`(in: `Wave`, out: `Position`)
 - [X] Implement `Sinusoid` structure and `List_Sinusoid` and `Sinusoid_ToReal`
-- [ ] Implement `HNMFrame` `HNMContour` structure and `List_HNMFrame`
+- [x] Implement `HNMFrame` `HNMContour` structure and `List_HNMFrame`
 - [ ] Implement `SinusoidIterlyzer`(in: `Wave`, out: `List_Sinusoid`)
 - [ ] Implement `SinusoidItersizer`(in: `Position` `Sinusoid`, out: `Wave`)
 - [ ] Implement `HNMIterlyzer`(in: `Wave`, out: `List_HNMFrame`)

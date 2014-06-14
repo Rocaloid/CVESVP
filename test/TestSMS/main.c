@@ -11,8 +11,9 @@ int main()
     RCall(Sinusoid, CtorSize)(& SinFrame, 5);
     RCall(Spectrum, CtorSize)(& SinSpec, 2048);
     SinSpec.MagnType = CDSP2_LogMagn;
-    
+        
     int i;
+    RCall(Sinusoid, Clear)(& SinFrame);
     for(i = 0; i < 5; i ++)
     {
         SinFrame.Freq[i] = 900 * i + 900;

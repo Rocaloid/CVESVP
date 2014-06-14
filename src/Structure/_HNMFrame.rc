@@ -1,0 +1,52 @@
+#define _Sinusoid _C(CSVP_Sinusoid, _, _T1)
+
+RCtor(_RTClassName)
+{
+    RCall(_Sinusoid, Ctor)(& This -> Hmnc);
+    This -> Size = 0;
+    This -> Noiz = NULL;
+    
+    RInit(_RTClassName);
+}
+
+RDtor(_RTClassName)
+{
+    RCall(_Sinusoid, Dtor)(& This -> Hmnc);
+    if(This -> Noiz != NULL)
+        RFree(This -> Noiz);
+}
+
+RTMethod(void, CSVP_HNMFrame, CtorSize, int Size, int HNum)
+{
+    RCall(_Sinusoid, CtorSize)(& This -> Hmnc, HNum);
+    This -> Size = Size;
+    This -> Noiz = RCall(RAlloc, _T1)(Size);
+    
+    RInit(_RTClassName);
+}
+
+RTMethod(void, CSVP_HNMFrame, Resize, int Size, int HNum)
+{
+    RCall(_Sinusoid, Resize)(& This -> Hmnc, HNum);
+    if(Size != This -> Size)
+    {
+        This -> Size = Size;
+        This -> Noiz = (_T1*)realloc(This -> Noiz, Size * sizeof(_T1));
+    }
+}
+
+RTMethod(void, CSVP_HNMFrame, Clear)
+{
+    RCall(_Sinusoid, Clear)(& This -> Hmnc);
+    RCall(CDSP2_VSet, _T1)(This -> Noiz, 0, This -> Size);
+}
+
+RTMethod(void, CSVP_HNMFrame, From, _RTClassName* Sorc)
+{
+    RCall(_RTClassName, Resize)(This, Sorc -> Size, Sorc -> Hmnc.Size);
+    RCall(_Sinusoid, From)(& This -> Hmnc, & Sorc -> Hmnc);
+    RCall(CDSP2_VCopy, _T1)(& This -> Noiz, Sorc -> Noiz, Sorc -> Size);
+}
+
+#undef  _Sinusoid
+
