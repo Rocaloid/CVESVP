@@ -33,3 +33,9 @@ RTMethod(void, CSVP_List_DataFrame, FromWave, void* SorcWave,
 #undef  _T2
 #undef  _T3
 
+#define _T2 _C(CSVP_HNMContour, _, _T1)
+#define _T3 HNMContour
+#include "_SizeNumList.h"
+#undef  _T2
+#undef  _T3
+
