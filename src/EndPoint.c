@@ -3,6 +3,7 @@
 
 #define SIZE_FFT 256
 #define SIZE_HOP 64
+#define POWER_STD 15.0f
 
 #if 0
 #include "_VOT.rc"

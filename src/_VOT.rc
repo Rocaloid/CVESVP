@@ -35,9 +35,14 @@ RTFunc(int, CSVP_VOTFromWave, void* Sorc, int LBound, int RBound)
         RCall(_Spectrum, MagnConv)(& Sublyzer.SpecList.Frames[i], CDSP2_dBMagn);
         CurrPower = RCall(CDSP2_VMaxElmt, _T1)(Sublyzer.SpecList.Frames[i].Magn,
             LBin, HBin);
-        if(CurrPower < - 50) CurrPower = - 50;
+        if(CurrPower < - 50.0) CurrPower = - 50.0;
         Array_Push(_T1, PowerList, CurrPower - 2.0);
     }
+    _T1 MaxPower = RCall(CDSP2_VMaxElmt, _T1)(PowerList, 0,
+        PowerList_Index + 1);
+    _T1 Increment = POWER_STD - MaxPower;
+    RCall(CDSP2_VCAdd, _T1)(PowerList, PowerList, Increment,
+        PowerList_Index + 1);
     
     Array_Resize(_T1, PowerAcc, l);
     Array_Resize(_T1, PowerAccR, l);
