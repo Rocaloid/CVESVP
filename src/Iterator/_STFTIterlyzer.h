@@ -19,6 +19,7 @@ RClass(_RTClassName)
 RTMethod(void, CSVP_STFTIterlyzer, CtorSize, int FrameSize);
 RTMethod(void, CSVP_STFTIterlyzer, Resize, int FrameSize);
 RTMethod(void, CSVP_STFTIterlyzer, From, _RTClassName* Sorc);
+RTMethod(void, CSVP_STFTIterlyzer, Clear);
 
 RTMethod(void, CSVP_STFTIterlyzer, SetWave, void* Sorc);
 RTMethod(void, CSVP_STFTIterlyzer, SetPosition, int Position);

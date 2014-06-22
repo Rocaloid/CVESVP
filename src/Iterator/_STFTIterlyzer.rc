@@ -57,6 +57,12 @@ RTMethod(void, CSVP_STFTIterlyzer, From, _RTClassName* Sorc)
     This -> LastPosition = Sorc -> LastPosition;
 }
 
+RTMethod(void, CSVP_STFTIterlyzer, Clear)
+{
+    RCall(_List_Spectrum, Clear)(& This -> SpecList);
+    RCall(_List_Int     , Clear)(& This -> PulseList);
+}
+
 RTMethod(void, CSVP_STFTIterlyzer, SetWave, void* Sorc)
 {
     This -> Wave = Sorc;

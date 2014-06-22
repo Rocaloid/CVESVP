@@ -1,8 +1,10 @@
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 
-RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq);
-RTFunc(_T1, CSVP_F0FromSpectrum, _Spectrum* Sorc, int MinFreq, int MaxFreq);
+RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq);
+RTFunc(_T1, CSVP_F0FromSpectrum, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq);
 
+RTFunc(_T1, CSVP_F0FromSuccSpectrum, _Spectrum* Sorc1, _Spectrum* Sorc2,
+    int HopSize, _T1 MinFreq, _T1 MaxFreq);
 RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,
     int HopSize, int Bin);
 

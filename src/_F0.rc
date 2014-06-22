@@ -4,7 +4,7 @@
 #define B2F(B) (((_T1)B) * ((_T1)SampleRate) / FFTSize)
 
 //Wavetave/src/Plugin_F0Marking.m
-RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq)
+RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
 {
     int FFTSize = Sorc -> Size;
     int SampleRate = Sorc -> SampleRate;
@@ -44,11 +44,21 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, int MinFreq, int MaxFreq)
     return F0;
 }
 
-RTFunc(_T1, CSVP_F0FromSpectrum, _Spectrum* Sorc, int MinFreq, int MaxFreq)
+RTFunc(_T1, CSVP_F0FromSpectrum, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
 {
     int SampleRate = Sorc -> SampleRate;
     return RCall(CSVP_F0FromSpectrumB, _T1)(Sorc, MinFreq, MaxFreq)
         * SampleRate / Sorc -> Size;
+}
+
+RTFunc(_T1, CSVP_F0FromSuccSpectrum, _Spectrum* Sorc1, _Spectrum* Sorc2,
+    int HopSize, _T1 MinFreq, _T1 MaxFreq)
+{
+    int Bin = RCall(CSVP_F0FromSpectrumB, _T1)(Sorc1, MinFreq, MaxFreq);
+    if(Bin < 3)
+        return -1;
+    return RCall(CSVP_F0FromSuccSpectrumAndBin, _T1)(Sorc1, Sorc2, HopSize,
+        Bin);
 }
 
 RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,

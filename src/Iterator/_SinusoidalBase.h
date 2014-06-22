@@ -7,6 +7,7 @@ RClass(_RTClassName)
     
     //Public
     _List_Int PulseList;
+    Array_Define(_T1, FreqList);
     
     //Private
     void* Wave;
@@ -24,6 +25,7 @@ RClass(_RTClassName)
 RTMethod(void, CSVP_SinusoidalBase, CtorSize, int Size);
 RTMethod(void, CSVP_SinusoidalBase, Resize, int Size);
 RTMethod(void, CSVP_SinusoidalBase, From, _RTClassName* Sorc);
+RTMethod(void, CSVP_SinusoidalBase, Clear);
 
 RTMethod(void, CSVP_SinusoidalBase, SetWave, void* Sorc);
 RTMethod(void, CSVP_SinusoidalBase, SetHopSize, int HopSize);
@@ -32,6 +34,9 @@ RTMethod(int , CSVP_SinusoidalBase, GetPosition);
 RTMethod(void, CSVP_SinusoidalBase, SetRefFreq, _T1 RefF0);
 
 RTMethod(int , CSVP_SinusoidalBase, PreAnalysisTo, int Position);
+
+RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position);
+RTMethod(int , CSVP_SinusoidalBase, PrevTo, int Position);
 
 #undef  _List_Int
 #undef  _STFTIterlyzer

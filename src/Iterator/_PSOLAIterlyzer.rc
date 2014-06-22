@@ -82,6 +82,11 @@ RTMethod(void, CSVP_PSOLAIterlyzer, From, _RTClassName* Sorc)
     This -> LPF = Sorc -> LPF;
 }
 
+RTMethod(void, CSVP_PSOLAIterlyzer, Clear)
+{
+    RCall(_List_Int, Clear)(& This -> PulseList);
+}
+
 RTMethod(void, CSVP_PSOLAIterlyzer, SetWave, void* Sorc)
 {
     This -> Wave = Sorc;

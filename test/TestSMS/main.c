@@ -19,7 +19,7 @@ int main()
     RCall(Sinusoid, Clear)(& SinFrame);
     for(i = 0; i < 5; i ++)
     {
-        SinFrame.Freq[i] = 60 * i + 60;
+        SinFrame.Freq[i] = 260 * i + 260;
         SinFrame.Ampl[i] = i * 0.2;
     }
     
@@ -46,6 +46,12 @@ int main()
     RCall(SinusoidalBase, PreAnalysisTo)(& IterBase, 15000);
     
     printf("%f\n", IterBase.InitF0);
+    
+    RCall(SinusoidalBase, PrevTo)(& IterBase, 0);
+    RCall(SinusoidalBase, Clear)(& IterBase);
+    RCall(SinusoidalBase, IterNextTo)(& IterBase, 15000);
+    RCall(SinusoidalBase, Clear)(& IterBase);
+    RCall(SinusoidalBase, IterNextTo)(& IterBase, 30000);
     
     RFree(Win);
     RDelete(& SinFrame, & SinSpec, & XWave, & IterBase);

@@ -10,6 +10,8 @@ RCtor(_RTClassName)
 RDtor(_RTClassName)
 {
     RCall(_List_Int, Dtor)(& This -> PulseList);
+    Array_Dtor(_T1, This -> FreqList);
+    
     RCall(_STFTIterlyzer, Dtor)(This -> Sublyzer0);
     RCall(_STFTIterlyzer, Dtor)(This -> Sublyzer1);
     
@@ -23,6 +25,8 @@ RTMethod(void, CSVP_SinusoidalBase, CtorSize, int Size)
     This -> Sublyzer1 = RAlloc_Class(_STFTIterlyzer, 1);
     
     RCall(_List_Int, Ctor)(& This -> PulseList);
+    Array_Ctor(_T1, This -> FreqList);
+    
     RCall(_STFTIterlyzer, CtorSize)(This -> Sublyzer0, Size);
     RCall(_STFTIterlyzer, CtorSize)(This -> Sublyzer1, Size);
     RCall(_STFTIterlyzer, SetHopSize)(This -> Sublyzer0, ANALHOP);
@@ -58,6 +62,15 @@ RTMethod(void, CSVP_SinusoidalBase, From, _RTClassName* Sorc)
     This -> InitPosition = Sorc -> InitPosition;
     This -> RefF0 = Sorc -> RefF0;
     This -> InitF0 = Sorc -> InitF0;
+}
+
+RTMethod(void, CSVP_SinusoidalBase, Clear)
+{
+    RCall(_List_Int, Clear)(& This -> PulseList);
+    This -> FreqList_Index = -1;
+    
+    RCall(_STFTIterlyzer, Clear)(This -> Sublyzer0);
+    RCall(_STFTIterlyzer, Clear)(This -> Sublyzer1);
 }
 
 RTMethod(void, CSVP_SinusoidalBase, SetWave, void* Sorc)
@@ -101,6 +114,63 @@ RTMethod(int , CSVP_SinusoidalBase, PreAnalysisTo, int Position)
         return - 1;
     This -> InitF0 = Candidate;
     This -> RefF0  = Candidate;
+}
+
+RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
+{
+    RCall(_STFTIterlyzer, IterNextTo)(This -> Sublyzer0, Position + 0);
+    RCall(_STFTIterlyzer, IterNextTo)(This -> Sublyzer1, Position + 1);
+    RCall(_List_Int, From)(& This -> PulseList,
+        & This -> Sublyzer0 -> PulseList);
+    Array_Resize(_T1, This -> FreqList, This -> PulseList.Frames_Index + 1);
+    This -> LastPosition = This -> Sublyzer0 -> LastPosition;
+    
+    int i;
+    for(i = 0; i <= This -> PulseList.Frames_Index; i ++)
+    {
+        _T1 Candidate = RCall(CSVP_F0FromSuccSpectrum, _T1)(
+            & This -> Sublyzer0 -> SpecList.Frames[i],
+            & This -> Sublyzer1 -> SpecList.Frames[i], 1,
+            This -> RefF0 * 0.7, This -> RefF0 * 1.4);
+        if(! (Candidate > 50 && Candidate < 1500))
+            return -1;
+        This -> RefF0 = Candidate;
+        This -> FreqList[i] = Candidate;
+        printf("%d %f\n", This -> PulseList.Frames[i], Candidate);
+    }
+}
+
+RTMethod(int , CSVP_SinusoidalBase, PrevTo, int Position)
+{
+    RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer0,
+        This -> InitPosition + 0);
+    RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer1,
+        This -> InitPosition + 1);
+    
+    RCall(_STFTIterlyzer, IterPrevTo)(This -> Sublyzer0, Position + 0);
+    RCall(_STFTIterlyzer, IterPrevTo)(This -> Sublyzer1, Position + 1);
+    RCall(_List_Int, From)(& This -> PulseList,
+        & This -> Sublyzer0 -> PulseList);
+    Array_Resize(_T1, This -> FreqList, This -> PulseList.Frames_Index + 1);
+    
+    int i;
+    for(i = This -> PulseList.Frames_Index; i >= 0; i --)
+    {
+        _T1 Candidate = RCall(CSVP_F0FromSuccSpectrum, _T1)(
+            & This -> Sublyzer0 -> SpecList.Frames[i],
+            & This -> Sublyzer1 -> SpecList.Frames[i], 1,
+            This -> RefF0 * 0.7, This -> RefF0 * 1.4);
+        if(! (Candidate > 50 && Candidate < 1500))
+            return -1;
+        This -> RefF0 = Candidate;
+        This -> FreqList[i] = Candidate;
+        printf("%d %f\n", This -> PulseList.Frames[i], Candidate);
+    }
+    
+    RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer0,
+        This -> LastPosition + 0);
+    RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer1,
+        This -> LastPosition + 1);
 }
 
 #undef  _Wave

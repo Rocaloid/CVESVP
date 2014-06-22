@@ -27,6 +27,7 @@ RClass(_RTClassName)
 };
 
 RTMethod(void, CSVP_PSOLAIterlyzer, From, _RTClassName* Sorc);
+RTMethod(void, CSVP_PSOLAIterlyzer, Clear);
 
 RTMethod(void, CSVP_PSOLAIterlyzer, SetWave, void* Sorc);
 RTMethod(void, CSVP_PSOLAIterlyzer, SetPosition, int Position);
