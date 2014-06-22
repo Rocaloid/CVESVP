@@ -74,6 +74,7 @@ RTMethod(void, CSVP_PSOLAIterlyzer, From, _RTClassName* Sorc)
     RCall(_STFTIterlyzer, From)(This -> Sublyzer, Sorc -> Sublyzer);
     RCall(_STFTItersizer, From)(This -> Subsizer, Sorc -> Subsizer);
     
+    RCall(CDSP2_VCopy, _T1)(This -> Window, Sorc -> Window, LPFSIZE);
     This -> LastPosition = Sorc -> LastPosition;
     This -> InitPosition = Sorc -> InitPosition;
     This -> PeakSign = Sorc -> PeakSign;

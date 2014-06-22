@@ -9,7 +9,7 @@ RClass(_RTClassName)
     RInherit(_SinusoidalBase);
     
     //Public
-    _List_Sinusoid SinusoidList;
+    _List_Sinusoid SinuList;
 };
 
 #undef  _Wave

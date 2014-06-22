@@ -44,8 +44,6 @@
 #define _T1 Double
 #include <RUtil2/Core/RTemplate.h>
 
-#endif
-
 //-----
 
 #include <RUtil2.h>
@@ -64,4 +62,6 @@
 
 #define _T1 Double
 #include <RUtil2/Core/RTemplate.h>
+
+#endif
 

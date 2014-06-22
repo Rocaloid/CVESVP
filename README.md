@@ -16,6 +16,8 @@ Todo & Plan List
 - [ ] Implement `SinusoidItersizer`(in: `Position` `Sinusoid`, out: `Wave`)
 - [ ] Implement `HNMIterlyzer`(in: `Wave`, out: `List_HNMFrame`)
 - [ ] Implement `HNMItersizer` based on `SinusoidItersizer`(in: `Position` `HNMFrame`, out: `Wave`)
+- [ ] Implement `F0Iterlyzer`(in: `Wave`, out: `Real`)
+- [ ] Default analysis window for `_F0.rc`
 - [ ] Implement `PulseIterlyzer`(in: `Wave`, out: `PulseList`)
 - [ ] Implement `PulseItersizer`(in: `Position`, out: `Wave`)
 - [ ] Implement `GainIterfector`(in: `Wave` `Wave`, out: `Wave`)
