@@ -18,6 +18,7 @@ RTMethod(void, CSVP_Sinusoid, Clear);
 
 RTMethod(void, CSVP_Sinusoid, ToReal, _T1* Dest, int Size, int SampleRate);
 RTMethod(void, CSVP_Sinusoid, ToSpectrum, _Spectrum* Dest);
+RTMethod(void, CSVP_Sinusoid, FromSpectrum, _Spectrum* Sorc, _T1 F0);
 
 #undef  _Spectrum
 

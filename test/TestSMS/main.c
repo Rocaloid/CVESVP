@@ -5,6 +5,7 @@
 #define Sinusoid CSVP_Sinusoid_Float
 #define Spectrum CDSP2_Spectrum_Float
 #define SinusoidalBase CSVP_SinusoidalBase_Float
+#define SinusoidIterlyzer CSVP_SinusoidIterlyzer_Float
 #define Wave CDSP2_Wave_Float
 #define IWave CDSP2_IWave_Float
 int main()
@@ -38,23 +39,23 @@ int main()
         printf("%.20f\n", X[i]);*/
     //    printf("%.20f\n", SinSpec.Magn[i]);
     
-    SinusoidalBase IterBase;
-    RCall(SinusoidalBase, CtorSize)(& IterBase, 2048);
-    RCall(SinusoidalBase, SetHopSize)(& IterBase, 256);
-    RCall(SinusoidalBase, SetWave)(& IterBase, & XWave);
-    RCall(SinusoidalBase, SetPosition)(& IterBase, 5000);
-    RCall(SinusoidalBase, PreAnalysisTo)(& IterBase, 15000);
+    SinusoidIterlyzer SinuIter;
+    RCall(SinusoidIterlyzer, CtorSize)(& SinuIter, 2048);
+    RCall(SinusoidIterlyzer, SetHopSize)(& SinuIter, 256);
+    RCall(SinusoidIterlyzer, SetWave)(& SinuIter, & XWave);
+    RCall(SinusoidIterlyzer, SetPosition)(& SinuIter, 5000);
+    RCall(SinusoidIterlyzer, PreAnalysisTo)(& SinuIter, 15000);
     
-    printf("%f\n", IterBase.InitF0);
+    printf("%f\n", SinuIter._Base.InitF0);
     
-    RCall(SinusoidalBase, PrevTo)(& IterBase, 0);
-    RCall(SinusoidalBase, Clear)(& IterBase);
-    RCall(SinusoidalBase, IterNextTo)(& IterBase, 15000);
-    RCall(SinusoidalBase, Clear)(& IterBase);
-    RCall(SinusoidalBase, IterNextTo)(& IterBase, 30000);
+    RCall(SinusoidIterlyzer, PrevTo)(& SinuIter, 0);
+    //RCall(SinusoidIterlyzer, Clear)(& SinuIter);
+    RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 15000);
+    //RCall(SinusoidIterlyzer, Clear)(& SinuIter);
+    RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 30000);
     
     RFree(Win);
-    RDelete(& SinFrame, & SinSpec, & XWave, & IterBase);
+    RDelete(& SinFrame, & SinSpec, & XWave, & SinuIter);
     return 0;
 }
 

@@ -9,8 +9,25 @@ RClass(_RTClassName)
     RInherit(_SinusoidalBase);
     
     //Public
+    _List_Int      PulseList;
     _List_Sinusoid SinuList;
 };
+
+RTMethod(void, CSVP_SinusoidIterlyzer, CtorSize, int Size);
+RTMethod(void, CSVP_SinusoidIterlyzer, Resize, int Size);
+RTMethod(void, CSVP_SinusoidIterlyzer, From, _RTClassName* Sorc);
+RTMethod(void, CSVP_SinusoidIterlyzer, Clear);
+
+RTMethod(void, CSVP_SinusoidIterlyzer, SetWave, void* Sorc);
+RTMethod(void, CSVP_SinusoidIterlyzer, SetHopSize, int HopSize);
+RTMethod(void, CSVP_SinusoidIterlyzer, SetPosition, int Position);
+RTMethod(int , CSVP_SinusoidIterlyzer, GetPosition);
+RTMethod(void, CSVP_SinusoidIterlyzer, SetRefFreq, _T1 RefF0);
+
+RTMethod(int , CSVP_SinusoidIterlyzer, PreAnalysisTo, int Position);
+
+RTMethod(int , CSVP_SinusoidIterlyzer, IterNextTo, int Position);
+RTMethod(int , CSVP_SinusoidIterlyzer, PrevTo, int Position);
 
 #undef  _Wave
 #undef  _List_Int
