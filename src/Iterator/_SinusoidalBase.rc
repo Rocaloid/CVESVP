@@ -123,6 +123,7 @@ RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
     RCall(_List_Int, From)(& This -> PulseList,
         & This -> Sublyzer0 -> PulseList);
     Array_Resize(_T1, This -> FreqList, This -> PulseList.Frames_Index + 1);
+    This -> FreqList_Index = This -> PulseList.Frames_Index;
     This -> LastPosition = This -> Sublyzer0 -> LastPosition;
     
     int i;
@@ -136,7 +137,7 @@ RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
             return -1;
         This -> RefF0 = Candidate;
         This -> FreqList[i] = Candidate;
-        printf("%d %f\n", This -> PulseList.Frames[i], Candidate);
+        //printf("%d %f\n", This -> PulseList.Frames[i], Candidate);
     }
 }
 
@@ -152,6 +153,7 @@ RTMethod(int , CSVP_SinusoidalBase, PrevTo, int Position)
     RCall(_List_Int, From)(& This -> PulseList,
         & This -> Sublyzer0 -> PulseList);
     Array_Resize(_T1, This -> FreqList, This -> PulseList.Frames_Index + 1);
+    This -> FreqList_Index = This -> PulseList.Frames_Index;
     
     int i;
     for(i = This -> PulseList.Frames_Index; i >= 0; i --)
@@ -164,7 +166,7 @@ RTMethod(int , CSVP_SinusoidalBase, PrevTo, int Position)
             return -1;
         This -> RefF0 = Candidate;
         This -> FreqList[i] = Candidate;
-        printf("%d %f\n", This -> PulseList.Frames[i], Candidate);
+        //printf("%d %f\n", This -> PulseList.Frames[i], Candidate);
     }
     
     RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer0,

@@ -21,7 +21,7 @@ int main()
     for(i = 0; i < 5; i ++)
     {
         SinFrame.Freq[i] = 260 * i + 260;
-        SinFrame.Ampl[i] = i * 0.2;
+        SinFrame.Ampl[i] = i;
     }
     
     Wave XWave;
@@ -31,9 +31,14 @@ int main()
     CDSP2_GenHanning_Float(Win, 2048);
     RCall(Wave, SetWindow)(& XWave, Win, 2048);
     
-    RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
-    RCall(Sinusoid, ToReal)(& SinFrame, X, 44100 * 5, 44100);
-    CDSP2_VCMul_Float(X, X, 0.05, 44100 * 5);
+    String Path;
+    String_Ctor(& Path);
+    String_SetChars(& Path, "/tmp/r/ra0.wsp");
+    RCall(Wave, FromFile)(& XWave, & Path);
+    RDelete(& Path);
+    //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
+    //RCall(Sinusoid, ToReal)(& SinFrame, X, 44100 * 5, 44100);
+    //CDSP2_VCMul_Float(X, X, 0.05, 44100 * 5);
     /*
     for(i = 0; i < 1025; i ++)
         printf("%.20f\n", X[i]);*/
@@ -43,16 +48,26 @@ int main()
     RCall(SinusoidIterlyzer, CtorSize)(& SinuIter, 2048);
     RCall(SinusoidIterlyzer, SetHopSize)(& SinuIter, 256);
     RCall(SinusoidIterlyzer, SetWave)(& SinuIter, & XWave);
-    RCall(SinusoidIterlyzer, SetPosition)(& SinuIter, 5000);
-    RCall(SinusoidIterlyzer, PreAnalysisTo)(& SinuIter, 15000);
+    RCall(SinusoidIterlyzer, SetPosition)(& SinuIter, 15000);
+    RCall(SinusoidIterlyzer, PreAnalysisTo)(& SinuIter, 20000);
     
-    printf("%f\n", SinuIter._Base.InitF0);
+    //printf("%f\n", SinuIter._Base.InitF0);
     
-    RCall(SinusoidIterlyzer, PrevTo)(& SinuIter, 0);
+    RCall(SinusoidIterlyzer, PrevTo)(& SinuIter, 10000);
     //RCall(SinusoidIterlyzer, Clear)(& SinuIter);
-    RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 15000);
+    RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 20000);
     //RCall(SinusoidIterlyzer, Clear)(& SinuIter);
     RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 30000);
+    
+    for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
+    {
+        int j;
+        printf("Frame %d at %d:\n", i, SinuIter.PulseList.Frames[i]);
+        Sinusoid* Sinu = & SinuIter.SinuList.Frames[i];
+        for(j = 0; j <= Sinu -> Freq_Index; j ++)
+            printf("  %dth Harmonic, F = %fHz, A = %f.\n", j + 1,
+                Sinu -> Freq[j], Sinu -> Ampl[j]);
+    }
     
     RFree(Win);
     RDelete(& SinFrame, & SinSpec, & XWave, & SinuIter);

@@ -1,5 +1,13 @@
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 
+#define _XYPair _C(CSVP_XYPair, _, _T1)
+
+typedef struct
+{
+    _T1 X;
+    _T1 Y;
+} _XYPair;
+
 RCtor(_RTClassName)
 {
     This -> Size = 0;
@@ -103,5 +111,69 @@ RTMethod(void, CSVP_Sinusoid, ToSpectrum, _Spectrum* Dest)
     RFree(Tmp);
 }
 
+RTFunc(static _XYPair, CSVP_PeakFromSpectrum, _Spectrum* Sorc, int LInt,
+    int HInt)
+{
+    _XYPair Ret;
+    
+    _Spectrum* NewSorc = RCall(_Spectrum, AllocConvSpecRO)(Sorc, CDSP2_LogMagn);
+    
+    //TODO: Vectorization
+    //Find spectral peak
+    int Max_X = LInt;
+    _T1 Max_Y = NewSorc -> Magn[LInt];
+    int i;
+    for(i = LInt; i < HInt; i ++)
+    {
+        if(NewSorc -> Magn[i] > Max_Y)
+        {
+            Max_Y = NewSorc -> Magn[i];
+            Max_X = i;
+        }
+    }
+    
+    //Quadratic interpolation
+    _T1 a, b, c;
+    _T1 a1, a2;
+    _T1 x;
+    a = NewSorc -> Magn[Max_X - 1];
+    b = NewSorc -> Magn[Max_X + 0];
+    c = NewSorc -> Magn[Max_X + 1];
+    a1 = (a + c) / 2.0 - b;
+    a2 = c - b - a1;
+    x = - a2 / a1 * 0.5;
+    Ret.X = ((_T1)Max_X + x) * Sorc -> SampleRate / Sorc -> Size;
+    Ret.Y = a1 * x * x + a2 * x + b;
+    Ret.Y = Ret.Y > b * 1.05 ? b * 1.05 : Ret.Y;
+    
+    //Magnitude restoration
+    Ret.Y -= log(Sorc -> Size / 4);
+    
+    RCall(_Spectrum, FreeConvSpecRO)(Sorc, NewSorc);
+    return Ret;
+}
+
+RTMethod(void, CSVP_Sinusoid, FromSpectrum, _Spectrum* Sorc, _T1 F0)
+{
+    int i;
+    
+    _T1 Center;
+    _T1 LBound, HBound;
+    int LInt, HInt;
+    for(i = 0; i < This -> Size; i ++)
+    {
+        Center = (i + 1) * F0;
+        LBound = Center - F0 / 2.0f;
+        HBound = Center + F0 / 2.0f;
+        LInt   = (int)(LBound * Sorc -> Size / Sorc -> SampleRate);
+        HInt   = (int)(HBound * Sorc -> Size / Sorc -> SampleRate);
+        _XYPair TempPair;
+        TempPair = RCall(CSVP_PeakFromSpectrum, _T1)(Sorc, LInt, HInt);
+        This -> Freq[i] = TempPair.X;
+        This -> Ampl[i] = TempPair.Y;
+    }
+}
+
 #undef  _Spectrum
+#undef  _XYPair
 

@@ -83,9 +83,16 @@ RTMethod(static void, CSVP_SinusoidIterlyzer, _Analyze)
     _Sinusoid TempSinu;
     RCall(_Sinusoid, Ctor)(& TempSinu);
     int i;
+    
     for(i = 0; i <= _MyBase -> FreqList_Index; i ++)
     {
         //Analysis
+        _T1 F0 = _MyBase -> FreqList[i];
+        int N = 10000.0f / F0;
+        
+        RCall(_Sinusoid, Resize)(& TempSinu, N);
+        RCall(_Sinusoid, FromSpectrum)(& TempSinu,
+            & _MyBase -> Sublyzer0 -> SpecList.Frames[i], F0);
         
         int Index = CSVP_List_Int_Add(& This -> PulseList,
             _MyBase -> PulseList.Frames[i]);
