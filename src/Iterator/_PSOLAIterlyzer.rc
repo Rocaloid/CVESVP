@@ -15,7 +15,7 @@
         if(This -> Wave == NULL) \
             RDebugPrint(_RTClassName, _S(Name) ": require wave."); \
         if(This -> RefPeriod == 0) \
-            RDebugPrint(_RTClassName, _S(Name) ": require reference " \
+            RDebugPrint(_RTClassName, _S(Name) ": require referential " \
                 "frequency."); \
     )
 
@@ -374,7 +374,7 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
     (
         if(Position > This -> InitPosition)
             RDebugPrint(_RTClassName, "PrevTo: destination position later than "
-                "the initial position.");
+                "initial position.");
     )
     
     int Ret = 1;

@@ -2,13 +2,15 @@
 #define CSVP_HNMFRAME_H
 
 #include <CVEDSP2.h>
-#include <RUtil2.h>
+#include "DataFrame.h"
 
 #if 0
 #include "_HNMContour.h"
 #include "_HNMFrame.h"
 #include "_Sinusoid.h"
 #endif
+
+#include <RUtil2.h>
 
 #ifdef __CSVP_Install
 #define _RTAddress "CVESVP/Structure/_Sinusoid.h"

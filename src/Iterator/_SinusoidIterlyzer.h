@@ -1,6 +1,7 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
 #define _List_Int CSVP_List_Int
 #define _List_Sinusoid _C(CSVP_List_Sinusoid, _, _T1)
+#define _List_DataFrame _C(CSVP_List_DataFrame, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 #define _SinusoidalBase _C(CSVP_SinusoidalBase, _, _T1)
 
@@ -9,8 +10,11 @@ RClass(_RTClassName)
     RInherit(_SinusoidalBase);
     
     //Public
-    _List_Int      PulseList;
-    _List_Sinusoid SinuList;
+    char GenPhase;
+    
+    _List_Int       PulseList;
+    _List_Sinusoid  SinuList;
+    _List_DataFrame PhseList;
 };
 
 RTMethod(void, CSVP_SinusoidIterlyzer, CtorSize, int Size);
@@ -32,6 +36,7 @@ RTMethod(int , CSVP_SinusoidIterlyzer, PrevTo, int Position);
 #undef  _Wave
 #undef  _List_Int
 #undef  _List_Sinusoid
+#undef  _List_DataFrame
 #undef  _STFTIterlyzer
 #undef  _SinusoidalBase
 

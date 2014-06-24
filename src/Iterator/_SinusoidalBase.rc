@@ -2,6 +2,16 @@
 #define _List_Int CSVP_List_Int
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 
+#define _CheckMembers(Name) \
+    CDSP2_If_Debug_Check \
+    ( \
+        if(This -> Wave == NULL) \
+            RDebugPrint(_RTClassName, _S(Name) ": require wave."); \
+        if(This -> RefF0 <= 0) \
+            RDebugPrint(_RTClassName, _S(Name) ": require referential " \
+                "frequency."); \
+    )
+
 RCtor(_RTClassName)
 {
     RCall(_RTClassName, CtorSize)(This, ANALSIZE);
@@ -36,8 +46,8 @@ RTMethod(void, CSVP_SinusoidalBase, CtorSize, int Size)
     This -> Wave = NULL;
     This -> LastPosition = 0;
     This -> InitPosition = 0;
-    This -> RefF0 = 0;
-    This -> InitF0 = 0;
+    This -> RefF0 = -1;
+    This -> InitF0 = -1;
     RInit(_RTClassName);    
 }
 
@@ -88,6 +98,13 @@ RTMethod(void, CSVP_SinusoidalBase, SetHopSize, int HopSize)
 
 RTMethod(void, CSVP_SinusoidalBase, SetPosition, int Position)
 {
+    CDSP2_If_Debug_Check
+    (
+        if(This -> Wave == NULL)
+            RDebugPrint(_RTClassName, "SetPosition: inproper call sequence"
+                "(Wave not set yet).");
+    )
+    
     This -> LastPosition = Position;
     This -> InitPosition = Position;
     RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer0, Position + 0);
@@ -108,6 +125,13 @@ RTMethod(void, CSVP_SinusoidalBase, SetRefFreq, _T1 RefF0)
 
 RTMethod(int , CSVP_SinusoidalBase, PreAnalysisTo, int Position)
 {
+    CDSP2_If_Debug_Check
+    (
+        if(This -> Wave == NULL)
+            RDebugPrint(_RTClassName, "PreAnalysisTo: inproper call sequence"
+                "(Wave not set yet).");
+    )
+    
     _T1 Candidate = RCall(CSVP_SecureF0FromWave, _T1)(This -> Wave,
         This -> InitPosition, This -> InitPosition, Position, 50, 1500);
     if(Candidate < 0)
@@ -118,6 +142,8 @@ RTMethod(int , CSVP_SinusoidalBase, PreAnalysisTo, int Position)
 
 RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
 {
+    _CheckMembers(IterNextTo);
+    
     RCall(_STFTIterlyzer, IterNextTo)(This -> Sublyzer0, Position + 0);
     RCall(_STFTIterlyzer, IterNextTo)(This -> Sublyzer1, Position + 1);
     RCall(_List_Int, From)(& This -> PulseList,
@@ -143,6 +169,14 @@ RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
 
 RTMethod(int , CSVP_SinusoidalBase, PrevTo, int Position)
 {
+    _CheckMembers(PrevTo);
+    CDSP2_If_Debug_Check
+    (
+        if(Position > This -> InitPosition)
+            RDebugPrint(_RTClassName, "PrevTo: destination position later than "
+                "initial position.");
+    )
+    
     RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer0,
         This -> InitPosition + 0);
     RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer1,

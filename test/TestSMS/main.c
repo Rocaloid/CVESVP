@@ -1,4 +1,5 @@
 #include "HNM.h"
+#include "EndPoint.h"
 #include <CVEDSP2.h>
 #include <RUtil2.h>
 
@@ -25,7 +26,7 @@ int main()
     }
     
     Wave XWave;
-    RCall(Wave, CtorSize)(& XWave, 44100 * 5);
+    RCall(Wave, CtorSize)(& XWave, 20);
     Float* X = RCall(IWave, GetUnsafePtr)(& XWave);
     Float* Win = RAlloc_Float(2048);
     CDSP2_GenHanning_Float(Win, 2048);
@@ -46,19 +47,24 @@ int main()
     
     SinusoidIterlyzer SinuIter;
     RCall(SinusoidIterlyzer, CtorSize)(& SinuIter, 2048);
+    SinuIter.GenPhase = 1;
+    
     RCall(SinusoidIterlyzer, SetHopSize)(& SinuIter, 256);
     RCall(SinusoidIterlyzer, SetWave)(& SinuIter, & XWave);
     RCall(SinusoidIterlyzer, SetPosition)(& SinuIter, 15000);
     RCall(SinusoidIterlyzer, PreAnalysisTo)(& SinuIter, 20000);
     
     //printf("%f\n", SinuIter._Base.InitF0);
+    int VOT = CSVP_VOTFromWave_Float(& XWave, 0, XWave.Size / 2);
     
-    RCall(SinusoidIterlyzer, PrevTo)(& SinuIter, 10000);
+    printf("VOT: %d\n", VOT);
+    
+    RCall(SinusoidIterlyzer, PrevTo)(& SinuIter, VOT);
     //RCall(SinusoidIterlyzer, Clear)(& SinuIter);
     RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 20000);
     //RCall(SinusoidIterlyzer, Clear)(& SinuIter);
-    RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 30000);
-    
+    RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, XWave.Size - 2000);
+    /*
     for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
     {
         int j;
@@ -67,7 +73,7 @@ int main()
         for(j = 0; j <= Sinu -> Freq_Index; j ++)
             printf("  %dth Harmonic, F = %fHz, A = %f.\n", j + 1,
                 Sinu -> Freq[j], Sinu -> Ampl[j]);
-    }
+    }*/
     
     RFree(Win);
     RDelete(& SinFrame, & SinSpec, & XWave, & SinuIter);
