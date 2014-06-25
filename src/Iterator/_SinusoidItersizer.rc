@@ -117,8 +117,6 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
 #define _IfAfter_Before(Stat)
 #define _IfAfter(Cond, Stat) _C1(_IfAfter_, Cond)(Stat)
 
-//The even property of cosine function enables us to use same PhaseCores for
-// both forward and backward synthesis.
 //Notice: PCos accepts only positive numbers.
 #define _SynthesisCycle(ForCore, PhaseCore1, PhaseCore2, Cond) do { \
     /*For each sample.*/ \
@@ -149,7 +147,8 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
                 PhaseCore1(3) \
             ); \
             \
-            RCall(RFNL_Pk4PCos_Gnrc, _T1)(Y, X); \
+            _IfBefore(Cond, RCall(RFNL_Pk4Cos_Gnrc, _T1)(Y, X)); \
+            _IfAfter(Cond, RCall(RFNL_Pk4PCos_Gnrc, _T1)(Y, X)); \
             \
             Accum += Y[0] * Ampl[0]; \
             Accum += Y[1] * Ampl[1]; \
@@ -172,7 +171,8 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
                 Cond, \
                 PhaseCore2(); \
             ); \
-            Accum += RCall(RFNL_PCos_Gnrc, _T1)(Phse[k]) * \
+            Accum += _IfBefore(Cond, RCall(RFNL_Cos__Gnrc, _T1)(Phse[k])) \
+                     _IfAfter(Cond, RCall(RFNL_PCos_Gnrc, _T1)(Phse[k])) * \
                 RCall(RFNL_Interp_Linear_Gnrc, _T1) \
                     (LAmpl[k], HAmpl[k], Ratio); \
             _IfAfter \
@@ -229,18 +229,23 @@ RTMethod(void, CSVP_SinusoidItersizer, _Partial, int Position,
     _T1* HFreq  = HSinu -> Freq;
     _T1* HAmpl  = HSinu -> Ampl;
     
+    if(Direction == 1)
+    {
     #define _P1(n) Phse[k + n] += Delta[n]
     #define _P2() Phse[k] += Omega * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
         (LFreq[k], HFreq[k], Ratio);
-    if(Direction == 1)
-    {
         _SynthesisCycle((n = LPos; n < HPos; n ++), _P1, _P2, After);
-    }else
-    {
-        _SynthesisCycle((n = HPos - 1; n >= LPos; n --), _P1, _P2, Before);
-    }
     #undef  _P1
     #undef  _P2
+    }else
+    {
+    #define _P1(n) Phse[k + n] -= Delta[n]
+    #define _P2() Phse[k] -= Omega * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
+        (LFreq[k], HFreq[k], Ratio);
+        _SynthesisCycle((n = HPos - 1; n >= LPos; n --), _P1, _P2, Before);
+    #undef  _P1
+    #undef  _P2
+    }
 }
 
 RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
@@ -290,18 +295,23 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
         _T1* HFreq  = HSinu -> Freq;
         _T1* HAmpl  = HSinu -> Ampl;
         
+        if(Direction == 1)
+        {
         #define _P1(n) Phse[k + n] += Delta[n]
         #define _P2() Phse[k] += Omega * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
             (LFreq[k], HFreq[k], Ratio);
-        if(Direction == 1)
-        {
             _SynthesisCycle((n = LPos; n < HPos; n ++), _P1, _P2, After);
-        }else
-        {
-            _SynthesisCycle((n = HPos - 1; n >= LPos; n --), _P1, _P2, Before);
-        }
         #undef  _P1
         #undef  _P2
+        }else
+        {
+        #define _P1(n) Phse[k + n] -= Delta[n]
+        #define _P2() Phse[k] -= Omega * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
+            (LFreq[k], HFreq[k], Ratio);
+            _SynthesisCycle((n = HPos - 1; n >= LPos; n --), _P1, _P2, Before);
+        #undef  _P1
+        #undef  _P2
+        }
     }
 }
 
@@ -314,6 +324,7 @@ RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
     RCall(_RTClassName, _Partial)(This, This -> LastPosition, StartIndex, 1);
     RCall(_RTClassName, _Full)(This, StartIndex, EndIndex, 1);
     RCall(_RTClassName, _Partial)(This, Position, EndIndex, 1);
+    This -> LastPosition = Position;
 }
 
 RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)

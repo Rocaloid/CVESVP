@@ -85,6 +85,7 @@ int main()
     RCall(SinusoidItersizer, SetPosition)(& SinuSizer, 15000);
     
     RCall(SinusoidItersizer, PrevTo)(& SinuSizer, VOT + 256);
+    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, XWave.Size - 13000);
     RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, XWave.Size - 3000);
     
     String_SetChars(& Path, "/tmp/out.wav");
