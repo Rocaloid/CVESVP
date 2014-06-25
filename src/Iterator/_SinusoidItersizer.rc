@@ -110,9 +110,19 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
     Dest[3] = Mul * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
         (Sorc1[k + 3], Sorc2[k + 3], Ratio); \
 
-#define _SynthesisCycle() do { \
+#define _IfBefore_Before(Stat) Stat
+#define _IfBefore_After(Stat)
+#define _IfBefore(Cond, Stat) _C1(_IfBefore_, Cond)(Stat)
+#define _IfAfter_After(Stat) Stat
+#define _IfAfter_Before(Stat)
+#define _IfAfter(Cond, Stat) _C1(_IfAfter_, Cond)(Stat)
+
+//The even property of cosine function enables us to use same PhaseCores for
+// both forward and backward synthesis.
+//Notice: PCos accepts only positive numbers.
+#define _SynthesisCycle(ForCore, PhaseCore1, PhaseCore2, Cond) do { \
     /*For each sample.*/ \
-    for(n = LPos; n < HPos; n ++) \
+    for ForCore \
     { \
         _T1 Ratio = (_T1)(n - LPos) / HopSize; \
         _T1 Accum = 0; \
@@ -130,6 +140,15 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
             X[2] = Phse[k + 2]; \
             X[3] = Phse[k + 3]; \
             \
+            _IfBefore \
+            ( \
+                Cond, \
+                PhaseCore1(0); \
+                PhaseCore1(1); \
+                PhaseCore1(2); \
+                PhaseCore1(3) \
+            ); \
+            \
             RCall(RFNL_Pk4PCos_Gnrc, _T1)(Y, X); \
             \
             Accum += Y[0] * Ampl[0]; \
@@ -137,25 +156,37 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
             Accum += Y[2] * Ampl[2]; \
             Accum += Y[3] * Ampl[3]; \
             \
-            Phse[k + 0] += Delta[0]; \
-            Phse[k + 1] += Delta[1]; \
-            Phse[k + 2] += Delta[2]; \
-            Phse[k + 3] += Delta[3]; \
+            _IfAfter \
+            ( \
+                Cond, \
+                PhaseCore1(0); \
+                PhaseCore1(1); \
+                PhaseCore1(2); \
+                PhaseCore1(3) \
+            ); \
         } \
         for(; k < LSinu -> Size; k ++) \
         { \
+            _IfBefore \
+            ( \
+                Cond, \
+                PhaseCore2(); \
+            ); \
             Accum += RCall(RFNL_PCos_Gnrc, _T1)(Phse[k]) * \
                 RCall(RFNL_Interp_Linear_Gnrc, _T1) \
                     (LAmpl[k], HAmpl[k], Ratio); \
-            Phse[k] += Omega * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
-                (LFreq[k], HFreq[k], Ratio); \
+            _IfAfter \
+            ( \
+                Cond, \
+                PhaseCore2(); \
+            ); \
         } \
         Data[n] = Accum; \
     } \
     } while(0)
 
-RTMethod(void, CSVP_SinusoidItersizer, _Forward_Partial, int Position,
-    int Index)
+RTMethod(void, CSVP_SinusoidItersizer, _Partial, int Position,
+    int Index, int Direction)
 {
     _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     _T1* Phse   = This -> LastPhse.Data;
@@ -198,25 +229,48 @@ RTMethod(void, CSVP_SinusoidItersizer, _Forward_Partial, int Position,
     _T1* HFreq  = HSinu -> Freq;
     _T1* HAmpl  = HSinu -> Ampl;
     
-    _SynthesisCycle();
+    #define _P1(n) Phse[k + n] += Delta[n]
+    #define _P2() Phse[k] += Omega * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
+        (LFreq[k], HFreq[k], Ratio);
+    if(Direction == 1)
+    {
+        _SynthesisCycle((n = LPos; n < HPos; n ++), _P1, _P2, After);
+    }else
+    {
+        _SynthesisCycle((n = HPos - 1; n >= LPos; n --), _P1, _P2, Before);
+    }
+    #undef  _P1
+    #undef  _P2
 }
 
-RTMethod(static void, CSVP_SinusoidItersizer, _Forward, int LIndex, int HIndex)
+RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
+    int Direction)
 {
     int i, j, n, k;
     _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     _T1* Phse   = This -> LastPhse.Data;
     _T1* Data   = RCall(_IWave, GetUnsafePtr)(This -> Wave);
     
-    for(j = LIndex; j < HIndex; j ++)
+    for(j = SIndex;
+        ((Direction == 1 ) && j < DIndex) ||
+        ((Direction == -1) && j > DIndex);
+        j += Direction)
     {
         int LPos, HPos;
         int LIndex, HIndex;
         int LSize, HSize;
         _Sinusoid* LSinu, *HSinu;
         
-        LIndex = j;
-        HIndex = j + 1;
+        if(Direction == -1)
+        {
+            LIndex = j - 1;
+            HIndex = j;
+        }else
+        {
+            LIndex = j;
+            HIndex = j + 1;
+        }
+        
         LPos = This -> PulseList.Frames[LIndex];
         HPos = This -> PulseList.Frames[HIndex];
         LSinu = & This -> SinuList.Frames[LIndex];
@@ -236,7 +290,18 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Forward, int LIndex, int HIndex)
         _T1* HFreq  = HSinu -> Freq;
         _T1* HAmpl  = HSinu -> Ampl;
         
-        _SynthesisCycle();
+        #define _P1(n) Phse[k + n] += Delta[n]
+        #define _P2() Phse[k] += Omega * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
+            (LFreq[k], HFreq[k], Ratio);
+        if(Direction == 1)
+        {
+            _SynthesisCycle((n = LPos; n < HPos; n ++), _P1, _P2, After);
+        }else
+        {
+            _SynthesisCycle((n = HPos - 1; n >= LPos; n --), _P1, _P2, Before);
+        }
+        #undef  _P1
+        #undef  _P2
     }
 }
 
@@ -246,12 +311,33 @@ RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
         This -> LastPosition);
     int EndIndex   = RCall(_List_Int, IndexBefore)(& This -> PulseList,
         Position);
-    RCall(_RTClassName, _Forward_Partial)(This, This -> LastPosition,
-        StartIndex);
-    RCall(_RTClassName, _Forward)(This, StartIndex, EndIndex);
+    RCall(_RTClassName, _Partial)(This, This -> LastPosition, StartIndex, 1);
+    RCall(_RTClassName, _Full)(This, StartIndex, EndIndex, 1);
+    RCall(_RTClassName, _Partial)(This, Position, EndIndex, 1);
 }
 
-RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position);
+RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
+{
+    int OrigPosition = This -> LastPosition;
+    _DataFrame OrigPhse;
+    RCall(_DataFrame, Ctor)(& OrigPhse);
+    RCall(_DataFrame, From)(& OrigPhse, & This -> LastPhse);
+    RCall(_DataFrame, From)(& This -> LastPhse, & This -> InitPhse);
+    This -> LastPosition = This -> InitPosition;
+    
+    int StartIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList,
+        This -> LastPosition);
+    int EndIndex   = RCall(_List_Int, IndexAfter)(& This -> PulseList,
+        Position);
+    
+    RCall(_RTClassName, _Partial)(This, This -> LastPosition, StartIndex, -1);
+    RCall(_RTClassName, _Full)(This, StartIndex, EndIndex, -1);
+    RCall(_RTClassName, _Partial)(This, Position, EndIndex, -1);
+    
+    RCall(_DataFrame, From)(& This -> LastPhse, & OrigPhse);
+    This -> LastPosition = OrigPosition;
+    RCall(_DataFrame, Dtor)(& OrigPhse);
+}
 
 RTMethod(void, CSVP_SinusoidItersizer, Add, _Sinusoid* Sorc, int Position);
 

@@ -27,17 +27,20 @@ int main()
         SinFrame.Ampl[i] = 0.5 - 0.01 * 1;
     }
     
-    Wave XWave;
+    Wave XWave, YWave;
     RCall(Wave, CtorSize)(& XWave, 20);
-    Float* X = RCall(IWave, GetUnsafePtr)(& XWave);
+    RCall(Wave, CtorSize)(& YWave, 44100 * 5);
+    //Float* X = RCall(IWave, GetUnsafePtr)(& XWave);
     Float* Win = RAlloc_Float(2048);
     CDSP2_GenHanning_Float(Win, 2048);
     RCall(Wave, SetWindow)(& XWave, Win, 2048);
+    RCall(Wave, SetWindow)(& YWave, Win, 2048);
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/r/ra0.wsp");
+    String_SetChars(& Path, "/tmp/p/pa1.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
+    RCall(Wave, Resize)(& YWave, XWave.Size);
     //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
     //RCall(Sinusoid, ToReal)(& SinFrame, X, 44100 * 5, 44100);
     //CDSP2_VCMul_Float(X, X, 0.05, 44100 * 5);
@@ -78,17 +81,18 @@ int main()
     RCall(SinusoidItersizer, Ctor)(& SinuSizer);
     CSVP_List_Int_From(& SinuSizer.PulseList, & SinuIter.PulseList);
     CSVP_List_Sinusoid_Float_From(& SinuSizer.SinuList, & SinuIter.SinuList);
-    RCall(SinusoidItersizer, SetWave)(& SinuSizer, & XWave);
+    RCall(SinusoidItersizer, SetWave)(& SinuSizer, & YWave);
     RCall(SinusoidItersizer, SetPosition)(& SinuSizer, 15000);
     
-    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, 40000);
+    RCall(SinusoidItersizer, PrevTo)(& SinuSizer, VOT + 256);
+    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, XWave.Size - 3000);
     
     String_SetChars(& Path, "/tmp/out.wav");
-    RCall(Wave, ToFile)(& XWave, & Path);
+    RCall(Wave, ToFile)(& YWave, & Path);
     
     RFree(Win);
     RDelete(& Path);
-    RDelete(& SinFrame, & SinSpec, & XWave, & SinuIter, & SinuSizer);
+    RDelete(& SinFrame, & SinSpec, & XWave, & YWave, & SinuIter, & SinuSizer);
     return 0;
 }
 
