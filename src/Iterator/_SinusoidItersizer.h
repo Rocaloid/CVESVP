@@ -22,6 +22,19 @@ RClass(_RTClassName)
     _DataFrame InitPhse;
 };
 
+RTMethod(void, CSVP_SinusoidItersizer, From, _RTClassName* Sorc);
+RTMethod(void, CSVP_SinusoidItersizer, Clear);
+
+RTMethod(void, CSVP_SinusoidItersizer, SetWave, void* Sorc);
+RTMethod(void, CSVP_SinusoidItersizer, SetInitPhase, _DataFrame* Sorc);
+RTMethod(void, CSVP_SinusoidItersizer, SetPosition, int Position);
+RTMethod(int , CSVP_SinusoidItersizer, GetPosition);
+
+RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position);
+RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position);
+
+RTMethod(void, CSVP_SinusoidItersizer, Add, _Sinusoid* Sorc, int Position);
+
 #undef  _Wave
 #undef  _List_Int
 #undef  _List_Sinusoid

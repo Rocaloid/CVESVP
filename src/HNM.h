@@ -10,6 +10,7 @@
 #if 0
 #include "Iterator/_SinusoidalBase.h"
 #include "Iterator/_SinusoidIterlyzer.h"
+#include "Iterator/_SinusoidItersizer.h"
 #endif
 
 #ifdef __CSVP_Install
@@ -38,6 +39,25 @@
 #endif
 
 #define _ClassName CSVP_SinusoidIterlyzer_
+#define _Attr 1
+
+#define _T1 Float
+#include <RUtil2/Core/RTemplate.h>
+
+#define _T1 Double
+#include <RUtil2/Core/RTemplate.h>
+
+//-----
+
+#include <RUtil2.h>
+
+#ifdef __CSVP_Install
+#define _RTAddress "CVESVP/Iterator/_SinusoidItersizer.h"
+#else
+#define _RTAddress "Iterator/_SinusoidItersizer.h"
+#endif
+
+#define _ClassName CSVP_SinusoidItersizer_
 #define _Attr 1
 
 #define _T1 Float

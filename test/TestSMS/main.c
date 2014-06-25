@@ -7,8 +7,10 @@
 #define Spectrum CDSP2_Spectrum_Float
 #define SinusoidalBase CSVP_SinusoidalBase_Float
 #define SinusoidIterlyzer CSVP_SinusoidIterlyzer_Float
+#define SinusoidItersizer CSVP_SinusoidItersizer_Float
 #define Wave CDSP2_Wave_Float
 #define IWave CDSP2_IWave_Float
+
 int main()
 {
     Sinusoid SinFrame;
@@ -22,7 +24,7 @@ int main()
     for(i = 0; i < 5; i ++)
     {
         SinFrame.Freq[i] = 260 * i + 260;
-        SinFrame.Ampl[i] = i;
+        SinFrame.Ampl[i] = 0.5 - 0.01 * 1;
     }
     
     Wave XWave;
@@ -36,7 +38,6 @@ int main()
     String_Ctor(& Path);
     String_SetChars(& Path, "/tmp/r/ra0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
-    RDelete(& Path);
     //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
     //RCall(Sinusoid, ToReal)(& SinFrame, X, 44100 * 5, 44100);
     //CDSP2_VCMul_Float(X, X, 0.05, 44100 * 5);
@@ -60,9 +61,7 @@ int main()
     printf("VOT: %d\n", VOT);
     
     RCall(SinusoidIterlyzer, PrevTo)(& SinuIter, VOT);
-    //RCall(SinusoidIterlyzer, Clear)(& SinuIter);
     RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 20000);
-    //RCall(SinusoidIterlyzer, Clear)(& SinuIter);
     RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, XWave.Size - 2000);
     /*
     for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
@@ -75,8 +74,21 @@ int main()
                 Sinu -> Freq[j], Sinu -> Ampl[j]);
     }*/
     
+    SinusoidItersizer SinuSizer;
+    RCall(SinusoidItersizer, Ctor)(& SinuSizer);
+    CSVP_List_Int_From(& SinuSizer.PulseList, & SinuIter.PulseList);
+    CSVP_List_Sinusoid_Float_From(& SinuSizer.SinuList, & SinuIter.SinuList);
+    RCall(SinusoidItersizer, SetWave)(& SinuSizer, & XWave);
+    RCall(SinusoidItersizer, SetPosition)(& SinuSizer, 15000);
+    
+    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, 40000);
+    
+    String_SetChars(& Path, "/tmp/out.wav");
+    RCall(Wave, ToFile)(& XWave, & Path);
+    
     RFree(Win);
-    RDelete(& SinFrame, & SinSpec, & XWave, & SinuIter);
+    RDelete(& Path);
+    RDelete(& SinFrame, & SinSpec, & XWave, & SinuIter, & SinuSizer);
     return 0;
 }
 

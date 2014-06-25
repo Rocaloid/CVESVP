@@ -75,7 +75,7 @@ RTMethod(void, CSVP_Sinusoid, ToReal, _T1* Dest, int Size, int SampleRate)
     //For each sinusoid
     for(i = 0; i < N; i ++)
     {
-        _T1 Ampl = exp(This -> Ampl[i]);
+        _T1 Ampl = This -> Ampl[i];
         _T1 Freq = This -> Freq[i] * k;
         
         _T1 X[4], Y[4];
@@ -152,6 +152,7 @@ RTFunc(static _XYPair, CSVP_PeakFromSpectrum, _Spectrum* Sorc, int LInt,
     
     //Magnitude restoration
     Ret.Y -= log(Sorc -> Size / 4);
+    Ret.Y = exp(Ret.Y);
     
     RCall(_Spectrum, FreeConvSpecRO)(Sorc, NewSorc);
     return Ret;

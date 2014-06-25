@@ -150,7 +150,8 @@ RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
         & This -> Sublyzer0 -> PulseList);
     Array_Resize(_T1, This -> FreqList, This -> PulseList.Frames_Index + 1);
     This -> FreqList_Index = This -> PulseList.Frames_Index;
-    This -> LastPosition = This -> Sublyzer0 -> LastPosition;
+    This -> LastPosition = RCall(_STFTIterlyzer, GetPosition)
+        (This -> Sublyzer0);
     
     int i;
     for(i = 0; i <= This -> PulseList.Frames_Index; i ++)
