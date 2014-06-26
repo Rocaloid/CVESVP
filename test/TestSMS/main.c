@@ -38,9 +38,9 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/p/pa1.wsp");
+    String_SetChars(& Path, "/tmp/r/ri0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
-    RCall(Wave, Resize)(& YWave, XWave.Size);
+    RCall(Wave, Resize)(& YWave, XWave.Size * 3);
     //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
     //RCall(Sinusoid, ToReal)(& SinFrame, X, 44100 * 5, 44100);
     //CDSP2_VCMul_Float(X, X, 0.05, 44100 * 5);
@@ -79,14 +79,29 @@ int main()
     
     SinusoidItersizer SinuSizer;
     RCall(SinusoidItersizer, Ctor)(& SinuSizer);
+    /*
     CSVP_List_Int_From(& SinuSizer.PulseList, & SinuIter.PulseList);
     CSVP_List_Sinusoid_Float_From(& SinuSizer.SinuList, & SinuIter.SinuList);
-    RCall(SinusoidItersizer, SetWave)(& SinuSizer, & YWave);
-    RCall(SinusoidItersizer, SetPosition)(& SinuSizer, 15000);
+    */
+    int Offset = SinuIter.PulseList.Frames[0];
+    int Last;
+    for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
+    {
+        SinuIter.PulseList.Frames[i] -= Offset;
+    }
+    for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
+    {
+        RCall(SinusoidItersizer, Add)(& SinuSizer,
+            & SinuIter.SinuList.Frames[i], SinuIter.PulseList.Frames[i] * 3);
+    }
+    Last = SinuIter.PulseList.Frames[i - 1] * 3;
     
-    RCall(SinusoidItersizer, PrevTo)(& SinuSizer, VOT + 256);
-    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, XWave.Size - 13000);
-    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, XWave.Size - 3000);
+    RCall(SinusoidItersizer, SetWave)(& SinuSizer, & YWave);
+    RCall(SinusoidItersizer, SetPosition)(& SinuSizer, 40000);
+    
+    RCall(SinusoidItersizer, PrevTo)(& SinuSizer, 256);
+    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, XWave.Size - 1000);
+    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, Last - 1000);
     
     String_SetChars(& Path, "/tmp/out.wav");
     RCall(Wave, ToFile)(& YWave, & Path);

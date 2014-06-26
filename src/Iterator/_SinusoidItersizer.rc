@@ -171,7 +171,7 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
                 Cond, \
                 PhaseCore2(); \
             ); \
-            Accum += _IfBefore(Cond, RCall(RFNL_Cos__Gnrc, _T1)(Phse[k])) \
+            Accum += _IfBefore(Cond, RCall(RFNL_Cos_Gnrc, _T1)(Phse[k])) \
                      _IfAfter(Cond, RCall(RFNL_PCos_Gnrc, _T1)(Phse[k])) * \
                 RCall(RFNL_Interp_Linear_Gnrc, _T1) \
                     (LAmpl[k], HAmpl[k], Ratio); \
@@ -184,6 +184,14 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
         Data[n] = Accum; \
     } \
     } while(0)
+
+RTMethod(void __inline__, CSVP_SinusoidItersizer, _Compress)
+{
+    int  i;
+    _T1* Phse = This -> LastPhse.Data;
+    for(i = 0; i < This -> LastPhse.Size; i ++)
+        Phse[i] = fmod(Phse[i], 2 * M_PI);
+}
 
 RTMethod(void, CSVP_SinusoidItersizer, _Partial, int Position,
     int Index, int Direction)
@@ -219,7 +227,6 @@ RTMethod(void, CSVP_SinusoidItersizer, _Partial, int Position,
         _FillUp(H, L);
     else
         _FillUp(L, H);
-    
     
     _T1 HopSize = This -> PulseList.Frames[HIndex]
                 - This -> PulseList.Frames[LIndex];
@@ -295,6 +302,9 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
         _T1* HFreq  = HSinu -> Freq;
         _T1* HAmpl  = HSinu -> Ampl;
         
+        if(j % 5 == 0)
+            RCall(_RTClassName, _Compress)(This);
+        
         if(Direction == 1)
         {
         #define _P1(n) Phse[k + n] += Delta[n]
@@ -350,7 +360,11 @@ RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
     RCall(_DataFrame, Dtor)(& OrigPhse);
 }
 
-RTMethod(void, CSVP_SinusoidItersizer, Add, _Sinusoid* Sorc, int Position);
+RTMethod(void, CSVP_SinusoidItersizer, Add, _Sinusoid* Sorc, int Position)
+{
+    int i = RCall(_List_Int, Add)(& This -> PulseList, Position);
+    RCall(_List_Sinusoid, Add)(& This -> SinuList, Sorc, i);
+}
 
 #undef  _Wave
 #undef  _IWave
