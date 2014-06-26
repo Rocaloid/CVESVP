@@ -5,6 +5,16 @@
 #define _Sinusoid _C(CSVP_Sinusoid, _, _T1)
 #define _DataFrame _C(CSVP_DataFrame, _, _T1)
 
+#define _CheckMembers(Name) \
+    CDSP2_If_Debug_Check \
+    ( \
+        if(This -> Wave == NULL) \
+            RDebugPrint(_RTClassName, _S(Name) ": require wave.") \
+        if(This -> SinuList.FrameNum != This -> PulseList.Frames_Index + 1) \
+            RDebugPrint(_RTClassName, _S(Name) ": unmatching number of pulses" \
+                " and sinusoidal frames."); \
+    )
+
 RCtor(_RTClassName)
 {
     RCall(_List_Int, Ctor)(& This -> PulseList);
@@ -327,10 +337,14 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
 
 RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
 {
+    _CheckMembers(IterNextTo);
+    
     int StartIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         This -> LastPosition);
     int EndIndex   = RCall(_List_Int, IndexBefore)(& This -> PulseList,
         Position);
+
+    RCall(_RTClassName, _Compress)(This);
     RCall(_RTClassName, _Partial)(This, This -> LastPosition, StartIndex, 1);
     RCall(_RTClassName, _Full)(This, StartIndex, EndIndex, 1);
     RCall(_RTClassName, _Partial)(This, Position, EndIndex, 1);
@@ -339,6 +353,8 @@ RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
 {
+    _CheckMembers(PrevTo);
+    
     int OrigPosition = This -> LastPosition;
     _DataFrame OrigPhse;
     RCall(_DataFrame, Ctor)(& OrigPhse);
@@ -351,6 +367,7 @@ RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
     int EndIndex   = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         Position);
     
+    RCall(_RTClassName, _Compress)(This);
     RCall(_RTClassName, _Partial)(This, This -> LastPosition, StartIndex, -1);
     RCall(_RTClassName, _Full)(This, StartIndex, EndIndex, -1);
     RCall(_RTClassName, _Partial)(This, Position, EndIndex, -1);

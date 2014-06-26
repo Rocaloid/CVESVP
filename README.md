@@ -14,7 +14,7 @@ Todo & Plan List
 - [x] Implement `HNMFrame` `HNMContour` structure and `List_HNMFrame`
 - [x] Implement `SinusoidIterlyzer`(in: `Wave`, out: `List_Sinusoid`)
 - [x] Implement `SinusoidItersizer`(in: `Position` `Sinusoid`, out: `Wave`)
-- [ ] Implement `HNMIterlyzer`(in: `Wave`, out: `List_HNMFrame`)
+- [x] Implement `HNMIterlyzer`(in: `Wave`, out: `List_HNMFrame`)
 - [ ] Implement `HNMItersizer` based on `SinusoidItersizer`(in: `Position` `HNMFrame`, out: `Wave`)
 - [ ] Implement `F0Iterlyzer`(in: `Wave`, out: `Real`)
 - [ ] Default analysis window for `_F0.rc`

@@ -7,6 +7,7 @@
 #define Spectrum CDSP2_Spectrum_Float
 #define SinusoidalBase CSVP_SinusoidalBase_Float
 #define SinusoidIterlyzer CSVP_SinusoidIterlyzer_Float
+#define HNMIterlyzer CSVP_HNMIterlyzer_Float
 #define SinusoidItersizer CSVP_SinusoidItersizer_Float
 #define Wave CDSP2_Wave_Float
 #define IWave CDSP2_IWave_Float
@@ -38,7 +39,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/r/ri0.wsp");
+    String_SetChars(& Path, "/tmp/r/ra0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * 3);
     //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
@@ -49,6 +50,9 @@ int main()
         printf("%.20f\n", X[i]);*/
     //    printf("%.20f\n", SinSpec.Magn[i]);
     
+    int VOT = CSVP_VOTFromWave_Float(& XWave, 0, XWave.Size / 2);
+    printf("VOT: %d\n", VOT);
+    
     SinusoidIterlyzer SinuIter;
     RCall(SinusoidIterlyzer, CtorSize)(& SinuIter, 2048);
     SinuIter.GenPhase = 1;
@@ -58,14 +62,22 @@ int main()
     RCall(SinusoidIterlyzer, SetPosition)(& SinuIter, 15000);
     RCall(SinusoidIterlyzer, PreAnalysisTo)(& SinuIter, 20000);
     
-    //printf("%f\n", SinuIter._Base.InitF0);
-    int VOT = CSVP_VOTFromWave_Float(& XWave, 0, XWave.Size / 2);
-    
-    printf("VOT: %d\n", VOT);
-    
     RCall(SinusoidIterlyzer, PrevTo)(& SinuIter, VOT);
     RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 20000);
     RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, XWave.Size - 2000);
+    
+    HNMIterlyzer HNMIter;
+    RCall(HNMIterlyzer, CtorSize)(& HNMIter, 2048);
+    HNMIter.GenPhase = 1;
+    
+    RCall(HNMIterlyzer, SetHopSize)(& HNMIter, 256);
+    RCall(HNMIterlyzer, SetWave)(& HNMIter, & XWave);
+    RCall(HNMIterlyzer, SetPosition)(& HNMIter, 15000);
+    RCall(HNMIterlyzer, PreAnalysisTo)(& HNMIter, 20000);
+    
+    RCall(HNMIterlyzer, PrevTo)(& HNMIter, VOT);
+    RCall(HNMIterlyzer, IterNextTo)(& HNMIter, 20000);
+    RCall(HNMIterlyzer, IterNextTo)(& HNMIter, XWave.Size - 2000);
     /*
     for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
     {
@@ -108,7 +120,8 @@ int main()
     
     RFree(Win);
     RDelete(& Path);
-    RDelete(& SinFrame, & SinSpec, & XWave, & YWave, & SinuIter, & SinuSizer);
+    RDelete(& SinFrame, & SinSpec, & XWave, & YWave, & SinuIter, & SinuSizer,
+        & HNMIter);
     return 0;
 }
 

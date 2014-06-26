@@ -1,4 +1,6 @@
 #define _Sinusoid _C(CSVP_Sinusoid, _, _T1)
+#define _DataFrame _C(CSVP_DataFrame, _, _T1)
+#define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 
 RCtor(_RTClassName)
 {
@@ -20,7 +22,7 @@ RTMethod(void, CSVP_HNMFrame, CtorSize, int Size, int HNum)
 {
     RCall(_Sinusoid, CtorSize)(& This -> Hmnc, HNum);
     This -> Size = Size;
-    This -> Noiz = RCall(RAlloc, _T1)(Size);
+    This -> Noiz = RCall(RAlloc, _T1)(Size / 2 + 1);
     
     RInit(_RTClassName);
 }
@@ -31,22 +33,80 @@ RTMethod(void, CSVP_HNMFrame, Resize, int Size, int HNum)
     if(Size != This -> Size)
     {
         This -> Size = Size;
-        This -> Noiz = (_T1*)realloc(This -> Noiz, Size * sizeof(_T1));
+        This -> Noiz = (_T1*)realloc(This -> Noiz, (Size / 2 + 1)
+            * sizeof(_T1));
     }
 }
 
 RTMethod(void, CSVP_HNMFrame, Clear)
 {
     RCall(_Sinusoid, Clear)(& This -> Hmnc);
-    RCall(CDSP2_VSet, _T1)(This -> Noiz, 0, This -> Size);
+    RCall(CDSP2_VSet, _T1)(This -> Noiz, 0, This -> Size / 2 + 1);
 }
 
 RTMethod(void, CSVP_HNMFrame, From, _RTClassName* Sorc)
 {
     RCall(_RTClassName, Resize)(This, Sorc -> Size, Sorc -> Hmnc.Size);
     RCall(_Sinusoid, From)(& This -> Hmnc, & Sorc -> Hmnc);
-    RCall(CDSP2_VCopy, _T1)(& This -> Noiz, Sorc -> Noiz, Sorc -> Size);
+    RCall(CDSP2_VCopy, _T1)(This -> Noiz, Sorc -> Noiz, Sorc -> Size / 2 + 1);
+}
+
+RTMethod(static void, CSVP_HNMFrame, _FromSpectrum, _DataFrame* Dest,
+    _Spectrum* Sorc, _T1 F0, int SinuNum, int GenPhase)
+{
+    _Spectrum TempSpec;
+    int  Size = Sorc -> Size;
+    int  DataSize = Size / 2 + 1;
+    
+    int  SampleRate = Sorc -> SampleRate;
+    _T1* TempReal = RCall(RAlloc, _T1)(Size);
+    _T1* Wind = RCall(RAlloc, _T1)(Size);
+    
+    
+    RCall(_RTClassName, Resize)(This, Size, SinuNum);
+    RCall(_Spectrum, CtorSize)(& TempSpec, Size);
+    //TODO: Temporary window generation.
+    RCall(CDSP2_GenHanning, _T1)(Wind, Size);
+    _Spectrum* NewSorc = RCall(_Spectrum, AllocConvSpecRO)
+        (Sorc, CDSP2_LinearMagn);
+    TempSpec.MagnType = CDSP2_LinearMagn;
+    
+    
+    if(GenPhase)
+        RCall(_Sinusoid, FromSpectrumWithPhase)(& This -> Hmnc, Dest, Sorc, F0);
+    else
+        RCall(_Sinusoid, FromSpectrum)(& This -> Hmnc, Sorc, F0);
+    RCall(_Sinusoid, ToReal)(& This -> Hmnc, TempReal, Size, SampleRate);
+    RCall(_Spectrum, FromRealW)(& TempSpec, TempReal, Wind);
+    
+    RCall(CDSP2_VCopy, _T1)(TempReal, NewSorc -> Magn, DataSize);
+    RCall(CDSP2_VSub , _T1)(TempReal, TempReal, TempSpec.Magn, DataSize);
+    RCall(CDSP2_VCMax, _T1)(TempReal, TempReal, 0, DataSize);
+    
+    //TODO: Implement SIMD accelerated vector log in RFNL.
+    int i;
+    for(i = 0; i < DataSize; i ++)
+        This -> Noiz[i] = log(TempReal[i]);
+    
+    RFree(TempReal);
+    RFree(Wind);
+    RCall(_Spectrum, Dtor)(& TempSpec);
+    RCall(_Spectrum, FreeConvSpecRO)(Sorc, NewSorc);
+}
+
+RTMethod(void, CSVP_HNMFrame, FromSpectrum, _Spectrum* Sorc, _T1 F0,
+    int SinuNum)
+{
+    RCall(_RTClassName, _FromSpectrum)(This, NULL, Sorc, F0, SinuNum, 0);
+}
+
+RTMethod(void, CSVP_HNMFrame, FromSpectrumWithPhase, _DataFrame* Dest,
+    _Spectrum* Sorc, _T1 F0, int SinuNum)
+{
+    RCall(_RTClassName, _FromSpectrum)(This, Dest, Sorc, F0, SinuNum, 1);
 }
 
 #undef  _Sinusoid
+#undef  _DataFrame
+#undef  _Spectrum
 
