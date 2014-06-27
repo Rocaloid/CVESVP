@@ -161,7 +161,7 @@ RTFunc(static _XYPair, CSVP_PeakFromSpectrum, _Spectrum* Sorc, int LInt,
 RTMethod(static void, CSVP_Sinusoid, _FromSpectrum, _DataFrame* Dest,
     _Spectrum* Sorc, _T1 F0, int GenPhase)
 {
-    int i, j;
+    int i;
     
     _T1 Center;
     _T1 LBound, HBound;
@@ -179,7 +179,7 @@ RTMethod(static void, CSVP_Sinusoid, _FromSpectrum, _DataFrame* Dest,
         This -> Ampl[i] = TempPair.Y;
         
         if(GenPhase)
-            Dest -> Data[j] = Sorc -> Phse[TempPair.IntX];
+            Dest -> Data[i] = Sorc -> Phse[TempPair.IntX];
     }
 }
 
@@ -191,7 +191,7 @@ RTMethod(void, CSVP_Sinusoid, FromSpectrum, _Spectrum* Sorc, _T1 F0)
 RTMethod(void, CSVP_Sinusoid, FromSpectrumWithPhase, _DataFrame* Dest,
     _Spectrum* Sorc, _T1 F0)
 {
-    RCall(_RTClassName, _FromSpectrum)(This, Dest, Sorc, F0, 0);
+    RCall(_RTClassName, _FromSpectrum)(This, Dest, Sorc, F0, 1);
 }
 
 #undef  _DataFrame

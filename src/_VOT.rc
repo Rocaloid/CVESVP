@@ -22,7 +22,7 @@ RTFunc(int, CSVP_VOTFromWave, void* Sorc, int LBound, int RBound)
     
     int i;
     int SampleRate = ((_Wave*)Sorc) -> SampleRate;
-    int LBin = 100 * SIZE_FFT / SampleRate;
+    int LBin = 300 * SIZE_FFT / SampleRate;
     int HBin = 1500 * SIZE_FFT / SampleRate;
     Array_Gtor(_T1, PowerList);
     Array_Gtor(_T1, PowerAcc);

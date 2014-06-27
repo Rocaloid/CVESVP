@@ -11,6 +11,7 @@
 #include "Iterator/_SinusoidalBase.h"
 #include "Iterator/_SinuGenericIterlyzer.h"
 #include "Iterator/_SinusoidItersizer.h"
+#include "Iterator/_HNMItersizer.h"
 #endif
 
 #ifdef __CSVP_Install
@@ -94,6 +95,25 @@
 #define _T4 HNMList
 #define _T3 HNMFrame
 #define _T2 CSVP_HNMIterlyzer
+#define _T1 Double
+#include <RUtil2/Core/RTemplate.h>
+
+//-----
+
+#include <RUtil2.h>
+
+#ifdef __CSVP_Install
+#define _RTAddress "CVESVP/Iterator/_HNMItersizer.h"
+#else
+#define _RTAddress "Iterator/_HNMItersizer.h"
+#endif
+
+#define _ClassName CSVP_HNMItersizer_
+#define _Attr 1
+
+#define _T1 Float
+#include <RUtil2/Core/RTemplate.h>
+
 #define _T1 Double
 #include <RUtil2/Core/RTemplate.h>
 

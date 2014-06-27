@@ -23,7 +23,7 @@ RTMethod(void, CSVP_DataFrame, Resize, int Size)
 {
     if(This -> Size != Size)
     {
-        if(This -> Data != 0)
+        if(This -> Data != NULL)
             This -> Data = (_T1*)realloc(This -> Data, Size * sizeof(_T1));
         else
             This -> Data = malloc(Size * sizeof(_T1));

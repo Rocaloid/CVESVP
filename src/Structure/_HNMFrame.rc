@@ -62,7 +62,6 @@ RTMethod(static void, CSVP_HNMFrame, _FromSpectrum, _DataFrame* Dest,
     _T1* TempReal = RCall(RAlloc, _T1)(Size);
     _T1* Wind = RCall(RAlloc, _T1)(Size);
     
-    
     RCall(_RTClassName, Resize)(This, Size, SinuNum);
     RCall(_Spectrum, CtorSize)(& TempSpec, Size);
     //TODO: Temporary window generation.
@@ -70,7 +69,6 @@ RTMethod(static void, CSVP_HNMFrame, _FromSpectrum, _DataFrame* Dest,
     _Spectrum* NewSorc = RCall(_Spectrum, AllocConvSpecRO)
         (Sorc, CDSP2_LinearMagn);
     TempSpec.MagnType = CDSP2_LinearMagn;
-    
     
     if(GenPhase)
         RCall(_Sinusoid, FromSpectrumWithPhase)(& This -> Hmnc, Dest, Sorc, F0);

@@ -51,6 +51,12 @@ RTMethod(void, CSVP_STFTItersizer, FromIterlyzer, _STFTIterlyzer* Sorc)
          RCall(_RTClassName, GetFrameSize)(This));
 }
 
+RTMethod(void, CSVP_STFTItersizer, Clear)
+{
+    RCall(CSVP_List_Int, Clear)(& This -> PulseList);
+    RCall(_List_Spectrum, Clear)(& This -> SpecList);
+}
+
 RTMethod(void, CSVP_STFTItersizer, SetWave, void* Sorc)
 {
     CDSP2_If_Debug_Check

@@ -114,11 +114,10 @@ RTMethod(static void, _T2, _Analyze)
         //Analysis
         _T1 F0 = _MyBase -> FreqList[i];
         int N = This -> UFreq / F0;
-        
         _IfSinu
         (
             _T3,
-            RCall(_GnrcFrame, Resize)(& TempGnrc, N);
+            RCall(_GnrcFrame, Resize)(& TempGnrc, N)
         );
         RCall(_DataFrame, Resize)(& TempPhse, N);
         if(This -> GenPhase)
@@ -129,7 +128,7 @@ RTMethod(static void, _T2, _Analyze)
                 RCall(_GnrcFrame, FromSpectrumWithPhase)(& TempGnrc, & TempPhse,
                     & _MyBase -> Sublyzer0 -> SpecList.Frames[i], F0),
                 RCall(_GnrcFrame, FromSpectrumWithPhase)(& TempGnrc, & TempPhse,
-                    & _MyBase -> Sublyzer0 -> SpecList.Frames[i], F0, N);
+                    & _MyBase -> Sublyzer0 -> SpecList.Frames[i], F0, N)
             );
         }else
         {

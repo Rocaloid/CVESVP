@@ -103,9 +103,9 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
             int PhseSize = This -> LastPhse.Size; \
             RCall(_DataFrame, Resize)(& This -> LastPhse, \
                 _C1(More, Sinu) -> Size); \
-            for(i = PhseSize - 1; i < _C1(More, Size); i ++) \
+            for(i = PhseSize; i < This -> LastPhse.Size; i ++) \
             { \
-                This -> LastPhse.Data[i] = 0; \
+                This -> LastPhse.Data[i] = 2 * M_PI; \
             } \
         } \
     } while(0)
@@ -179,7 +179,7 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
             _IfBefore \
             ( \
                 Cond, \
-                PhaseCore2(); \
+                PhaseCore2() \
             ); \
             Accum += _IfBefore(Cond, RCall(RFNL_Cos_Gnrc, _T1)(Phse[k])) \
                      _IfAfter(Cond, RCall(RFNL_PCos_Gnrc, _T1)(Phse[k])) * \
@@ -188,7 +188,7 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
             _IfAfter \
             ( \
                 Cond, \
-                PhaseCore2(); \
+                PhaseCore2() \
             ); \
         } \
         Data[n] = Accum; \
@@ -200,14 +200,15 @@ RTMethod(void __inline__, CSVP_SinusoidItersizer, _Compress)
     int  i;
     _T1* Phse = This -> LastPhse.Data;
     for(i = 0; i < This -> LastPhse.Size; i ++)
-        Phse[i] = fmod(Phse[i], 2 * M_PI);
+    {
+        Phse[i] = fmod(Phse[i], 2 * M_PI) + 2 * M_PI;
+    }
 }
 
 RTMethod(void, CSVP_SinusoidItersizer, _Partial, int Position,
     int Index, int Direction)
 {
     _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
-    _T1* Phse   = This -> LastPhse.Data;
     _T1* Data   = RCall(_IWave, GetUnsafePtr)(This -> Wave);
     
     int IPosition = This -> PulseList.Frames[Index];
@@ -238,6 +239,7 @@ RTMethod(void, CSVP_SinusoidItersizer, _Partial, int Position,
     else
         _FillUp(L, H);
     
+    _T1* Phse   = This -> LastPhse.Data;
     _T1 HopSize = This -> PulseList.Frames[HIndex]
                 - This -> PulseList.Frames[LIndex];
     _T1  Omega  = 2.0 * M_PI / SampleRate;
@@ -270,7 +272,6 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
 {
     int i, j, n, k;
     _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
-    _T1* Phse   = This -> LastPhse.Data;
     _T1* Data   = RCall(_IWave, GetUnsafePtr)(This -> Wave);
     
     for(j = SIndex;
@@ -305,6 +306,7 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
         else
             _FillUp(L, H);
         
+        _T1* Phse   = This -> LastPhse.Data;
         int HopSize = HPos - LPos;
         _T1  Omega  = 2.0 * M_PI / SampleRate;
         _T1* LFreq  = LSinu -> Freq;
@@ -339,16 +341,21 @@ RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
 {
     _CheckMembers(IterNextTo);
     
-    int StartIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
+    int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         This -> LastPosition);
-    int EndIndex   = RCall(_List_Int, IndexBefore)(& This -> PulseList,
+    int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList,
         Position);
 
     RCall(_RTClassName, _Compress)(This);
-    RCall(_RTClassName, _Partial)(This, This -> LastPosition, StartIndex, 1);
-    RCall(_RTClassName, _Full)(This, StartIndex, EndIndex, 1);
-    RCall(_RTClassName, _Partial)(This, Position, EndIndex, 1);
+    RCall(_RTClassName, _Partial)(This, This -> LastPosition, LIndex, 1);
+    RCall(_RTClassName, _Full)(This, LIndex, HIndex, 1);
+    RCall(_RTClassName, _Partial)(This, Position, HIndex, 1);
     This -> LastPosition = Position;
+    
+    //Delete
+    RCall(_List_Int, RemoveRange)(& This -> PulseList, LIndex + 1, HIndex - 1);
+    RCall(_List_Sinusoid, RemoveRange)(& This -> SinuList,
+        LIndex + 1, HIndex - 1);
 }
 
 RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
@@ -362,19 +369,24 @@ RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
     RCall(_DataFrame, From)(& This -> LastPhse, & This -> InitPhse);
     This -> LastPosition = This -> InitPosition;
     
-    int StartIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList,
+    int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList,
         This -> LastPosition);
-    int EndIndex   = RCall(_List_Int, IndexAfter)(& This -> PulseList,
+    int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         Position);
     
     RCall(_RTClassName, _Compress)(This);
-    RCall(_RTClassName, _Partial)(This, This -> LastPosition, StartIndex, -1);
-    RCall(_RTClassName, _Full)(This, StartIndex, EndIndex, -1);
-    RCall(_RTClassName, _Partial)(This, Position, EndIndex, -1);
+    RCall(_RTClassName, _Partial)(This, This -> LastPosition, HIndex, -1);
+    RCall(_RTClassName, _Full)(This, HIndex, LIndex, -1);
+    RCall(_RTClassName, _Partial)(This, Position, LIndex, -1);
     
     RCall(_DataFrame, From)(& This -> LastPhse, & OrigPhse);
     This -> LastPosition = OrigPosition;
     RCall(_DataFrame, Dtor)(& OrigPhse);
+    
+    //Delete
+    RCall(_List_Int, RemoveRange)(& This -> PulseList, LIndex + 1, HIndex - 1);
+    RCall(_List_Sinusoid, RemoveRange)(& This -> SinuList,
+        LIndex + 1, HIndex - 1);
 }
 
 RTMethod(void, CSVP_SinusoidItersizer, Add, _Sinusoid* Sorc, int Position)
