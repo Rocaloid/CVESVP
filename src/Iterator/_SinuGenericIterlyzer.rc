@@ -114,6 +114,7 @@ RTMethod(static void, _T2, _Analyze)
         //Analysis
         _T1 F0 = _MyBase -> FreqList[i];
         int N = This -> UFreq / F0;
+        printf("%d %f\n", _MyBase -> Sublyzer0 -> PulseList.Frames[i], F0);
         _IfSinu
         (
             _T3,

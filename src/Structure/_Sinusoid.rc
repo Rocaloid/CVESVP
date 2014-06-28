@@ -72,6 +72,7 @@ RTMethod(void, CSVP_Sinusoid, ToReal, _T1* Dest, int Size, int SampleRate)
     int i, j;
     RCall(CDSP2_VSet, _T1)(Dest, 0, Size);
     
+    
     //For each sinusoid
     for(i = 0; i < N; i ++)
     {
@@ -144,6 +145,9 @@ RTFunc(static _XYPair, CSVP_PeakFromSpectrum, _Spectrum* Sorc, int LInt,
     a1 = (a + c) / 2.0 - b;
     a2 = c - b - a1;
     x = - a2 / a1 * 0.5;
+    
+    if(fabs(x) > 1.0)
+        x = 0;
     
     Ret.IntX = Max_X;
     Ret.X = ((_T1)Max_X + x) * Sorc -> SampleRate / Sorc -> Size;

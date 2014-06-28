@@ -40,7 +40,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/p/pi1.wsp");
+    String_SetChars(& Path, "/tmp/s/sa0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * 3);
     //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
@@ -60,7 +60,7 @@ int main()
     
     RCall(SinusoidIterlyzer, SetHopSize)(& SinuIter, 256);
     RCall(SinusoidIterlyzer, SetWave)(& SinuIter, & XWave);
-    RCall(SinusoidIterlyzer, SetPosition)(& SinuIter, 15000);
+    RCall(SinusoidIterlyzer, SetPosition)(& SinuIter, 20000);
     //RCall(SinusoidIterlyzer, PreAnalysisTo)(& SinuIter, 20000);
     
     //RCall(SinusoidIterlyzer, PrevTo)(& SinuIter, VOT);
@@ -73,13 +73,13 @@ int main()
     
     RCall(HNMIterlyzer, SetHopSize)(& HNMIter, 256);
     RCall(HNMIterlyzer, SetWave)(& HNMIter, & XWave);
-    RCall(HNMIterlyzer, SetPosition)(& HNMIter, 15000);
-    RCall(HNMIterlyzer, PreAnalysisTo)(& HNMIter, 20000);
+    RCall(HNMIterlyzer, SetPosition)(& HNMIter, 20000);
+    RCall(HNMIterlyzer, PreAnalysisTo)(& HNMIter, 25000);
     RCall(HNMIterlyzer, SetUpperFreq)(& HNMIter, 10000);
     printf("F0: %f\n", HNMIter._Base.InitF0);
     
     RCall(HNMIterlyzer, PrevTo)(& HNMIter, VOT);
-    RCall(HNMIterlyzer, IterNextTo)(& HNMIter, XWave.Size - 4410);
+    RCall(HNMIterlyzer, IterNextTo)(& HNMIter, XWave.Size - 510);
     /*
     for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
     {
@@ -128,7 +128,7 @@ int main()
     int Last;
     for(i = 0; i <= HNMIter.PulseList.Frames_Index; i ++)
     {
-        HNMIter.PulseList.Frames[i] -= Offset;
+        //HNMIter.PulseList.Frames[i] -= Offset;
         RCall(HNMItersizer, Add)(& HNMSizer, & HNMIter.HNMList.Frames[i],
             HNMIter.PulseList.Frames[i]);
     }
@@ -136,9 +136,12 @@ int main()
     
     RCall(HNMItersizer, SetHopSize)(& HNMSizer, 256);
     RCall(HNMItersizer, SetWave)(& HNMSizer, & YWave);
-    RCall(HNMItersizer, SetPosition)(& HNMSizer, 15000);
-    //RCall(HNMItersizer, SetInitPhase)(& HNMSizer,
-    //    & HNMIter.PhseList.Frames[20]);
+    RCall(HNMItersizer, SetPosition)(& HNMSizer, HNMIter.PulseList.Frames[i - 40]);
+    
+    RCall(HNMItersizer, SetInitPhase)(& HNMSizer,
+        & HNMIter.PhseList.Frames[i - 40]);
+    
+    printf("%d %d\n", Last - 1000, HNMIter.PulseList.Frames[i - 40]);
     
     RCall(HNMItersizer, PrevTo    )(& HNMSizer, 0);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 1000);
