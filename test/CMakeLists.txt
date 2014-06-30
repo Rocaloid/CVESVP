@@ -32,5 +32,5 @@ add_test(TestPSOLA TestPSOLA)
 
 get_filename_component(TestDir "." ABSOLUTE)
 get_filename_component(TopDir ${CMAKE_SOURCE_DIR} ABSOLUTE)
-set(CMAKE_C_FLAGS "-Ofast -I${TopDir}/src")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${TopDir}/src")
 
