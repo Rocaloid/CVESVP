@@ -2,6 +2,7 @@
 #include "EndPoint.h"
 #include <CVEDSP2.h>
 #include <RUtil2.h>
+#include <stdlib.h>
 
 #define Sinusoid CSVP_Sinusoid_Float
 #define Spectrum CDSP2_Spectrum_Float
@@ -42,7 +43,7 @@ int main()
     String_Ctor(& Path);
     String_SetChars(& Path, "/tmp/s/sa0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
-    RCall(Wave, Resize)(& YWave, XWave.Size * 3);
+    RCall(Wave, Resize)(& YWave, XWave.Size * 8);
     //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
     //RCall(Sinusoid, ToReal)(& SinFrame, X, 44100 * 5, 44100);
     //CDSP2_VCMul_Float(X, X, 0.05, 44100 * 5);
@@ -126,22 +127,31 @@ int main()
     
     int Offset = HNMIter.PulseList.Frames[0];
     int Last;
+    int j;
     for(i = 0; i <= HNMIter.PulseList.Frames_Index; i ++)
     {
         //HNMIter.PulseList.Frames[i] -= Offset;
-        RCall(HNMItersizer, Add)(& HNMSizer, & HNMIter.HNMList.Frames[i],
-            HNMIter.PulseList.Frames[i]);
+        for(j = 0; j < 8; j ++)
+        {
+            RCall(HNMItersizer, Add)(& HNMSizer, & HNMIter.HNMList.Frames[i],
+                Offset);
+            Offset += 256;
+        }
     }
-    Last = HNMIter.PulseList.Frames[i - 1];
+    Last = HNMSizer.PulseList.Frames[i * 8 - 1];
+    
+    for(j = 0; j < HNMIter.PhseList.Frames[2].Size; j ++)
+        HNMIter.PhseList.Frames[2].Data[j] = 2.0 * M_PI
+            + /*(float)rand() / RAND_MAX **/(float) j / 2.0;
     
     RCall(HNMItersizer, SetHopSize)(& HNMSizer, 256);
     RCall(HNMItersizer, SetWave)(& HNMSizer, & YWave);
-    RCall(HNMItersizer, SetPosition)(& HNMSizer, HNMIter.PulseList.Frames[i - 40]);
+    RCall(HNMItersizer, SetPosition)(& HNMSizer, HNMIter.PulseList.Frames[2]);
     
     RCall(HNMItersizer, SetInitPhase)(& HNMSizer,
-        & HNMIter.PhseList.Frames[i - 40]);
+        & HNMIter.PhseList.Frames[2]);
     
-    printf("%d %d\n", Last - 1000, HNMIter.PulseList.Frames[i - 40]);
+    printf("%d %d\n", Last - 1000, HNMIter.PulseList.Frames[2]);
     
     RCall(HNMItersizer, PrevTo    )(& HNMSizer, 0);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 1000);
