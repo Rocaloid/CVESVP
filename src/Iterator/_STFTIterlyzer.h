@@ -12,6 +12,7 @@ RClass(_RTClassName)
     _List_Int      PulseList;
     
     //Private
+    char UseWindow;
     void* Wave;
     int LastPosition;
 };

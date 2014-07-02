@@ -41,7 +41,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/s/sa0.wsp");
+    String_SetChars(& Path, "/tmp/en.wav");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * 8);
     //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
@@ -74,8 +74,8 @@ int main()
     
     RCall(HNMIterlyzer, SetHopSize)(& HNMIter, 256);
     RCall(HNMIterlyzer, SetWave)(& HNMIter, & XWave);
-    RCall(HNMIterlyzer, SetPosition)(& HNMIter, 20000);
-    RCall(HNMIterlyzer, PreAnalysisTo)(& HNMIter, 25000);
+    RCall(HNMIterlyzer, SetPosition)(& HNMIter, VOT + 1000);
+    RCall(HNMIterlyzer, PreAnalysisTo)(& HNMIter, VOT + 5000);
     RCall(HNMIterlyzer, SetUpperFreq)(& HNMIter, 10000);
     printf("F0: %f\n", HNMIter._Base.InitF0);
     
@@ -140,18 +140,20 @@ int main()
     }
     Last = HNMSizer.PulseList.Frames[i * 8 - 1];
     
-    for(j = 0; j < HNMIter.PhseList.Frames[2].Size; j ++)
-        HNMIter.PhseList.Frames[2].Data[j] = 2.0 * M_PI
-            + /*(float)rand() / RAND_MAX **/(float) j / 2.0;
+    int f = i - 10;
+    
+    for(j = 0; j < HNMIter.PhseList.Frames[f].Size; j ++)
+        HNMIter.PhseList.Frames[f].Data[j] = 2.0 * M_PI;
+            + /*(float)rand() / RAND_MAX * 2.0 * M_PI*/ (float) j / 2.0 * 0;
     
     RCall(HNMItersizer, SetHopSize)(& HNMSizer, 256);
     RCall(HNMItersizer, SetWave)(& HNMSizer, & YWave);
-    RCall(HNMItersizer, SetPosition)(& HNMSizer, HNMIter.PulseList.Frames[2]);
+    RCall(HNMItersizer, SetPosition)(& HNMSizer, HNMIter.PulseList.Frames[f]);
     
     RCall(HNMItersizer, SetInitPhase)(& HNMSizer,
-        & HNMIter.PhseList.Frames[2]);
+        & HNMIter.PhseList.Frames[f]);
     
-    printf("%d %d\n", Last - 1000, HNMIter.PulseList.Frames[2]);
+    printf("%d %d\n", Last - 1000, HNMIter.PulseList.Frames[f]);
     
     RCall(HNMItersizer, PrevTo    )(& HNMSizer, 0);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 1000);

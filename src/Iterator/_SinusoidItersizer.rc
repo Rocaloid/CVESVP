@@ -314,9 +314,6 @@ RTMethod(static void, CSVP_SinusoidItersizer, _GenPhase, _DataFrame* Dest,
         F = Sinu -> Freq[i];
         Dest -> Data[i] = InitPhse -> Data[i] + 2.0 * M_PI * F * l + 2.0 * M_PI;
     }
-    if(Pos > 35000 && Pos < 40000)
-        printf("Pos: %.1f, DPos: %d, F01: %f, F02: %f\n", Pos, DPos, Sinu -> Freq[0],
-            This -> SinuList.Frames[DIndex + 1].Freq[0]);
 }
 
 RTMethod(static void, CSVP_SinusoidItersizer, _UnwrapPhase, _DataFrame* Dest,
@@ -329,7 +326,8 @@ RTMethod(static void, CSVP_SinusoidItersizer, _UnwrapPhase, _DataFrame* Dest,
     for(i = 0; i < Dest -> Size; i ++)
     {
         _T1 Phi = Sorc -> Data[i] / 2.0 / M_PI
-                + (SFreq[i] * t + (DFreq[i] - SFreq[i]) / 2.0 * t * t) * Direction
+                + (SFreq[i] * t + (DFreq[i] - SFreq[i]) / 2.0 * t * t)
+                * Direction
                 - Dest -> Data[i] / 2.0 / M_PI;
         Dest -> Data[i] += round(Phi) * 2.0 * M_PI;
     }
@@ -410,6 +408,7 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
                            * RCall(RFNL_Interp_Linear_Gnrc, _T1)
                                  (LAmpl[k], HAmpl[k], Ratio);
                 }
+                
                 Data[n] = Accum;
             }
             /*
@@ -419,7 +418,6 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
             _SynthesisCycle((n = LPos; n < HPos; n ++), _P1, _P2, After);
         #undef  _P1
         #undef  _P2*/
-            
         }else
         {
             RCall(_RTClassName, _UnwrapPhase)(This, & TempPhse,

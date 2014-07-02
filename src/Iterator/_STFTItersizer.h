@@ -11,6 +11,7 @@ RClass(_RTClassName)
     int HopSize;
     _List_Spectrum SpecList;
     _List_Int PulseList;
+    char UseWindow;
     
     //Private
     void* Wave;

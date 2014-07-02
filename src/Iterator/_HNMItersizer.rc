@@ -42,6 +42,7 @@ RTMethod(void, CSVP_HNMItersizer, CtorSize, int Size)
     else
         RCall(_STFTItersizer, CtorSize)(This -> SubsizerF, Size);
     
+    This -> SubsizerF -> UseWindow = 1;
     RInit(_RTClassName);
 }
 
