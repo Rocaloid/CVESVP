@@ -14,6 +14,9 @@
 #define Wave CDSP2_Wave_Float
 #define IWave CDSP2_IWave_Float
 
+#define Stretch 5
+#define FFTSIZE 128
+
 int main()
 {
     Sinusoid SinFrame;
@@ -41,9 +44,9 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/en.wav");
+    String_SetChars(& Path, "/tmp/p/po-0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
-    RCall(Wave, Resize)(& YWave, XWave.Size * 8);
+    RCall(Wave, Resize)(& YWave, XWave.Size * Stretch);
     //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
     //RCall(Sinusoid, ToReal)(& SinFrame, X, 44100 * 5, 44100);
     //CDSP2_VCMul_Float(X, X, 0.05, 44100 * 5);
@@ -55,24 +58,11 @@ int main()
     int VOT = CSVP_VOTFromWave_Float(& XWave, 0, XWave.Size / 2);
     printf("VOT: %d\n", VOT);
     
-    SinusoidIterlyzer SinuIter;
-    RCall(SinusoidIterlyzer, CtorSize)(& SinuIter, 2048);
-    SinuIter.GenPhase = 1;
-    
-    RCall(SinusoidIterlyzer, SetHopSize)(& SinuIter, 256);
-    RCall(SinusoidIterlyzer, SetWave)(& SinuIter, & XWave);
-    RCall(SinusoidIterlyzer, SetPosition)(& SinuIter, 20000);
-    //RCall(SinusoidIterlyzer, PreAnalysisTo)(& SinuIter, 20000);
-    
-    //RCall(SinusoidIterlyzer, PrevTo)(& SinuIter, VOT);
-    //RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, 20000);
-    //RCall(SinusoidIterlyzer, IterNextTo)(& SinuIter, XWave.Size - 2000);
-    
     HNMIterlyzer HNMIter;
     RCall(HNMIterlyzer, CtorSize)(& HNMIter, 2048);
     HNMIter.GenPhase = 1;
     
-    RCall(HNMIterlyzer, SetHopSize)(& HNMIter, 256);
+    RCall(HNMIterlyzer, SetHopSize)(& HNMIter, FFTSIZE);
     RCall(HNMIterlyzer, SetWave)(& HNMIter, & XWave);
     RCall(HNMIterlyzer, SetPosition)(& HNMIter, VOT + 1000);
     RCall(HNMIterlyzer, PreAnalysisTo)(& HNMIter, VOT + 5000);
@@ -81,72 +71,32 @@ int main()
     
     RCall(HNMIterlyzer, PrevTo)(& HNMIter, VOT);
     RCall(HNMIterlyzer, IterNextTo)(& HNMIter, XWave.Size - 510);
-    /*
-    for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
-    {
-        int j;
-        printf("Frame %d at %d:\n", i, SinuIter.PulseList.Frames[i]);
-        Sinusoid* Sinu = & SinuIter.SinuList.Frames[i];
-        for(j = 0; j <= Sinu -> Freq_Index; j ++)
-            printf("  %dth Harmonic, F = %fHz, A = %f.\n", j + 1,
-                Sinu -> Freq[j], Sinu -> Ampl[j]);
-    }*/
     
-    #define GenHNM
-    
-    SinusoidItersizer SinuSizer;
-    RCall(SinusoidItersizer, Ctor)(& SinuSizer);
     HNMItersizer HNMSizer;
     RCall(HNMItersizer, CtorSize)(& HNMSizer, 2048);
-    
-    #ifndef GenHNM
-    /*
-    CSVP_List_Int_From(& SinuSizer.PulseList, & SinuIter.PulseList);
-    CSVP_List_Sinusoid_Float_From(& SinuSizer.SinuList, & SinuIter.SinuList);
-    */
-    int Offset = SinuIter.PulseList.Frames[0];
-    int Last;
-    for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
-    {
-        SinuIter.PulseList.Frames[i] -= Offset;
-    }
-    for(i = 0; i <= SinuIter.PulseList.Frames_Index; i ++)
-    {
-        RCall(SinusoidItersizer, Add)(& SinuSizer,
-            & SinuIter.SinuList.Frames[i], SinuIter.PulseList.Frames[i] * 3);
-    }
-    Last = SinuIter.PulseList.Frames[i - 1] * 3;
-    
-    RCall(SinusoidItersizer, SetWave)(& SinuSizer, & YWave);
-    RCall(SinusoidItersizer, SetPosition)(& SinuSizer, 40000);
-    
-    RCall(SinusoidItersizer, PrevTo)(& SinuSizer, 256);
-    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, XWave.Size - 1000);
-    RCall(SinusoidItersizer, IterNextTo)(& SinuSizer, Last - 1000);
-    #else
-    
+        
     int Offset = HNMIter.PulseList.Frames[0];
     int Last;
     int j;
     for(i = 0; i <= HNMIter.PulseList.Frames_Index; i ++)
     {
         //HNMIter.PulseList.Frames[i] -= Offset;
-        for(j = 0; j < 8; j ++)
+        for(j = 0; j < Stretch; j ++)
         {
             RCall(HNMItersizer, Add)(& HNMSizer, & HNMIter.HNMList.Frames[i],
                 Offset);
-            Offset += 256;
+            Offset += FFTSIZE;
         }
     }
-    Last = HNMSizer.PulseList.Frames[i * 8 - 1];
+    Last = HNMSizer.PulseList.Frames[i * Stretch - 1];
     
     int f = i - 10;
     
     for(j = 0; j < HNMIter.PhseList.Frames[f].Size; j ++)
-        HNMIter.PhseList.Frames[f].Data[j] = 2.0 * M_PI;
-            + /*(float)rand() / RAND_MAX * 2.0 * M_PI*/ (float) j / 2.0 * 0;
+        HNMIter.PhseList.Frames[f].Data[j] = 2.0 * M_PI
+            + (float)rand() / RAND_MAX * (float) j;
     
-    RCall(HNMItersizer, SetHopSize)(& HNMSizer, 256);
+    RCall(HNMItersizer, SetHopSize)(& HNMSizer, FFTSIZE);
     RCall(HNMItersizer, SetWave)(& HNMSizer, & YWave);
     RCall(HNMItersizer, SetPosition)(& HNMSizer, HNMIter.PulseList.Frames[f]);
     
@@ -158,15 +108,12 @@ int main()
     RCall(HNMItersizer, PrevTo    )(& HNMSizer, 0);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 1000);
     
-    #endif
-    
     String_SetChars(& Path, "/tmp/out.wav");
     RCall(Wave, ToFile)(& YWave, & Path);
     
     RFree(Win);
     RDelete(& Path);
-    RDelete(& SinFrame, & SinSpec, & XWave, & YWave, & SinuIter, & SinuSizer,
-        & HNMIter, & HNMSizer);
+    RDelete(& SinFrame, & SinSpec, & XWave, & YWave, & HNMIter, & HNMSizer);
     return 0;
 }
 

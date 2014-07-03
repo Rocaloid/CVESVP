@@ -131,76 +131,50 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
     Dest[3] = Mul * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
         (Sorc1[k + 3], Sorc2[k + 3], Ratio); \
 
-#define _IfBefore_Before(Stat) Stat
-#define _IfBefore_After(Stat)
-#define _IfBefore(Cond, Stat) _C1(_IfBefore_, Cond)(Stat)
-#define _IfAfter_After(Stat) Stat
-#define _IfAfter_Before(Stat)
-#define _IfAfter(Cond, Stat) _C1(_IfAfter_, Cond)(Stat)
+#define _IfFrwd_Frwd(Stat) Stat
+#define _IfFrwd_Bkwd(Stat)
+#define _IfBkwd_Bkwd(Stat) Stat
+#define _IfBkwd_Frwd(Stat)
 
-//Notice: PCos accepts only positive numbers.
-#define _SynthesisCycle(ForCore, PhaseCore1, PhaseCore2, Cond) do { \
+#define _IfFrwd(Cond, Stat) _C1(_IfFrwd_, Cond)(Stat)
+#define _IfBkwd(Cond, Stat) _C1(_IfBkwd_, Cond)(Stat)
+
+//Notice: PCos accepts only positive numbers._T1 Accum = 0;
+#define _SynthesisCycle(ForCore, Cond) do { \
     /*For each sample.*/ \
     for ForCore \
     { \
-        _T1 Ratio = (_T1)(n - LPos) / HopSize; \
+       _T1 Ratio = (_T1) _IfFrwd(Cond, (n - LPos)) \
+                         _IfBkwd(Cond, (HPos - n)) / (_T1)HopSize; \
         _T1 Accum = 0; \
         \
         _T1 X[4], Y[4]; \
-        _T1 Delta[4], Ampl[4]; \
+        _T1 Ampl[4]; \
         for(k = 0; k < LSinu -> Size - 3; k += 4) \
         { \
         \
-            _Pk4InterpMul(Delta, LFreq, HFreq, Omega); \
-            _Pk4InterpMul(Ampl, LAmpl, HAmpl, 1.0); \
+            _Pk4InterpMul(X, Phse, TempPhse.Data, 1.0); \
+            _IfFrwd(Cond, _Pk4InterpMul(Ampl, LAmpl, HAmpl, 1.0)); \
+            _IfBkwd(Cond, _Pk4InterpMul(Ampl, HAmpl, LAmpl, 1.0)); \
             \
-            X[0] = Phse[k + 0]; \
-            X[1] = Phse[k + 1]; \
-            X[2] = Phse[k + 2]; \
-            X[3] = Phse[k + 3]; \
-            \
-            _IfBefore \
-            ( \
-                Cond, \
-                PhaseCore1(0); \
-                PhaseCore1(1); \
-                PhaseCore1(2); \
-                PhaseCore1(3) \
-            ); \
-            \
-            _IfBefore(Cond, RCall(RFNL_Pk4Cos_Gnrc, _T1)(Y, X)); \
-            _IfAfter(Cond, RCall(RFNL_Pk4PCos_Gnrc, _T1)(Y, X)); \
+            _IfFrwd(Cond, RCall(RFNL_Pk4PCos_Gnrc, _T1)(Y, X)); \
+            _IfBkwd(Cond, RCall(RFNL_Pk4Cos_Gnrc,  _T1)(Y, X)); \
             \
             Accum += Y[0] * Ampl[0]; \
             Accum += Y[1] * Ampl[1]; \
             Accum += Y[2] * Ampl[2]; \
             Accum += Y[3] * Ampl[3]; \
             \
-            _IfAfter \
-            ( \
-                Cond, \
-                PhaseCore1(0); \
-                PhaseCore1(1); \
-                PhaseCore1(2); \
-                PhaseCore1(3) \
-            ); \
         } \
         for(; k < LSinu -> Size; k ++) \
         { \
-            _IfBefore \
-            ( \
-                Cond, \
-                PhaseCore2() \
-            ); \
-            Accum += _IfBefore(Cond, RCall(RFNL_Cos_Gnrc, _T1)(Phse[k])) \
-                     _IfAfter(Cond, RCall(RFNL_PCos_Gnrc, _T1)(Phse[k])) * \
+            Accum += _IfFrwd(Cond, RCall(RFNL_PCos_Gnrc, _T1)) \
+                     _IfBkwd(Cond, RCall(RFNL_Cos_Gnrc,  _T1))( \
                 RCall(RFNL_Interp_Linear_Gnrc, _T1) \
-                    (LAmpl[k], HAmpl[k], Ratio); \
-            _IfAfter \
-            ( \
-                Cond, \
-                PhaseCore2() \
-            ); \
+                    (Phse[k], TempPhse.Data[k], Ratio)) * \
+                RCall(RFNL_Interp_Linear_Gnrc, _T1) \
+                    _IfFrwd(Cond, (LAmpl[k], HAmpl[k], Ratio)) \
+                    _IfBkwd(Cond, (HAmpl[k], LAmpl[k], Ratio)); \
         } \
         Data[n] = Accum; \
     } \
@@ -397,52 +371,13 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
             RCall(_RTClassName, _UnwrapPhase)(This, & TempPhse,
                 & This -> LastPhse, LFreq, HFreq, HopSize, Direction);
             
-            for(n = LPos; n < HPos; n ++)
-            {
-                _T1 Accum = 0;
-                _T1 Ratio = (_T1)(n - LPos) / (_T1)HopSize;
-                
-                for(k = 0; k < LSinu -> Size; k ++)
-                {
-                    Accum += cos(Phse[k] + (TempPhse.Data[k] - Phse[k]) * Ratio)
-                           * RCall(RFNL_Interp_Linear_Gnrc, _T1)
-                                 (LAmpl[k], HAmpl[k], Ratio);
-                }
-                
-                Data[n] = Accum;
-            }
-            /*
-        #define _P1(n) Phse[k + n] += Delta[n]
-        #define _P2() Phse[k] += Omega * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
-            (LFreq[k], HFreq[k], Ratio);
-            _SynthesisCycle((n = LPos; n < HPos; n ++), _P1, _P2, After);
-        #undef  _P1
-        #undef  _P2*/
+            _SynthesisCycle((n = LPos; n < HPos; n ++), Frwd);
         }else
         {
             RCall(_RTClassName, _UnwrapPhase)(This, & TempPhse,
                 & This -> LastPhse, HFreq, LFreq, HopSize, Direction);
             
-            for(n = HPos - 1; n >= LPos; n --)
-            {
-                _T1 Accum = 0;
-                _T1 Ratio = (_T1)(HPos - n) / (_T1)HopSize;
-                
-                for(k = 0; k < LSinu -> Size; k ++)
-                {
-                    Accum += cos(Phse[k] + (TempPhse.Data[k] - Phse[k]) * Ratio)
-                           * RCall(RFNL_Interp_Linear_Gnrc, _T1)
-                                 (HAmpl[k], LAmpl[k], Ratio);
-                }
-                Data[n] = Accum;
-            }
-            /*
-        #define _P1(n) Phse[k + n] -= Delta[n]
-        #define _P2() Phse[k] -= Omega * RCall(RFNL_Interp_Linear_Gnrc, _T1) \
-            (LFreq[k], HFreq[k], Ratio);
-            _SynthesisCycle((n = HPos - 1; n >= LPos; n --), _P1, _P2, Before);
-        #undef  _P1
-        #undef  _P2*/
+            _SynthesisCycle((n = HPos - 1; n >= LPos; n --), Bkwd);
         }
         RCall(_DataFrame, From)(& This -> LastPhse, & TempPhse);
     }

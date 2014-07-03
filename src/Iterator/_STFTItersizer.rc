@@ -126,7 +126,6 @@ RTMethod(static void, CSVP_STFTItersizer, _RenderRange, int LIndex, int HIndex)
     LIndex = LIndex < 0 ? 0 : LIndex;
     HIndex = HIndex > This -> PulseList.Frames_Index ?
         This -> PulseList.Frames_Index : HIndex;
-
     for(i = LIndex; i <= HIndex; i ++)
     {
         int p = This -> PulseList.Frames[i];
