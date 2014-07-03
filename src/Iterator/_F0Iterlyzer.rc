@@ -1,0 +1,104 @@
+#define _PMatch _C(PMatch_, _T1, _, _T1)
+#define _List_Int CSVP_List_Int
+
+RCtor(_RTClassName)
+{
+    RCall(_PMatch, Ctor)(& This -> F0List);
+    
+    This -> Wave = NULL;
+    This -> HopSize = 256;
+    This -> LastPosition = 0;
+    This -> RefF0 = 0;
+    
+    RInit(_RTClassName);
+}
+
+RDtor(_RTClassName)
+{
+    RCall(_PMatch, Dtor)(& This -> F0List);
+}
+
+RTMethod(void, CSVP_F0Iterlyzer, From, _RTClassName* Sorc)
+{
+    RCall(_PMatch, From)(& This -> F0List, & Sorc -> F0List);
+    
+    This -> Wave = Sorc -> Wave;
+    This -> HopSize = Sorc -> HopSize;
+    This -> LastPosition = Sorc -> LastPosition;
+    This -> RefF0 = Sorc -> RefF0;
+}
+
+RTMethod(void, CSVP_F0Iterlyzer, Clear)
+{
+    RCall(_PMatch, Clear)(& This -> F0List);
+}
+
+RTMethod(void, CSVP_F0Iterlyzer, SetWave, void* Sorc)
+{
+    This -> Wave = Sorc;
+}
+
+RTMethod(void, CSVP_F0Iterlyzer, SetHopSize, int HopSize)
+{
+    This -> HopSize = HopSize;
+}
+
+RTMethod(void, CSVP_F0Iterlyzer, SetPosition, int Position)
+{
+    This -> LastPosition = Position;
+}
+
+RTMethod(int , CSVP_F0Iterlyzer, GetPosition)
+{
+    return This -> LastPosition;
+}
+
+RTMethod(void, CSVP_F0Iterlyzer, SetRefFreq, _T1 RefF0)
+{
+    This -> RefF0 = RefF0;
+}
+
+RTMethod(int , CSVP_F0Iterlyzer, PreAnalysisTo, int Position)
+{
+    _T1 Candidate = RCall(CSVP_SecureF0FromWave, _T1)(This -> Wave,
+        This -> LastPosition, This -> LastPosition, Position, 50, 1500);
+    if(Candidate < 50)
+        return 1;
+    This -> RefF0 = Candidate;
+    return 0;
+}
+
+RTMethod(void, CSVP_F0Iterlyzer, _IterProcess)
+{
+    _T1 Candidate = RCall(CSVP_F0FromWave, _T1)(This -> Wave, 
+        This -> LastPosition, This -> RefF0 * 0.7, This -> RefF0 * 1.4);
+    if(abs(Candidate - This -> RefF0 < This -> RefF0 * 0.2))
+    {
+        RCall(_PMatch, AddPair)(& This -> F0List, This -> LastPosition,
+            Candidate);
+        This -> RefF0 = Candidate;
+    }
+}
+
+RTMethod(int , CSVP_F0Iterlyzer, IterNextTo, int Position)
+{
+    while(This -> LastPosition < Position)
+    {
+        RCall(_RTClassName, _IterProcess)(This);
+        This -> LastPosition += This -> HopSize;
+    }
+    return 0;
+}
+
+RTMethod(int , CSVP_F0Iterlyzer, IterPrevTo, int Position)
+{
+    while(This -> LastPosition > Position)
+    {
+        This -> LastPosition -= This -> HopSize;
+        RCall(_RTClassName, _IterProcess)(This);
+    }
+}
+
+#undef  _List_Int
+#undef  _Match
+

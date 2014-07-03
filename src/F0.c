@@ -3,7 +3,7 @@
 
 #if 0
 #include "_F0.rc"
-#include "Iterator/_F0Iterator.rc"
+#include "Iterator/_F0Iterlyzer.rc"
 #endif
 
 #ifdef __CSVP_Install
@@ -30,7 +30,7 @@
 #define _RTAddress "Iterator/_F0Iterlyzer.rc"
 #endif
 
-#define _ClassName _F0Iterlyzer
+#define _ClassName CSVP_F0Iterlyzer_
 #define _Attr 1
 
 #define _T1 Float

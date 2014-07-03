@@ -35,7 +35,7 @@
 #define _RTAddress "Iterator/_F0Iterlyzer.h"
 #endif
 
-#define _ClassName _F0Iterlyzer
+#define _ClassName CSVP_F0Iterlyzer_
 #define _Attr 1
 
 #define _T1 Float
