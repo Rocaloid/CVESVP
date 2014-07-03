@@ -2,6 +2,7 @@
 #include "F0.h"
 #include <RUtil2.h>
 #include <RFNL.h>
+#include <stdlib.h>
 
 #if 0
 #include "Iterator/_SinusoidalBase.rc"

@@ -15,7 +15,8 @@ Todo & Plan List
 - [x] Implement `SinusoidIterlyzer`(in: `Wave`, out: `List_Sinusoid`)
 - [x] Implement `SinusoidItersizer`(in: `Position` `Sinusoid`, out: `Wave`)
 - [x] Implement `HNMIterlyzer`(in: `Wave`, out: `List_HNMFrame`)
-- [ ] Implement `HNMItersizer` based on `SinusoidItersizer`(in: `Position` `HNMFrame`, out: `Wave`)
+- [x] Glottal pulse & phase reconstruction in `SinusoidItersizer`
+- [x] Implement `HNMItersizer` based on `SinusoidItersizer`(in: `Position` `HNMFrame`, out: `Wave`)
 - [ ] Implement `F0Iterlyzer`(in: `Wave`, out: `Real`)
 - [ ] Default analysis window for `_F0.rc`
 - [ ] Implement `PulseIterlyzer`(in: `Wave`, out: `PulseList`)

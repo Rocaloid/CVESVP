@@ -17,6 +17,7 @@ RCtor(_RTClassName)
 {
     RCall(_STFTIterlyzer, Ctor)((_STFTIterlyzer*)This);
     This -> WinFactor = 0;
+    This -> UseWindow = 0;
     RInit(_RTClassName);
 }
 
@@ -29,6 +30,7 @@ RTMethod(void, CSVP_STFTItersizer, CtorSize, int FrameSize)
 {
     RCall(_STFTIterlyzer, CtorSize)((_STFTIterlyzer*)This, FrameSize);
     This -> WinFactor = 0;
+    This -> UseWindow = 0;
 }
 
 RTMethod(void, CSVP_STFTItersizer, Resize, int FrameSize)
@@ -40,6 +42,7 @@ RTMethod(void, CSVP_STFTItersizer, From, _RTClassName* Sorc)
 {
     RCall(_STFTIterlyzer, From)((_STFTIterlyzer*)This, Sorc);
     This -> WinFactor = Sorc -> WinFactor;
+    This -> UseWindow = Sorc -> UseWindow;
 }
 
 RTMethod(void, CSVP_STFTItersizer, FromIterlyzer, _STFTIterlyzer* Sorc)
@@ -123,13 +126,17 @@ RTMethod(static void, CSVP_STFTItersizer, _RenderRange, int LIndex, int HIndex)
     LIndex = LIndex < 0 ? 0 : LIndex;
     HIndex = HIndex > This -> PulseList.Frames_Index ?
         This -> PulseList.Frames_Index : HIndex;
-
     for(i = LIndex; i <= HIndex; i ++)
     {
         int p = This -> PulseList.Frames[i];
         RCall(_List_Spectrum, Fetch)(& This -> SpecList, & TmpSpec, i);
         RCall(_Spectrum, ToReal)(& TmpSpec, Tmp);
         RCall(CDSP2_VCMul, _T1)(Tmp, Tmp, This -> WinFactor, FrameSize);
+        if(This -> UseWindow)
+        {
+            RCall(CDSP2_VMul, _T1)(Tmp, Tmp, ((_Wave*)This -> Wave) -> Window,
+                FrameSize);
+        }
         RCall(_IWave, Add)(This -> Wave, Tmp, p - FrameSize / 2, FrameSize);
     }
     RCall(_Spectrum, Dtor)(& TmpSpec);
