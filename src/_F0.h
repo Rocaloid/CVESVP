@@ -1,4 +1,5 @@
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
+#define _PMatch _C(PMatch_, _T1, _, _T1)
 
 RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq);
 RTFunc(_T1, CSVP_F0FromSpectrum, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq);
@@ -18,5 +19,8 @@ RTFunc(int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition, int RPosition,
 RTFunc(_T1, CSVP_SecureF0FromWave, void* Sorc, int Center, 
     int LPosition, int RPosition, int MinFreq, int MaxFreq);
 
+RTFunc(void, CSVP_F0PostProcess, _PMatch* Dest, int AnaSize, _T1 Variance);
+
 #undef  _Spectrum
+#undef  _PMatch
 

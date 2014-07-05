@@ -88,14 +88,14 @@ RTFunc(int, CSVP_OnsetFromWave, void* Sorc, _T1 Threshold, int LBound,
     int RBound)
 {
     int i;
-    
     _T1* WPtr = RCall(_Wave, GetUnsafePtr)(Sorc);
-    for(i = LBound; i < RBound + 1; i ++)
+    
+    for(i = LBound; i < RBound; i ++)
     {
         if(WPtr[i] > Threshold)
             break;
     }
-    if(i > RBound) return - 1;
+    if(i >= RBound) return - 1;
     
     return i;
 }

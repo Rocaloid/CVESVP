@@ -2,6 +2,7 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
 #define F2B(F) (F * FFTSize / SampleRate)
 #define B2F(B) (((_T1)B) * ((_T1)SampleRate) / FFTSize)
+#define _PMatch _C(PMatch_, _T1, _, _T1)
 
 //Wavetave/src/Plugin_F0Marking.m
 RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
@@ -21,7 +22,9 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
     _T1 MaxDiff = 0;
     _T1 LeftMax = 0;
     
-    RCall(CDSP2_VCMax, _T1)(Magn, Magn, - 3.0, NewSorc.Size / 2);
+    //Standard size is 2048.
+    RCall(CDSP2_VCAdd, _T1)(Magn, Magn, log(2048.0 / FFTSize), FFTSize / 2);
+    RCall(CDSP2_VCMax, _T1)(Magn, Magn, - 1.0, FFTSize / 2);
     
     int Right = F2B(MinFreq) < 2 ? 2 : F2B(MinFreq);
     for(i = Right; i < UBound; i ++)
@@ -39,6 +42,9 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
             }
         }
     }
+    
+    if(F0 <= F2B(MinFreq) + 1 || F0 >= UBound)
+        F0 = -1;
     
     RCall(_Spectrum, Dtor)(& NewSorc);
     return F0;
@@ -177,6 +183,46 @@ RTFunc(_T1, CSVP_SecureF0FromWave, void* Sorc, int Center,
     return RCall(CSVP_F0FromWave, _T1)(Sorc, Center, FMed * 0.8, FMed * 1.2);
 }
 
+RTFunc(_T1, _CSVP_Mode, _T1* Sorc, int Num)
+{
+    _T1* Temp = RCall(RAlloc, _T1)(Num);
+    RCall(Sort_Inc, _T1)(Temp, Sorc, Num);
+    _T1 Ret = Temp[Num / 2];
+    RFree(Temp);
+    return Ret;
+}
+
+RTFunc(void, CSVP_F0PostProcess, _PMatch* Dest, int AnaSize, _T1 Variance)
+{
+    int i, j;
+    if(Dest -> X_Index < 5) return;
+    
+    Dest -> Y[0] = Dest -> Y[1];
+    
+    Array_Gtor(int, RmList);
+    for(i = 0; i < Dest -> X_Index; i ++)
+    {
+        int Center = Dest -> X[i];
+        int LIndex = RCall(_PMatch, Query)(Dest, Center - AnaSize).LowerIndex;
+        int HIndex = RCall(_PMatch, Query)(Dest, Center + AnaSize).LowerIndex;
+        
+        _T1 Mode = RCall(_CSVP_Mode, _T1)(& Dest -> Y[LIndex],
+           HIndex - LIndex + 1);
+        if(fabs(Dest -> Y[i] - Mode) > Mode * Variance)
+            Array_Push(int, RmList, i);
+    }
+    int RmAcc = 0;
+    for(i = 0; i <= RmList_Index; i ++)
+    {
+        Array_Remove(_T1, Dest -> X, RmList[i] - RmAcc);
+        Array_Remove(_T1, Dest -> Y, RmList[i] - RmAcc);
+        RmAcc ++;
+    }
+    Array_Dtor(int, RmList);
+}
+
 #undef  _Spectrum
 #undef  _Wave
+#undef  _PMatch
+
 

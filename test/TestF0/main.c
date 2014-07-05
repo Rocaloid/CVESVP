@@ -13,38 +13,38 @@ int main()
     CDSP2_GenHanning_Float(wind, 2048);
     CDSP2_Wave_Float_SetWindow(& MyWave, wind, 2048);
     
-    String_FromChars(Path, "/tmp/yiyou.wav");
+    String_FromChars(Path, "/tmp/burn.wav");
     
     CDSP2_Wave_Float_FromFile(& MyWave, & Path);
     
     CSVP_F0Iterlyzer_Float F0Iter;
     CSVP_F0Iterlyzer_Float_Ctor(& F0Iter);
+    F0Iter.Option.Adlib = 1;
+    F0Iter.Option.LFreq = 100;
+    F0Iter.Option.HFreq = 1000;
+    F0Iter.Option.Threshold = 0.01;
     
-    int VOT = CSVP_VOTFromWave_Float(& MyWave, 0, MyWave.Size / 2);
-    
-    printf("%d\n", VOT);
+    int Onset = CSVP_OnsetFromWave_Float(& MyWave, 0.0005, 0, MyWave.Size);
+    int VOT = CSVP_VOTFromWave_Float(& MyWave, Onset, Onset + 10000);
     
     CSVP_F0Iterlyzer_Float_SetHopSize(& F0Iter, 256);
     CSVP_F0Iterlyzer_Float_SetWave(& F0Iter, & MyWave);
     CSVP_F0Iterlyzer_Float_SetPosition(& F0Iter, VOT + 2000);
     CSVP_F0Iterlyzer_Float_PreAnalysisTo(& F0Iter, VOT + 10000);
+    
+    float RefF0 = F0Iter.RefF0;
     CSVP_F0Iterlyzer_Float_IterPrevTo(& F0Iter, 0);
     CSVP_F0Iterlyzer_Float_SetPosition(& F0Iter, VOT + 2000);
+    F0Iter.RefF0 = RefF0;
     CSVP_F0Iterlyzer_Float_IterNextTo(& F0Iter, MyWave.Size - 3000);
+    CSVP_F0PostProcess_Float(& F0Iter.F0List, 4000, 0.05);
     
     int i;
-    for(i = 0; i < 20000; i += 100)
-        printf("%f\n", PMatch_Float_Float_Query(& F0Iter.F0List, i).Y);
+    for(i = 0; i <= F0Iter.F0List.X_Index; i ++)
+        printf("%d, %f\n", (int)F0Iter.F0List.X[i], F0Iter.F0List.Y[i]);
     /*
-    int i;
-    float F0 = 0;
-    for(i = 0; i < MyWave.Size; i += 500)
-    {
-        float tmp = CSVP_F0FromWave_Float(& MyWave, i, 100, 1500);
-        printf("%f\n", tmp);
-        F0 = tmp;
-        //printf("%f at %f\n", tmp, (float)i / 48000);
-    }
+    for(i = 0; i < MyWave.Size - 3000; i += 100)
+        printf("%f\n", PMatch_Float_Float_Query(& F0Iter.F0List, i).Y);
     */
     RDelete(& MyWave, & Path, & F0Iter);
     RFree(wind);

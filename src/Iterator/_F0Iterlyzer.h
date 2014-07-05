@@ -7,6 +7,7 @@ RClass(_RTClassName)
     
     //Public
     _PMatch F0List;
+    CSVP_F0Option Option;
     
     //Private
     void* Wave;

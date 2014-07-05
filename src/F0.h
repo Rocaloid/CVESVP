@@ -4,6 +4,16 @@
 #include <CVEDSP2.h>
 #include "Misc/List_Int.h"
 
+typedef struct
+{
+    float HFreq;
+    float LFreq;
+    float Variance;
+    float Threshold;
+    
+    char Adlib;
+} CSVP_F0Option;
+
 #include <RUtil2.h>
 
 #if 0
