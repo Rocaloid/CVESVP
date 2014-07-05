@@ -22,8 +22,10 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
     _T1 MaxDiff = 0;
     _T1 LeftMax = 0;
     
+    _T1* OrigMagn = RCall(RAlloc, _T1)(FFTSize / 2);
     //Standard size is 2048.
     RCall(CDSP2_VCAdd, _T1)(Magn, Magn, log(2048.0 / FFTSize), FFTSize / 2);
+    RCall(CDSP2_VCopy, _T1)(OrigMagn, Magn, FFTSize / 2);
     RCall(CDSP2_VCMax, _T1)(Magn, Magn, - 1.0, FFTSize / 2);
     
     int Right = F2B(MinFreq) < 2 ? 2 : F2B(MinFreq);
@@ -46,6 +48,7 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
     if(F0 <= F2B(MinFreq) + 1 || F0 >= UBound)
         F0 = -1;
     
+    RFree(OrigMagn);
     RCall(_Spectrum, Dtor)(& NewSorc);
     return F0;
 }
@@ -142,7 +145,6 @@ RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position,
         Bin);
     
     RDelete(& Spec1, & Spec2);
-    
     return Ret;
 }
 
@@ -208,7 +210,7 @@ RTFunc(void, CSVP_F0PostProcess, _PMatch* Dest, int AnaSize, _T1 Variance)
         
         _T1 Mode = RCall(_CSVP_Mode, _T1)(& Dest -> Y[LIndex],
            HIndex - LIndex + 1);
-        if(fabs(Dest -> Y[i] - Mode) > Mode * Variance)
+        if(fabs(Dest -> Y[i] - Mode) > Mode * Variance || LIndex == HIndex)
             Array_Push(int, RmList, i);
     }
     int RmAcc = 0;
@@ -224,5 +226,4 @@ RTFunc(void, CSVP_F0PostProcess, _PMatch* Dest, int AnaSize, _T1 Variance)
 #undef  _Spectrum
 #undef  _Wave
 #undef  _PMatch
-
 
