@@ -44,7 +44,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/b/bo-0.wsp");
+    String_SetChars(& Path, "/tmp/t/to-0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch);
     //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);

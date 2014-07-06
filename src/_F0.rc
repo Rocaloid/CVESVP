@@ -4,8 +4,14 @@
 #define B2F(B) (((_T1)B) * ((_T1)SampleRate) / FFTSize)
 #define _PMatch _C(PMatch_, _T1, _, _T1)
 
-//Wavetave/src/Plugin_F0Marking.m
 RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
+{
+    return RCall(CSVP_F0FromSpectrumB_SpecStep, _T1)(Sorc, MinFreq, MaxFreq);
+}
+
+//Wavetave/src/Plugin_F0Marking.m
+RTFunc(_T1, CSVP_F0FromSpectrumB_SpecStep, _Spectrum* Sorc, _T1 MinFreq,
+    _T1 MaxFreq)
 {
     int FFTSize = Sorc -> Size;
     int SampleRate = Sorc -> SampleRate;
@@ -55,6 +61,12 @@ RTFunc(int, CSVP_F0FromSpectrumB, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
 
 RTFunc(_T1, CSVP_F0FromSpectrum, _Spectrum* Sorc, _T1 MinFreq, _T1 MaxFreq)
 {
+    return RCall(CSVP_F0FromSpectrum_SpecStep, _T1)(Sorc, MinFreq, MaxFreq);
+}
+
+RTFunc(_T1, CSVP_F0FromSpectrum_SpecStep, _Spectrum* Sorc, _T1 MinFreq,
+    _T1 MaxFreq)
+{
     int SampleRate = Sorc -> SampleRate;
     return RCall(CSVP_F0FromSpectrumB, _T1)(Sorc, MinFreq, MaxFreq)
         * SampleRate / Sorc -> Size;
@@ -99,7 +111,7 @@ RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,
     return Delta / 2.0 / M_PI * SampleRate / HopSize;
 }
 
-RTFunc(int, CSVP_F0FromWaveB, void* Sorc, int Position,
+RTFunc(static int, CSVP_F0FromWaveB, void* Sorc, int Position,
     int MinFreq, int MaxFreq)
 {
     _Spectrum Spec;
@@ -118,6 +130,13 @@ RTFunc(int, CSVP_F0FromWaveB, void* Sorc, int Position,
 }
 
 RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position,
+    int MinFreq, int MaxFreq)
+{
+    return RCall(CSVP_F0FromWave_SpecStep, _T1)(Sorc, Position, MinFreq, 
+        MaxFreq);
+}
+
+RTFunc(_T1, CSVP_F0FromWave_SpecStep, void* Sorc, int Position,
     int MinFreq, int MaxFreq)
 {
     _Spectrum Spec1, Spec2;
@@ -148,8 +167,8 @@ RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position,
     return Ret;
 }
 
-RTFunc(int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition, int RPosition, 
-    int MinFreq, int MaxFreq)
+RTFunc(static int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition,
+    int RPosition, int MinFreq, int MaxFreq)
 {
     int p = 0;
     int Ret = 1;
@@ -185,7 +204,7 @@ RTFunc(_T1, CSVP_SecureF0FromWave, void* Sorc, int Center,
     return RCall(CSVP_F0FromWave, _T1)(Sorc, Center, FMed * 0.8, FMed * 1.2);
 }
 
-RTFunc(_T1, _CSVP_Mode, _T1* Sorc, int Num)
+RTFunc(static _T1, _CSVP_Mode, _T1* Sorc, int Num)
 {
     _T1* Temp = RCall(RAlloc, _T1)(Num);
     RCall(Sort_Inc, _T1)(Temp, Sorc, Num);

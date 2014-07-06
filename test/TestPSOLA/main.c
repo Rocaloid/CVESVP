@@ -84,7 +84,7 @@ int main()
     #ifdef __WIN32__
     String_SetChars(& Path, "C:\\xxx.wav");
     #else
-    String_SetChars(& Path, "/tmp/t15/zhuang.wav");
+    String_SetChars(& Path, "/tmp/t/te0.wsp");
     #endif
     RCall(Wave, FromFile)(& InWave, & Path);
     
@@ -133,7 +133,7 @@ int main()
     for(i = 1; i <= PSyn.PulseList.Frames_Index; i ++)
     {
         PSyn.PulseList.Frames[i] = PSyn.PulseList.Frames[i - 1] + 
-            (PAna.PulseList.Frames[i] - PAna.PulseList.Frames[i - 1]) * 3;
+            (PAna.PulseList.Frames[i] - PAna.PulseList.Frames[i - 1]) * 0.7;
     }
     
     FWindow_T DyWin;

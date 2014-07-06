@@ -4,6 +4,8 @@
 #include <CVEDSP2.h>
 #include "Misc/List_Int.h"
 
+#define CSVP_F0_SpecStep 0
+
 typedef struct
 {
     float HFreq;
@@ -12,6 +14,7 @@ typedef struct
     float Threshold;
     
     char Adlib;
+    char Method;
 } CSVP_F0Option;
 
 #include <RUtil2.h>
