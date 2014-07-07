@@ -13,6 +13,8 @@ RClass(_RTClassName)
     void* Wave;
     int HopSize;
     int LastPosition;
+    int InitPosition;
+    _T1 InitF0;
     _T1 RefF0;
 };
 
@@ -29,6 +31,7 @@ RTMethod(int , CSVP_F0Iterlyzer, PreAnalysisTo, int Position);
 
 RTMethod(int , CSVP_F0Iterlyzer, IterNextTo, int Position);
 RTMethod(int , CSVP_F0Iterlyzer, IterPrevTo, int Position);
+RTMethod(int , CSVP_F0Iterlyzer, PrevTo, int Position);
 
 #undef  _List_Int
 #undef  _PMatch

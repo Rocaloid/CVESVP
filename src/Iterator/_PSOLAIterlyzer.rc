@@ -5,6 +5,7 @@
 #define _List_Spectrum _C(CSVP_List_Spectrum, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 #define _STFTItersizer _C(CSVP_STFTItersizer, _, _T1)
+#define _PMatch _C(PMatch_, _T1, _, _T1)
 
 #define LPFSIZE CSVP_PSOLAIterlyzer_LPFSTFTSize
 #define LPFHOP  CSVP_PSOLAIterlyzer_LPFHopSize
@@ -14,9 +15,8 @@
     ( \
         if(This -> Wave == NULL) \
             RDebugPrint(_RTClassName, _S(Name) ": require wave."); \
-        if(This -> RefPeriod == 0) \
-            RDebugPrint(_RTClassName, _S(Name) ": require referential " \
-                "frequency."); \
+        if(This -> RefF0 == NULL) \
+            RDebugPrint(_RTClassName, _S(Name) ": require pitch curve."); \
     )
 
 #define _ACMax _C(_CSVP_ACMax, _, _T1)
@@ -43,12 +43,12 @@ RCtor(_RTClassName)
     RCall(_STFTItersizer, SetHopSize)(This -> Subsizer, LPFHOP);
     RCall(_STFTItersizer, SetWave)(This -> Subsizer, This -> LPFWave);
     
+    This -> RefF0 = NULL;
+    This -> Wave = NULL;
+    This -> LPF = 0;
     This -> LastPosition = 0;
     This -> InitPosition = 0;
     This -> PeakSign = 1;
-    This -> RefPeriod = 0;
-    This -> InitPeriod = 0;
-    This -> LPF = 1500;
     This -> Boundary = 0;
     
     RInit(_RTClassName);
@@ -78,7 +78,8 @@ RTMethod(void, CSVP_PSOLAIterlyzer, From, _RTClassName* Sorc)
     This -> LastPosition = Sorc -> LastPosition;
     This -> InitPosition = Sorc -> InitPosition;
     This -> PeakSign = Sorc -> PeakSign;
-    This -> RefPeriod = Sorc -> RefPeriod;
+    This -> Wave = Sorc -> Wave;
+    This -> RefF0 = Sorc -> RefF0;
     This -> LPF = Sorc -> LPF;
 }
 
@@ -114,22 +115,9 @@ RTMethod(int , CSVP_PSOLAIterlyzer, GetPosition)
     return This -> LastPosition;
 }
 
-RTMethod(void, CSVP_PSOLAIterlyzer, SetRefFreq, _T1 Freq)
+RTMethod(void, CSVP_PSOLAIterlyzer, SetPitch, _PMatch* Sorc)
 {
-    CDSP2_If_Debug_Check
-    (
-        if(This -> Wave == NULL)
-            RDebugPrint(_RTClassName, "SetRefFreq: inproper call sequence"
-                "(Wave not set yet).");
-    )
-    This -> RefPeriod = ((_Wave*)This -> Wave) -> SampleRate / Freq;
-    if(This -> LastPosition == This -> InitPosition)
-        This -> InitPeriod = This -> RefPeriod;
-}
-
-RTMethod(void, CSVP_PSOLAIterlyzer, SetLPF, _T1 Freq)
-{
-    This -> LPF = Freq;
+    This -> RefF0 = Sorc;
 }
 
 RTMethod(void, CSVP_PSOLAIterlyzer, SetBound, _T1 Position)
@@ -234,31 +222,14 @@ RTMethod(static int, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
     //Analyze to Position - 512
     while(This -> LastPosition < Position - LPFSIZE)
     {
-        _T1 Freq = SampleRate / This -> RefPeriod;
-        
-        Freq = RCall(CSVP_F0FromWave, _T1)(This -> Wave, 
-            This -> LastPosition + This -> RefPeriod, Freq * 0.7, Freq * 1.4);
-        int NewPeriod = SampleRate / Freq;
-        if(abs(NewPeriod - This -> RefPeriod) < 20)
-        {
-            This -> LPF = Freq * 5.5;
-            This -> RefPeriod = NewPeriod;
-        }
+        _T1 Freq = RCall(_PMatch, Query)(This -> RefF0, This -> LastPosition).Y;
+        int Period = SampleRate / Freq;
+        This -> LPF = Freq * 5.5;
         
         _ACMax AutoCorr = RCall(_RTClassName, _MaxCorrelation)(This,
-            This -> LPFWave, This -> LastPosition, This -> RefPeriod, 1.0, 0.3);
-        int IdealNext = RCall(_RTClassName, _PeakAt)(This, This -> LPFWave,
-            AutoCorr.MaxPos, 10);
-        
-        Freq = SampleRate / (IdealNext - This -> LastPosition);
-        if((! (Freq > 50 && Freq < 1500)) || AutoCorr.Max < 0.01)
-        {
-            Ret = 0;
-            break;
-        }
-        
-        This -> RefPeriod = IdealNext - This -> LastPosition;
-        This -> LastPosition = IdealNext;
+            This -> LPFWave, This -> LastPosition, Period, 1.0, 0.3);
+        This -> LastPosition = RCall(_RTClassName, _PeakAt)(This,
+            This -> LPFWave, AutoCorr.MaxPos, 10);
         
         /*
         printf("%f %f\n", (_T1)IdealNext / SampleRate,
@@ -273,12 +244,7 @@ RTMethod(static int, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
 
 RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
 {
-    CDSP2_If_Debug_Check
-    (
-        if(This -> Wave == NULL)
-            RDebugPrint(_RTClassName, "PreAnalysisTo: inproper call sequence"
-                "(Wave not set yet).");
-    )
+    _CheckMembers(PreAnalysisTo);
     
     int SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     _T1* Hann = RCall(RAlloc, _T1)(2048);
@@ -288,27 +254,13 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
     int  OrigSize = ((_Wave*)This -> Wave) -> WinSize;
     RCall(_IWave, SetWindow)(This -> Wave, Hann, 2048);
     
-    {
-        //Find the fundamental frequency.
-        _T1 Freq = RCall(CSVP_SecureF0FromWave, _T1)(This -> Wave,
-            This -> InitPosition, This -> InitPosition, Position, 50, 1500);
-        
-        //printf("%f\n", Freq);
-        
-        //Error: Improper range.
-        if(! (Freq > 50 && Freq < 2000))
-            goto OnError;
-        
-        This -> InitPeriod = (int)(SampleRate / Freq);
-        This -> RefPeriod = (int)(SampleRate / Freq);
-        
-        //LPF Freq = 4rd harmonic
-        This -> LPF = Freq * 5.5;
-    }
+    _T1 Freq = RCall(_PMatch, Query)(This -> RefF0, This -> InitPosition).Y;
+    This -> LPF = Freq * 5.5;
+    int Period = SampleRate / Freq;
     
     {
         //Find the sign of peak.
-        int SearchSize = This -> InitPeriod * 1.5;
+        int SearchSize = Period * 1.5;
         int MaxCount = 0;
         int p = This -> InitPosition;
         _T1* Data = RCall(_IWave, GetUnsafePtr)(This -> Wave);
@@ -328,9 +280,9 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
         RCall(_IWave, SetWindow)(This -> Wave, This -> Window, LPFSIZE);
         RCall(_RTClassName, _LowPassTo)(This, This -> InitPosition + 2048);
         int OrigPeak = RCall(_RTClassName, _PeakAt)(This, This -> Wave,
-            This -> InitPosition, This -> InitPeriod);
+            This -> InitPosition, Period);
         This -> InitPosition = RCall(_RTClassName, _PeakAt)(This,
-            This -> LPFWave, OrigPeak, This -> InitPeriod / 2);
+            This -> LPFWave, OrigPeak, Period / 2);
         This -> LastPosition = This -> InitPosition;
     }
     
@@ -404,8 +356,9 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
         OrigPosition + ExtSize);
     
     //Set LPF and RefPeriod
-    int LPF = SampleRate / This -> InitPeriod * 5.5;
-    int RefPeriod = This -> InitPeriod;
+    _T1 Freq = RCall(_PMatch, Query)(This -> RefF0, This -> InitPosition).Y;
+    int LPF = Freq * 5.5;
+    int Period = SampleRate / Freq;
     
     //Initial LowPass
     RCall(_STFTIterlyzer, IterPrevTo)(This -> Sublyzer, OrigPosition - 2048);
@@ -422,7 +375,7 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
         //Beyond analysis boundary.
         if(LastPosition < This -> Boundary)
         {
-            LastPosition -= RefPeriod;
+            LastPosition -= Period;
             continue;
         }
         
@@ -434,38 +387,19 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
         RCall(_STFTItersizer, IterPrevTo)(& LPFItersizer,
             LastPosition - 2048);
         
-        _T1 Freq = SampleRate / RefPeriod;
-        
-        Freq = RCall(CSVP_F0FromWave, _T1)(This -> Wave,
-            LastPosition + RefPeriod, Freq * 0.7, Freq * 1.4);
-        int NewPeriod = SampleRate / Freq;
-        
-        if(abs(NewPeriod - RefPeriod) < 20)
-        {
-            LPF = Freq * 5.5;
-            RefPeriod = NewPeriod;
-        }
+        _T1 Freq = RCall(_PMatch, Query)(This -> RefF0, LastPosition).Y;
+        Period = SampleRate / Freq;
+        LPF = Freq * 5.5;
         
         _ACMax AutoCorr = RCall(_RTClassName, _MaxCorrelation)(This,
-            & LPFWave, LastPosition, RefPeriod, - 1.0, 0.3);
-        int IdealPrev = RCall(_RTClassName, _PeakAt)(This, & LPFWave,
+            & LPFWave, LastPosition, Period, - 1.0, 0.3);
+        LastPosition = RCall(_RTClassName, _PeakAt)(This, & LPFWave,
             AutoCorr.MaxPos, 10);
-        
-        Freq = SampleRate / (LastPosition - IdealPrev);
-        if(! (Freq > 50 && Freq < 1500))
-        {
-            Ret = 0;
-            break;
-        }
-        
-        RefPeriod = LastPosition - IdealPrev;
-        LastPosition = IdealPrev;
         
         /*
         printf("%f %f\n", (_T1)LastPosition / SampleRate,
             (_T1)LastPosition / SampleRate);*/
     }
-    
     //Low pass
     RCall(_STFTIterlyzer, IterNextTo)(This -> Sublyzer,
         This -> InitPosition + ExtSize);
@@ -501,4 +435,5 @@ RTMethod(int , CSVP_PSOLAIterlyzer, Fetch, int Index)
 #undef  _List_Spectrum
 #undef  _STFTIterlyzer
 #undef  _STFTItersizer
+#undef  _PMatch
 
