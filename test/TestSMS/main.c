@@ -1,4 +1,5 @@
 #include "HNM.h"
+#include "F0.h"
 #include "EndPoint.h"
 #include <CVEDSP2.h>
 #include <RUtil2.h>
@@ -19,24 +20,11 @@
 
 int main()
 {
-    Sinusoid SinFrame;
-    Spectrum SinSpec;
-    RCall(Sinusoid, CtorSize)(& SinFrame, 5);
-    RCall(Spectrum, CtorSize)(& SinSpec, 2048);
-    SinSpec.MagnType = CDSP2_LogMagn;
-    
-    int i;
-    RCall(Sinusoid, Clear)(& SinFrame);
-    for(i = 0; i < 5; i ++)
-    {
-        SinFrame.Freq[i] = 260 * i + 260;
-        SinFrame.Ampl[i] = 0.5 - 0.01 * 1;
-    }
+    CDSP2_SetDebugOn(CDSP2_Debug_Check);
     
     Wave XWave, YWave;
     RCall(Wave, CtorSize)(& XWave, 20);
     RCall(Wave, CtorSize)(& YWave, 44100 * 5);
-    //Float* X = RCall(IWave, GetUnsafePtr)(& XWave);
     Float* Win = RAlloc_Float(2048);
     CDSP2_GenHanning_Float(Win, 2048);
     RCall(Wave, SetWindow)(& XWave, Win, 2048);
@@ -44,19 +32,23 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/t/to-0.wsp");
+    String_SetChars(& Path, "/tmp/t/ti0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch);
-    //RCall(Sinusoid, ToSpectrum)(& SinFrame, & SinSpec);
-    //RCall(Sinusoid, ToReal)(& SinFrame, X, 44100 * 5, 44100);
-    //CDSP2_VCMul_Float(X, X, 0.05, 44100 * 5);
-    /*
-    for(i = 0; i < 1025; i ++)
-        printf("%.20f\n", X[i]);*/
-    //    printf("%.20f\n", SinSpec.Magn[i]);
     
     int VOT = CSVP_VOTFromWave_Float(& XWave, 0, XWave.Size / 2);
     printf("VOT: %d\n", VOT);
+    
+    CSVP_F0Iterlyzer_Float F0Iter;
+    CSVP_F0Iterlyzer_Float_Ctor(& F0Iter);
+    
+    CSVP_F0Iterlyzer_Float_SetHopSize(& F0Iter, 256);
+    CSVP_F0Iterlyzer_Float_SetWave(& F0Iter, & XWave);
+    CSVP_F0Iterlyzer_Float_SetPosition(& F0Iter, VOT + 2000);
+    CSVP_F0Iterlyzer_Float_PreAnalysisTo(& F0Iter, VOT + 10000);
+    
+    CSVP_F0Iterlyzer_Float_IterNextTo(& F0Iter, XWave.Size - 1000);
+    CSVP_F0Iterlyzer_Float_PrevTo(& F0Iter, 0);
     
     HNMIterlyzer HNMIter;
     RCall(HNMIterlyzer, CtorSize)(& HNMIter, 2048);
@@ -65,9 +57,8 @@ int main()
     RCall(HNMIterlyzer, SetHopSize)(& HNMIter, FFTSIZE);
     RCall(HNMIterlyzer, SetWave)(& HNMIter, & XWave);
     RCall(HNMIterlyzer, SetPosition)(& HNMIter, VOT + 1000);
-    RCall(HNMIterlyzer, PreAnalysisTo)(& HNMIter, VOT + 5000);
     RCall(HNMIterlyzer, SetUpperFreq)(& HNMIter, 10000);
-    printf("F0: %f\n", HNMIter._Base.InitF0);
+    RCall(HNMIterlyzer, SetPitch)(& HNMIter, & F0Iter.F0List);
     
     RCall(HNMIterlyzer, PrevTo)(& HNMIter, VOT);
     RCall(HNMIterlyzer, IterNextTo)(& HNMIter, XWave.Size - 510);
@@ -77,7 +68,7 @@ int main()
         
     int Offset = HNMIter.PulseList.Frames[0];
     int Last;
-    int j;
+    int i, j;
     for(i = 0; i <= HNMIter.PulseList.Frames_Index; i ++)
     {
         //HNMIter.PulseList.Frames[i] -= Offset;
@@ -113,7 +104,7 @@ int main()
     
     RFree(Win);
     RDelete(& Path);
-    RDelete(& SinFrame, & SinSpec, & XWave, & YWave, & HNMIter, & HNMSizer);
+    RDelete(& XWave, & YWave, & HNMIter, & HNMSizer, & F0Iter);
     return 0;
 }
 

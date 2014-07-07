@@ -1,15 +1,15 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
 #define _List_Int CSVP_List_Int
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
+#define _PMatch _C(PMatch_, _T1, _, _T1)
 
 #define _CheckMembers(Name) \
     CDSP2_If_Debug_Check \
     ( \
         if(This -> Wave == NULL) \
             RDebugPrint(_RTClassName, _S(Name) ": require wave."); \
-        if(This -> RefF0 <= 0) \
-            RDebugPrint(_RTClassName, _S(Name) ": require referential " \
-                "frequency."); \
+        if(This -> RefF0 == NULL) \
+            RDebugPrint(_RTClassName, _S(Name) ": require pitch curve."); \
     )
 
 RCtor(_RTClassName)
@@ -46,8 +46,7 @@ RTMethod(void, CSVP_SinusoidalBase, CtorSize, int Size)
     This -> Wave = NULL;
     This -> LastPosition = 0;
     This -> InitPosition = 0;
-    This -> RefF0 = -1;
-    This -> InitF0 = -1;
+    This -> RefF0 = NULL;
     RInit(_RTClassName);    
 }
 
@@ -71,7 +70,6 @@ RTMethod(void, CSVP_SinusoidalBase, From, _RTClassName* Sorc)
     This -> LastPosition = Sorc -> LastPosition;
     This -> InitPosition = Sorc -> InitPosition;
     This -> RefF0 = Sorc -> RefF0;
-    This -> InitF0 = Sorc -> InitF0;
 }
 
 RTMethod(void, CSVP_SinusoidalBase, Clear)
@@ -116,28 +114,9 @@ RTMethod(int , CSVP_SinusoidalBase, GetPosition)
     return This -> LastPosition;
 }
 
-RTMethod(void, CSVP_SinusoidalBase, SetRefFreq, _T1 RefF0)
+RTMethod(void, CSVP_SinusoidalBase, SetPitch, _PMatch* Sorc)
 {
-    This -> RefF0 = RefF0;
-    if(This -> LastPosition == This -> InitPosition)
-        This -> InitF0 = RefF0;
-}
-
-RTMethod(int , CSVP_SinusoidalBase, PreAnalysisTo, int Position)
-{
-    CDSP2_If_Debug_Check
-    (
-        if(This -> Wave == NULL)
-            RDebugPrint(_RTClassName, "PreAnalysisTo: inproper call sequence"
-                "(Wave not set yet).");
-    )
-    
-    _T1 Candidate = RCall(CSVP_SecureF0FromWave, _T1)(This -> Wave,
-        This -> InitPosition, This -> InitPosition, Position, 50, 1500);
-    if(Candidate < 0)
-        return - 1;
-    This -> InitF0 = Candidate;
-    This -> RefF0  = Candidate;
+    This -> RefF0 = Sorc;
 }
 
 RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
@@ -156,13 +135,14 @@ RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
     int i;
     for(i = 0; i <= This -> PulseList.Frames_Index; i ++)
     {
+        _T1 Freq = RCall(_PMatch, Query)(This -> RefF0,
+            This -> PulseList.Frames[i]).Y;
         _T1 Candidate = RCall(CSVP_F0FromSuccSpectrum, _T1)(
             & This -> Sublyzer0 -> SpecList.Frames[i],
             & This -> Sublyzer1 -> SpecList.Frames[i], 1,
-            This -> RefF0 * 0.85, This -> RefF0 * 1.3);
+            Freq * 0.85, Freq * 1.3);
         if(! (Candidate > 50 && Candidate < 1500))
             return -1;
-        This -> RefF0 = Candidate;
         This -> FreqList[i] = Candidate;
         //printf("%d %f\n", This -> PulseList.Frames[i], Candidate);
     }
@@ -193,13 +173,14 @@ RTMethod(int , CSVP_SinusoidalBase, PrevTo, int Position)
     int i;
     for(i = This -> PulseList.Frames_Index; i >= 0; i --)
     {
+        _T1 Freq = RCall(_PMatch, Query)(This -> RefF0,
+            This -> PulseList.Frames[i]).Y;
         _T1 Candidate = RCall(CSVP_F0FromSuccSpectrum, _T1)(
             & This -> Sublyzer0 -> SpecList.Frames[i],
             & This -> Sublyzer1 -> SpecList.Frames[i], 1,
-            This -> RefF0 * 0.7, This -> RefF0 * 1.4);
+            Freq * 0.7, Freq * 1.4);
         if(! (Candidate > 50 && Candidate < 1500))
             return -1;
-        This -> RefF0 = Candidate;
         This -> FreqList[i] = Candidate;
         //printf("%d %f\n", This -> PulseList.Frames[i], Candidate);
     }
@@ -213,4 +194,5 @@ RTMethod(int , CSVP_SinusoidalBase, PrevTo, int Position)
 #undef  _Wave
 #undef  _List_Int
 #undef  _STFTIterlyzer
+#undef  _PMatch
 

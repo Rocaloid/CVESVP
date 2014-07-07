@@ -4,6 +4,7 @@
 #define _List_DataFrame _C(CSVP_List_DataFrame, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 #define _SinusoidalBase _C(CSVP_SinusoidalBase, _, _T1)
+#define _PMatch _C(PMatch_, _T1, _, _T1)
 
 RClass(_RTClassName)
 {
@@ -29,10 +30,8 @@ RTMethod(void, _T2, SetWave, void* Sorc);
 RTMethod(void, _T2, SetHopSize, int HopSize);
 RTMethod(void, _T2, SetPosition, int Position);
 RTMethod(int , _T2, GetPosition);
-RTMethod(void, _T2, SetRefFreq, _T1 RefF0);
+RTMethod(void, _T2, SetPitch, _PMatch* Sorc);
 RTMethod(void, _T2, SetUpperFreq, _T1 UFreq);
-
-RTMethod(int , _T2, PreAnalysisTo, int Position);
 
 RTMethod(int , _T2, IterNextTo, int Position);
 RTMethod(int , _T2, PrevTo, int Position);
@@ -43,4 +42,5 @@ RTMethod(int , _T2, PrevTo, int Position);
 #undef  _List_DataFrame
 #undef  _STFTIterlyzer
 #undef  _SinusoidalBase
+#undef  _PMatch
 
