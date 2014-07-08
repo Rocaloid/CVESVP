@@ -4,17 +4,11 @@
 #define _DataFrame _C(CSVP_DataFrame, _, _T1)
 #define _IWave _C(CDSP2_IWave, _, _T1)
 
-#define _CheckMembers(Name) \
-    CDSP2_If_Debug_Check \
-    ( \
-        if(This -> Wave == NULL) \
-            RDebugPrint(_RTClassName, _S(Name) ": require wave.") \
-        if(This -> Window == NULL) \
-            RDebugPrint(_RTClassName, _S(Name) ": require fast window.") \
-        if(This -> DataList.FrameNum != This -> PulseList.Frames_Index + 1) \
-            RDebugPrint(_RTClassName, _S(Name) ": unmatching number of pulses" \
-                " and data frames."); \
-    )
+#define _CheckMembers() \
+    RAssert(This -> Wave, "require wave."); \
+    RAssert(This -> Window, "require fast window."); \
+    RAssert(This -> DataList.FrameNum == This -> PulseList.Frames_Index + 1, \
+        "unmatching number of pulses and data frames.")
 
 RCtor(_RTClassName)
 {
@@ -24,6 +18,7 @@ RCtor(_RTClassName)
     This -> Wave = NULL;
     This -> Window = NULL;
     This -> LastPosition = 0;
+    This -> InitPosition = 0;
     
     RInit(_RTClassName);
 }
@@ -42,6 +37,7 @@ RTMethod(void, CSVP_PSOLAItersizer, From, _RTClassName* Sorc)
     This -> Wave = Sorc -> Wave;
     This -> Window = Sorc -> Window;
     This -> LastPosition = Sorc -> LastPosition;
+    This -> InitPosition = Sorc -> InitPosition;
 }
 
 RTMethod(void, CSVP_PSOLAItersizer, SetWave, void* Sorc)
@@ -57,6 +53,7 @@ RTMethod(void, CSVP_PSOLAItersizer, SetWindow, _FWindow* Sorc)
 RTMethod(void, CSVP_PSOLAItersizer, SetPosition, int Position)
 {
     This -> LastPosition = Position;
+    This -> InitPosition = Position;
 }
 
 RTMethod(int , CSVP_PSOLAItersizer, GetPosition)
@@ -94,10 +91,15 @@ RTMethod(static void, CSVP_PSOLAItersizer, _RenderRange, int LIndex, int HIndex)
 
 RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position)
 {
-    _CheckMembers(IterNextTo);
+    _CheckMembers();
+    RAssert(Position > This -> LastPosition, "destination position earlier "
+        "than source position.");
+    
     int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         This -> LastPosition);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList, Position);
+    
+    if(LIndex < 0 || HIndex < 0) return;
     
     RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
     
@@ -106,14 +108,33 @@ RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_PSOLAItersizer, IterPrevTo, int Position)
 {
-    _CheckMembers(IterPrevTo);
+    _CheckMembers();
+    RAssert(Position < This -> LastPosition, "destination position"
+        " later than source position.");
+    
     int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList, Position);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList,
         This -> LastPosition);
     
+    if(LIndex < 0 || HIndex < 0) return;
+    
     RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
     
     This -> LastPosition = Position;
+}
+
+RTMethod(void, CSVP_PSOLAItersizer, PrevTo, int Position)
+{
+    _CheckMembers();
+    RAssert(Position < This -> InitPosition, "destination position"
+        " later than source position.");
+    
+    int LastPosition = This -> LastPosition;
+    This -> LastPosition = This -> InitPosition;
+    
+    RCall(_RTClassName, IterPrevTo)(This, Position);
+    
+    This -> LastPosition = LastPosition;
 }
 
 RTMethod(void, CSVP_PSOLAItersizer, Add, int Position, _DataFrame* Sorc)

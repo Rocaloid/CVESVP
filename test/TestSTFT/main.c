@@ -3,9 +3,7 @@
 
 int main()
 {
-    CDSP2_SetArch(CDSP2_Arch_Gnrc);
-    CDSP2_SetDebugOn(CDSP2_Debug_Check);
-    
+    CDSP2_SetArch(CDSP2_Arch_Gnrc);    
     
     CDSP2_Wave_Float MyWave, NewWave;
     CDSP2_Wave_Float_Ctor(& MyWave);

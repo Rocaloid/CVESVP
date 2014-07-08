@@ -3,6 +3,9 @@
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 
+/*
+    Important: STFTItersizer shares identical structure to STFTIterlyzer.
+*/
 RClass(_RTClassName)
 {
     RInherit(RObject);
@@ -10,12 +13,13 @@ RClass(_RTClassName)
     //Public
     int HopSize;
     _List_Spectrum SpecList;
-    _List_Int PulseList;
+    _List_Int      PulseList;
     char UseWindow;
     
     //Private
     void* Wave;
     int LastPosition;
+    int InitPosition;
     _T1 WinFactor;
 };
 
@@ -36,6 +40,7 @@ RTMethod(void, CSVP_STFTItersizer, RepositionFrom, int Position);
 
 RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position);
 RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position);
+RTMethod(void, CSVP_STFTItersizer, PrevTo, int Position);
 
 RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position);
 RTMethod(int , CSVP_STFTItersizer, ExtractFrom, _STFTIterlyzer* Sorc);

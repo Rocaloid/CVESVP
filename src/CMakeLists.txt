@@ -3,7 +3,7 @@ aux_source_directory(./EpR SRC_LIST)
 aux_source_directory(./Structure SRC_LIST)
 aux_source_directory(./ SRC_LIST)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${TopDir}/src")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${TopDir}/src -DWITH_ASSERT_ABORT")
 
 add_library(CVESVP SHARED ${SRC_LIST})
 include_directories(CVESVP PUBLIC "${CMAKE_SOURCE_DIR}/src")

@@ -17,8 +17,8 @@ Todo & Plan List
 - [x] Implement `HNMIterlyzer`(in: `Wave`, out: `List_HNMFrame`)
 - [x] Glottal pulse & phase reconstruction in `SinusoidItersizer`
 - [x] Implement `HNMItersizer` based on `SinusoidItersizer`(in: `Position` `HNMFrame`, out: `Wave`)
-- [ ] Implement `F0Iterlyzer`(in: `Wave`, out: `Real`)
-- [ ] Replace `CDSP2_If_Debug_Check` with `RAssert`
+- [x] Implement `F0Iterlyzer`(in: `Wave`, out: `Real`)
+- [x] Replace `CDSP2_If_Debug_Check` with `RAssert`
 - [ ] Default analysis window for `_F0.rc`
 - [ ] Implement `PulseIterlyzer`(in: `Wave`, out: `PulseList`)
 - [ ] Implement `PulseItersizer`(in: `Position`, out: `Wave`)

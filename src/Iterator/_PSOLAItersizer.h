@@ -15,6 +15,7 @@ RClass(_RTClassName)
     void* Wave;
     _FWindow* Window;
     int LastPosition;
+    int InitPosition;
 };
 
 RTMethod(void, CSVP_PSOLAItersizer, From, _RTClassName* Sorc);
@@ -28,6 +29,7 @@ RTMethod(void, CSVP_PSOLAItersizer, RepositionFrom, int Position);
 
 RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position);
 RTMethod(void, CSVP_PSOLAItersizer, IterPrevTo, int Position);
+RTMethod(void, CSVP_PSOLAItersizer, PrevTo, int Position);
 
 RTMethod(void, CSVP_PSOLAItersizer, Add, int Position, _DataFrame* Sorc);
 

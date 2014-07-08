@@ -7,6 +7,7 @@
 #define _GnrcFrame _C(CSVP_, _T3, _, _T1)
 #define _DataFrame _C(CSVP_DataFrame, _, _T1)
 #define _MyBase ((_SinusoidalBase*)This)
+#define _PMatch _C(PMatch_, _T1, _, _T1)
 
 RCtor(_RTClassName)
 {
@@ -77,19 +78,14 @@ RTMethod(int , _T2, GetPosition)
     return RCall(_SinusoidalBase, GetPosition)(_MyBase);
 }
 
-RTMethod(void, _T2, SetRefFreq, _T1 RefF0)
+RTMethod(void, _T2, SetPitch, _PMatch* Sorc)
 {
-    RCall(_SinusoidalBase, SetRefFreq)(_MyBase, RefF0);
+    RCall(_SinusoidalBase, SetPitch)(_MyBase, Sorc);
 }
 
 RTMethod(void, _T2, SetUpperFreq, _T1 UFreq)
 {
     This -> UFreq = UFreq;
-}
-
-RTMethod(int , _T2, PreAnalysisTo, int Position)
-{
-    RCall(_SinusoidalBase, PreAnalysisTo)(_MyBase, Position);
 }
 
 #define _IfSinu_Sinusoid(Stat) Stat
@@ -176,4 +172,5 @@ RTMethod(int , _T2, PrevTo, int Position)
 #undef  _STFTIterlyzer
 #undef  _SinusoidalBase
 #undef  _MyBase
+#undef  _PMatch
 

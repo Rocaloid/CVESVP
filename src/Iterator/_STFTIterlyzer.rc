@@ -2,24 +2,19 @@
 #define _List_Int CSVP_List_Int
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 
-#define _CheckMembers(Name) \
-    CDSP2_If_Debug_Check \
-    ( \
-        if(This -> Wave == NULL) \
-            RDebugPrint(_RTClassName, _S(Name) ": require wave."); \
-        if(This -> HopSize == 0) \
-            RDebugPrint(_RTClassName, _S(Name) ": require hopsize."); \
-        if(RCall(_RTClassName, GetFrameSize)(This) != \
-            ((_C(CDSP2_Wave, _, _T1)*)This -> Wave) -> WinSize) \
-            RDebugPrint(_RTClassName, _S(Name) ": incompatible winsize of " \
-                "wave."); \
-    )
+#define _CheckMembers() \
+    RAssert(This -> Wave, "require wave."); \
+    RAssert(This -> HopSize, "require hopsize."); \
+    RAssert(RCall(_RTClassName, GetFrameSize)(This) == \
+        ((_C(CDSP2_Wave, _, _T1)*)This -> Wave) -> WinSize, \
+        "incompatible winsize of wave.")
 
 RCtor(_RTClassName)
 {
     This -> HopSize = 0;
     This -> Wave = NULL;
     This -> LastPosition = 0;
+    This -> InitPosition = 0;
     RCall(_List_Spectrum, Ctor)(& This -> SpecList);
     RCall(_List_Int     , Ctor)(& This -> PulseList);
     RInit(_RTClassName);
@@ -36,6 +31,7 @@ RTMethod(void, CSVP_STFTIterlyzer, CtorSize, int FrameSize)
     This -> HopSize = 0;
     This -> Wave = NULL;
     This -> LastPosition = 0;
+    This -> InitPosition = 0;
     RCall(_List_Spectrum, CtorSize)(& This -> SpecList, 0, FrameSize);
     RCall(_List_Int     , Ctor)(& This -> PulseList);
     RInit(_RTClassName);
@@ -55,6 +51,7 @@ RTMethod(void, CSVP_STFTIterlyzer, From, _RTClassName* Sorc)
     This -> HopSize = Sorc -> HopSize;
     This -> Wave = Sorc -> Wave;
     This -> LastPosition = Sorc -> LastPosition;
+    This -> InitPosition = Sorc -> InitPosition;
 }
 
 RTMethod(void, CSVP_STFTIterlyzer, Clear)
@@ -71,12 +68,8 @@ RTMethod(void, CSVP_STFTIterlyzer, SetWave, void* Sorc)
 
 RTMethod(void, CSVP_STFTIterlyzer, SetPosition, int Position)
 {
-    CDSP2_If_Debug_Check
-    (
-        if(This -> Wave == NULL)
-            RDebugPrint(_RTClassName, "SetPosition: inproper call sequence"
-                "(Wave not set yet).");
-    )
+    RAssert(This -> Wave, "improper call sequence(Wave not set yet).");
+    
     This -> LastPosition = Position;
 }
 
@@ -102,7 +95,10 @@ RTMethod(int , CSVP_STFTIterlyzer, GetFrameSize)
 
 RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position)
 {
-    _CheckMembers(IterNextTo);
+    _CheckMembers();
+    RAssert(Position > This -> LastPosition, "destination position earlier than"
+        " source position.");
+    
     int FrameSize = RCall(_RTClassName, GetFrameSize)(This);
     _Spectrum TmpSpec;
     RCall(_Spectrum, CtorSize)(& TmpSpec, FrameSize);
@@ -120,7 +116,10 @@ RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_STFTIterlyzer, IterPrevTo, int Position)
 {
-    _CheckMembers(IterPrevTo);
+    _CheckMembers();
+    RAssert(Position < This -> LastPosition, "destination position later than "
+        " source position.");
+    
     int FrameSize = RCall(_RTClassName, GetFrameSize)(This);
     _Spectrum TmpSpec;
     RCall(_Spectrum, CtorSize)(& TmpSpec, FrameSize);
@@ -134,6 +133,20 @@ RTMethod(void, CSVP_STFTIterlyzer, IterPrevTo, int Position)
         RCall(_List_Spectrum, Add)(& This -> SpecList, & TmpSpec, Index);
     }
     RCall(_Spectrum, Dtor)(& TmpSpec);
+}
+
+RTMethod(void, CSVP_STFTIterlyzer, PrevTo, int Position)
+{
+    _CheckMembers();
+    RAssert(Position < This -> LastPosition, "destination position later than "
+        " source position.");
+    
+    int LastPosition = This -> LastPosition;
+    This -> LastPosition = This -> InitPosition;
+    
+    RCall(_RTClassName, IterPrevTo)(This, Position);
+    
+    This -> LastPosition = LastPosition;
 }
 
 RTMethod(int , CSVP_STFTIterlyzer, Extract, _Spectrum* Dest, int Index)

@@ -1,6 +1,7 @@
 #define _PMatch _C(PMatch_, _T1, _, _T1)
 #define _List_Int CSVP_List_Int
 #define _Wave _C(CDSP2_Wave, _, _T1)
+#define _IWave _C(CDSP2_IWave, _, _T1)
 
 RCtor(_RTClassName)
 {
@@ -9,7 +10,9 @@ RCtor(_RTClassName)
     This -> Wave = NULL;
     This -> HopSize = 256;
     This -> LastPosition = 0;
+    This -> InitPosition = 0;
     This -> RefF0 = 0;
+    This -> InitF0 = 0;
     
     This -> Option.HFreq = 1500;
     This -> Option.LFreq = 50;
@@ -33,7 +36,9 @@ RTMethod(void, CSVP_F0Iterlyzer, From, _RTClassName* Sorc)
     This -> Wave = Sorc -> Wave;
     This -> HopSize = Sorc -> HopSize;
     This -> LastPosition = Sorc -> LastPosition;
+    This -> InitPosition = Sorc -> InitPosition;
     This -> RefF0 = Sorc -> RefF0;
+    This -> InitF0 = Sorc -> InitF0;
     This -> Option = Sorc -> Option;
 }
 
@@ -56,6 +61,7 @@ RTMethod(void, CSVP_F0Iterlyzer, SetHopSize, int HopSize)
 RTMethod(void, CSVP_F0Iterlyzer, SetPosition, int Position)
 {
     This -> LastPosition = Position;
+    This -> InitPosition = Position;
 }
 
 RTMethod(int , CSVP_F0Iterlyzer, GetPosition)
@@ -71,11 +77,12 @@ RTMethod(void, CSVP_F0Iterlyzer, SetRefFreq, _T1 RefF0)
 RTMethod(int , CSVP_F0Iterlyzer, PreAnalysisTo, int Position)
 {
     _T1 Candidate = RCall(CSVP_SecureF0FromWave, _T1)(This -> Wave,
-        This -> LastPosition, This -> LastPosition, Position,
+        This -> InitPosition, This -> InitPosition, Position,
         This -> Option.LFreq, This -> Option.HFreq);
     if(Candidate < This -> Option.LFreq)
         return 1;
     This -> RefF0 = Candidate;
+    This -> InitF0 = Candidate;
     return 0;
 }
 
@@ -83,9 +90,11 @@ RTMethod(void, CSVP_F0Iterlyzer, _IterProcess, _T1* Temp)
 {
     int Size = ((_Wave*)This -> Wave) -> WinSize;
     _T1 Var = 1.0 + This -> Option.Variance;
+    RCall(_IWave, Read)(This -> Wave, Temp, This -> LastPosition, Size);
     _T1 Max = RCall(CDSP2_VMaxElmt, _T1)(Temp, 0, Size);
     if(Max < This -> Option.Threshold)
         return;
+    
     if(This -> Option.Adlib)
     {
         _T1 Candidate = RCall(CSVP_F0FromWave, _T1)
@@ -117,6 +126,8 @@ RTMethod(void, CSVP_F0Iterlyzer, _IterProcess, _T1* Temp)
 
 RTMethod(int , CSVP_F0Iterlyzer, IterNextTo, int Position)
 {
+    RAssert(This -> RefF0, "require pre-analysis.");
+    
     _T1* Temp = RCall(RAlloc, _T1)(((_Wave*)This -> Wave) -> WinSize);
     while(This -> LastPosition < Position)
     {
@@ -129,6 +140,8 @@ RTMethod(int , CSVP_F0Iterlyzer, IterNextTo, int Position)
 
 RTMethod(int , CSVP_F0Iterlyzer, IterPrevTo, int Position)
 {
+    RAssert(This -> RefF0, "require pre-analysis.");
+    
     _T1* Temp = RCall(RAlloc, _T1)(((_Wave*)This -> Wave) -> WinSize);
     while(This -> LastPosition > Position)
     {
@@ -138,7 +151,24 @@ RTMethod(int , CSVP_F0Iterlyzer, IterPrevTo, int Position)
     RFree(Temp);
 }
 
+RTMethod(int , CSVP_F0Iterlyzer, PrevTo, int Position)
+{
+    RAssert(This -> InitF0, "require pre-analysis.");
+
+    _T1 RefF0 = This -> RefF0;
+    int LastPosition = This -> LastPosition;
+    
+    This -> RefF0 = This -> InitF0;
+    This -> LastPosition = This -> InitPosition;
+    int Ret = RCall(_RTClassName, IterPrevTo)(This, Position);
+    This -> LastPosition = LastPosition;
+    This -> RefF0 = RefF0;
+    
+    return Ret;
+}
+
 #undef  _List_Int
 #undef  _Match
 #undef  _Wave
+#undef  _IWave
 

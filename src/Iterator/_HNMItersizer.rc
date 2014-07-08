@@ -134,11 +134,18 @@ RTMethod(static void, CSVP_HNMItersizer, _GenResidual, int LIndex, int HIndex)
 
 RTMethod(void, CSVP_HNMItersizer, IterNextTo, int Position)
 {
+    RAssert(This -> SubsizerS -> Wave, "require wave.");
+    RAssert(This -> HopSize, "require hopsize.");
+    RAssert(Position > This -> SubsizerS -> LastPosition, "destination position"
+        " earlier than source position.");
+    
     //Calculate start and end indexes.
     int Start  = RCall(_SinusoidItersizer, GetPosition)(This -> SubsizerS);
     int End    = Position;
     int LIndex = RCall(_List_Int, IndexAfter )(& This -> PulseList, Start);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList, End);
+    
+    if(LIndex == HIndex) return;
     
     //Dump data into SubsizerS.
     int i;
@@ -164,6 +171,11 @@ RTMethod(void, CSVP_HNMItersizer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_HNMItersizer, PrevTo, int Position)
 {
+    RAssert(This -> SubsizerS -> Wave, "require wave.");
+    RAssert(This -> HopSize, "require hopsize.");
+    RAssert(Position < This -> SubsizerS -> InitPosition, "destination position"
+        " later than source position.");
+    
     //Calculate start and end indexes.
     int Start  = This -> InitPosition;
     int End    = Position;
@@ -173,6 +185,8 @@ RTMethod(void, CSVP_HNMItersizer, PrevTo, int Position)
     
     int LIndex = RCall(_List_Int, IndexAfter )(& This -> PulseList, End);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList, Start);
+    
+    if(LIndex == HIndex) return;
     
     //Dump data into SubsizerS.
     int i;
