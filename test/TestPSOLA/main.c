@@ -109,9 +109,10 @@ int main()
     OutWave.SampleRate = InWave.SampleRate;
     RCall(PSOLAItersizer, SetWave)(& PSyn, & OutWave);
     RCall(PSOLAItersizer, SetWindow)(& PSyn, & DyWin);
-    RCall(PSOLAItersizer, SetPosition)(& PSyn, 0);
+    RCall(PSOLAItersizer, SetPosition)(& PSyn, VOT);
     RCall(PSOLAItersizer, RepositionFrom)(& PSyn, 0);
     
+    RCall(PSOLAItersizer, PrevTo)(& PSyn, 0);
     RCall(PSOLAItersizer, IterNextTo)(& PSyn, InWave.Size);
     #ifdef __WIN32__
     String_SetChars(& Path, "C:\\out.wav");

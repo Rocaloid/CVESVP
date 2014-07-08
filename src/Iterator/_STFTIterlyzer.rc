@@ -93,6 +93,9 @@ RTMethod(int , CSVP_STFTIterlyzer, GetFrameSize)
 RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position)
 {
     _CheckMembers(IterNextTo);
+    RAssert(Position > This -> LastPosition, "destination position earlier than"
+        " source position.");
+    
     int FrameSize = RCall(_RTClassName, GetFrameSize)(This);
     _Spectrum TmpSpec;
     RCall(_Spectrum, CtorSize)(& TmpSpec, FrameSize);
@@ -111,6 +114,9 @@ RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position)
 RTMethod(void, CSVP_STFTIterlyzer, IterPrevTo, int Position)
 {
     _CheckMembers(IterPrevTo);
+    RAssert(Position < This -> LastPosition, "destination position later than "
+        " source position.");
+    
     int FrameSize = RCall(_RTClassName, GetFrameSize)(This);
     _Spectrum TmpSpec;
     RCall(_Spectrum, CtorSize)(& TmpSpec, FrameSize);

@@ -18,6 +18,7 @@ RCtor(_RTClassName)
     This -> Wave = NULL;
     This -> Window = NULL;
     This -> LastPosition = 0;
+    This -> InitPosition = 0;
     
     RInit(_RTClassName);
 }
@@ -36,6 +37,7 @@ RTMethod(void, CSVP_PSOLAItersizer, From, _RTClassName* Sorc)
     This -> Wave = Sorc -> Wave;
     This -> Window = Sorc -> Window;
     This -> LastPosition = Sorc -> LastPosition;
+    This -> InitPosition = Sorc -> InitPosition;
 }
 
 RTMethod(void, CSVP_PSOLAItersizer, SetWave, void* Sorc)
@@ -51,6 +53,7 @@ RTMethod(void, CSVP_PSOLAItersizer, SetWindow, _FWindow* Sorc)
 RTMethod(void, CSVP_PSOLAItersizer, SetPosition, int Position)
 {
     This -> LastPosition = Position;
+    This -> InitPosition = Position;
 }
 
 RTMethod(int , CSVP_PSOLAItersizer, GetPosition)
@@ -89,9 +92,14 @@ RTMethod(static void, CSVP_PSOLAItersizer, _RenderRange, int LIndex, int HIndex)
 RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position)
 {
     _CheckMembers(IterNextTo);
+    RAssert(Position > This -> LastPosition, "destination position earlier "
+        "than source position.");
+    
     int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         This -> LastPosition);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList, Position);
+    
+    if(LIndex < 0 || HIndex < 0) return;
     
     RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
     
@@ -101,13 +109,32 @@ RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position)
 RTMethod(void, CSVP_PSOLAItersizer, IterPrevTo, int Position)
 {
     _CheckMembers(IterPrevTo);
+    RAssert(Position < This -> LastPosition, "destination position"
+        " later than source position.");
+    
     int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList, Position);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList,
         This -> LastPosition);
     
+    if(LIndex < 0 || HIndex < 0) return;
+    
     RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
     
     This -> LastPosition = Position;
+}
+
+RTMethod(void, CSVP_PSOLAItersizer, PrevTo, int Position)
+{
+    _CheckMembers(IterPrevTo);
+    RAssert(Position < This -> InitPosition, "destination position"
+        " later than source position.");
+    
+    int LastPosition = This -> LastPosition;
+    This -> LastPosition = This -> InitPosition;
+    
+    RCall(_RTClassName, IterPrevTo)(This, Position);
+    
+    This -> LastPosition = LastPosition;
 }
 
 RTMethod(void, CSVP_PSOLAItersizer, Add, int Position, _DataFrame* Sorc)

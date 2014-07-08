@@ -139,9 +139,14 @@ RTMethod(static void, CSVP_STFTItersizer, _RenderRange, int LIndex, int HIndex)
 RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position)
 {
     _CheckMembers(IterNextTo);
+    RAssert(Position > This -> LastPosition, "destination position earlier than"
+        " source position.");
+    
     int LIndex = CSVP_List_Int_IndexAfter(& This -> PulseList, 
         This -> LastPosition);
     int HIndex = CSVP_List_Int_IndexBefore(& This -> PulseList, Position);
+    
+    if(LIndex < 0 || HIndex < 0) return;
     
     RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
     
@@ -151,9 +156,14 @@ RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position)
 RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position)
 {
     _CheckMembers(IterPrevTo);
+    RAssert(Position < This -> LastPosition, "destination position later than "
+        " source position.");
+    
     int LIndex = CSVP_List_Int_IndexAfter(& This -> PulseList, Position);
     int HIndex = CSVP_List_Int_IndexBefore(& This -> PulseList,
         This -> LastPosition);
+    
+    if(LIndex < 0 || HIndex < 0) return;
     
     RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
     

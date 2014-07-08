@@ -401,6 +401,8 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
 RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
 {
     _CheckMembers(IterNextTo);
+    RAssert(Position > This -> LastPosition, "destination position earlier "
+        "than source position.");
     
     int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         This -> LastPosition);
@@ -424,6 +426,8 @@ RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
 RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
 {
     _CheckMembers(PrevTo);
+    RAssert(Position < This -> InitPosition, "destination position"
+        " later than source position.");
     
     int OrigPosition = This -> LastPosition;
     int OrigPositionP = This -> LastPositionP;

@@ -48,8 +48,8 @@ int  CSVP_List_Int_Fetch(First, int Index)
 int  CSVP_List_Int_IndexBefore(First, int Position)
 {
     int i;
-    if(This -> Frames_Index < 0) return - 1;
-    if(Position < This -> Frames[0]) return - 1;
+    if(This -> Frames_Index < 0) return -1;
+    if(Position < This -> Frames[0]) return -1;
     Array_IncFind(i, int, This -> Frames, Position);
     return i - 1;
 }
