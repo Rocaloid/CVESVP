@@ -6,6 +6,8 @@ CVE Spectral Voice Processing Library
 Todo & Plan List
 ===
 
+####Step1: Voice(Low Level) Modeling
+
 - [x] Spectrum filter utilities
 - [x] Implement `PSOLAIterlyzer`(in: `Wave`, out: `PulseList`)
 - [x] Implement `PSOLAItersizer`(in: `Position` `DataFrame`, out: `Wave`)
@@ -18,18 +20,31 @@ Todo & Plan List
 - [x] Glottal pulse & phase reconstruction in `SinusoidItersizer`
 - [x] Implement `HNMItersizer` based on `SinusoidItersizer`(in: `Position` `HNMFrame`, out: `Wave`)
 - [x] Implement `F0Iterlyzer`(in: `Wave`, out: `Real`)
+- [ ] Phase control points for `SinusoidItersizer`
+
+####Step2: Structural Changes & Minor Improvements
+
 - [x] Replace `CDSP2_If_Debug_Check` with `RAssert`
-- [ ] Default analysis window for `_F0.rc`
-- [ ] Implement `PulseIterlyzer`(in: `Wave`, out: `PulseList`)
-- [ ] Implement `PulseItersizer`(in: `Position`, out: `Wave`)
-- [ ] Implement `GainIterfector`(in: `Wave` `Wave`, out: `Wave`)
-- [ ] Implement `MixIterfector`(in: `Wave` `Wave`, out: `Wave`)
+- [ ] Down integrate Lists to CVEDSP2
+- [ ] Conversion between `HNMFrame` and `HNMContour`
+- [ ] Implement `F0FromWave_YIN`
+- [ ] Implement `GainIterfector` in CVEDSP2(in: `Wave` `Wave`, out: `Wave`)
+- [ ] Implement `MixIterfector` in CVEDSP2(in: `Wave` `Wave`, out: `Wave`)
+- [ ] Implement `PulseItersizer` in CVEDSP2(in: `Position`, out: `Wave`)
 - [ ] Implement `TurbIterfector`(in: `Wave` `Wave`, out: `Wave`)
+
+####Step3: Voice Manipulation
+
+- [ ] Timbre adjustment related to pitch scaling
 - [ ] Implement `GenKlatt` based on `FWindow`
 - [ ] Implement `EpRParam` structure
 - [ ] Implement `EpRParam_ToHNMContour`
 - [ ] EpR fitting algorithm
 - [ ] EpR manipulating utilities
 - [ ] PSOLA manipulating utilities
-- [ ] Implement `VMaxIndex`, `VMinIndex`, `VMaxEI`, `VMinEI` in RFNL.
+
+####Others
+
+- [ ] Implement `VMaxIndex`, `VMinIndex`, `VMaxEI`, `VMinEI`, `VLog` in RFNL
+- [ ] Default analysis window for `_F0.rc`/Window Cache
 
