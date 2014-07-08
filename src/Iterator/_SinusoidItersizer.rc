@@ -6,7 +6,7 @@
 #define _Sinusoid _C(CSVP_Sinusoid, _, _T1)
 #define _DataFrame _C(CSVP_DataFrame, _, _T1)
 
-#define _CheckMembers(Name) \
+#define _CheckMembers() \
     RAssert(This -> Wave, "require wave."); \
     RAssert(This -> SinuList.FrameNum == This -> PulseList.Frames_Index + 1, \
         "unmatching number of pulses and sinusoidal frames.")
@@ -400,7 +400,7 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
 
 RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
 {
-    _CheckMembers(IterNextTo);
+    _CheckMembers();
     RAssert(Position > This -> LastPosition, "destination position earlier "
         "than source position.");
     
@@ -425,7 +425,7 @@ RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
 {
-    _CheckMembers(PrevTo);
+    _CheckMembers();
     RAssert(Position < This -> InitPosition, "destination position"
         " later than source position.");
     

@@ -10,7 +10,7 @@
 #define LPFSIZE CSVP_PSOLAIterlyzer_LPFSTFTSize
 #define LPFHOP  CSVP_PSOLAIterlyzer_LPFHopSize
 
-#define _CheckMembers(Name) \
+#define _CheckMembers() \
     RAssert(This -> Wave, "require wave."); \
     RAssert(This -> RefF0, "require pitch curve.")
 
@@ -239,7 +239,7 @@ RTMethod(static int, CSVP_PSOLAIterlyzer, _SubIterNextTo, int Position)
 
 RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
 {
-    _CheckMembers(PreAnalysisTo);
+    _CheckMembers();
     
     int SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     _T1* Hann = RCall(RAlloc, _T1)(2048);
@@ -293,7 +293,7 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
 
 RTMethod(int , CSVP_PSOLAIterlyzer, IterNextTo, int Position)
 {
-    _CheckMembers(IterNextTo);
+    _CheckMembers();
     RAssert(Position > This -> LastPosition, "destination position earlier "
         "than last position.");
     RAssert(This -> PeakSign, "require pre-analysis.");
@@ -319,7 +319,7 @@ RTMethod(int , CSVP_PSOLAIterlyzer, IterNextTo, int Position)
 
 RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
 {
-    _CheckMembers(PrevTo);
+    _CheckMembers();
     RAssert(Position < This -> InitPosition, "destination position later than "
         "initial position.");
     RAssert(This -> PeakSign, "require pre-analysis.");

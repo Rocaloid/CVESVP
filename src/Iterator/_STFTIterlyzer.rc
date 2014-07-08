@@ -2,7 +2,7 @@
 #define _List_Int CSVP_List_Int
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 
-#define _CheckMembers(Name) \
+#define _CheckMembers() \
     RAssert(This -> Wave, "require wave."); \
     RAssert(This -> HopSize, "require hopsize."); \
     RAssert(RCall(_RTClassName, GetFrameSize)(This) == \
@@ -14,6 +14,7 @@ RCtor(_RTClassName)
     This -> HopSize = 0;
     This -> Wave = NULL;
     This -> LastPosition = 0;
+    This -> InitPosition = 0;
     RCall(_List_Spectrum, Ctor)(& This -> SpecList);
     RCall(_List_Int     , Ctor)(& This -> PulseList);
     RInit(_RTClassName);
@@ -30,6 +31,7 @@ RTMethod(void, CSVP_STFTIterlyzer, CtorSize, int FrameSize)
     This -> HopSize = 0;
     This -> Wave = NULL;
     This -> LastPosition = 0;
+    This -> InitPosition = 0;
     RCall(_List_Spectrum, CtorSize)(& This -> SpecList, 0, FrameSize);
     RCall(_List_Int     , Ctor)(& This -> PulseList);
     RInit(_RTClassName);
@@ -49,6 +51,7 @@ RTMethod(void, CSVP_STFTIterlyzer, From, _RTClassName* Sorc)
     This -> HopSize = Sorc -> HopSize;
     This -> Wave = Sorc -> Wave;
     This -> LastPosition = Sorc -> LastPosition;
+    This -> InitPosition = Sorc -> InitPosition;
 }
 
 RTMethod(void, CSVP_STFTIterlyzer, Clear)
@@ -92,7 +95,7 @@ RTMethod(int , CSVP_STFTIterlyzer, GetFrameSize)
 
 RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position)
 {
-    _CheckMembers(IterNextTo);
+    _CheckMembers();
     RAssert(Position > This -> LastPosition, "destination position earlier than"
         " source position.");
     
@@ -113,7 +116,7 @@ RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_STFTIterlyzer, IterPrevTo, int Position)
 {
-    _CheckMembers(IterPrevTo);
+    _CheckMembers();
     RAssert(Position < This -> LastPosition, "destination position later than "
         " source position.");
     
@@ -130,6 +133,20 @@ RTMethod(void, CSVP_STFTIterlyzer, IterPrevTo, int Position)
         RCall(_List_Spectrum, Add)(& This -> SpecList, & TmpSpec, Index);
     }
     RCall(_Spectrum, Dtor)(& TmpSpec);
+}
+
+RTMethod(void, CSVP_STFTIterlyzer, PrevTo, int Position)
+{
+    _CheckMembers();
+    RAssert(Position < This -> LastPosition, "destination position later than "
+        " source position.");
+    
+    int LastPosition = This -> LastPosition;
+    This -> LastPosition = This -> InitPosition;
+    
+    RCall(_RTClassName, IterPrevTo)(This, Position);
+    
+    This -> LastPosition = LastPosition;
 }
 
 RTMethod(int , CSVP_STFTIterlyzer, Extract, _Spectrum* Dest, int Index)

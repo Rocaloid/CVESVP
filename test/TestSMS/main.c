@@ -19,9 +19,7 @@
 #define FFTSIZE 128
 
 int main()
-{
-    CDSP2_SetDebugOn(CDSP2_Debug_Check);
-    
+{    
     Wave XWave, YWave;
     RCall(Wave, CtorSize)(& XWave, 20);
     RCall(Wave, CtorSize)(& YWave, 44100 * 5);

@@ -4,7 +4,7 @@
 #define _DataFrame _C(CSVP_DataFrame, _, _T1)
 #define _IWave _C(CDSP2_IWave, _, _T1)
 
-#define _CheckMembers(Name) \
+#define _CheckMembers() \
     RAssert(This -> Wave, "require wave."); \
     RAssert(This -> Window, "require fast window."); \
     RAssert(This -> DataList.FrameNum == This -> PulseList.Frames_Index + 1, \
@@ -91,7 +91,7 @@ RTMethod(static void, CSVP_PSOLAItersizer, _RenderRange, int LIndex, int HIndex)
 
 RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position)
 {
-    _CheckMembers(IterNextTo);
+    _CheckMembers();
     RAssert(Position > This -> LastPosition, "destination position earlier "
         "than source position.");
     
@@ -108,7 +108,7 @@ RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_PSOLAItersizer, IterPrevTo, int Position)
 {
-    _CheckMembers(IterPrevTo);
+    _CheckMembers();
     RAssert(Position < This -> LastPosition, "destination position"
         " later than source position.");
     
@@ -125,7 +125,7 @@ RTMethod(void, CSVP_PSOLAItersizer, IterPrevTo, int Position)
 
 RTMethod(void, CSVP_PSOLAItersizer, PrevTo, int Position)
 {
-    _CheckMembers(IterPrevTo);
+    _CheckMembers();
     RAssert(Position < This -> InitPosition, "destination position"
         " later than source position.");
     

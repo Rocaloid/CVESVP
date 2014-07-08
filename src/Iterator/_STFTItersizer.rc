@@ -4,7 +4,7 @@
 #define _IWave _C(CDSP2_IWave, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 
-#define _CheckMembers(Name) \
+#define _CheckMembers() \
     RAssert(This -> Wave, "require wave."); \
     RAssert(This -> HopSize, "require hopsize.")
 
@@ -138,7 +138,7 @@ RTMethod(static void, CSVP_STFTItersizer, _RenderRange, int LIndex, int HIndex)
 
 RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position)
 {
-    _CheckMembers(IterNextTo);
+    _CheckMembers();
     RAssert(Position > This -> LastPosition, "destination position earlier than"
         " source position.");
     
@@ -155,7 +155,7 @@ RTMethod(void, CSVP_STFTItersizer, IterNextTo, int Position)
 
 RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position)
 {
-    _CheckMembers(IterPrevTo);
+    _CheckMembers();
     RAssert(Position < This -> LastPosition, "destination position later than "
         " source position.");
     
@@ -168,6 +168,20 @@ RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position)
     RCall(_RTClassName, _RenderRange)(This, LIndex, HIndex);
     
     This -> LastPosition = Position;
+}
+
+RTMethod(void, CSVP_STFTItersizer, PrevTo, int Position)
+{
+    _CheckMembers();
+    RAssert(Position < This -> LastPosition, "destination position later than "
+        " source position.");
+    
+    int LastPosition = This -> LastPosition;
+    This -> LastPosition = This -> InitPosition;
+    
+    RCall(_RTClassName, IterPrevTo)(This, Position);
+    
+    This -> LastPosition = LastPosition;
 }
 
 RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position)

@@ -15,6 +15,7 @@ RClass(_RTClassName)
     char UseWindow;
     void* Wave;
     int LastPosition;
+    int InitPosition;
 };
 
 RTMethod(void, CSVP_STFTIterlyzer, CtorSize, int FrameSize);
@@ -31,6 +32,7 @@ RTMethod(int , CSVP_STFTIterlyzer, GetFrameSize);
 
 RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position);
 RTMethod(void, CSVP_STFTIterlyzer, IterPrevTo, int Position);
+RTMethod(void, CSVP_STFTIterlyzer, PrevTo, int Position);
 
 RTMethod(int , CSVP_STFTIterlyzer, Extract, _Spectrum* Dest, int Index);
 RTMethod(int , CSVP_STFTIterlyzer, Fetch, _Spectrum* Dest, int Index);

@@ -3,7 +3,7 @@
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 #define _PMatch _C(PMatch_, _T1, _, _T1)
 
-#define _CheckMembers(Name) \
+#define _CheckMembers() \
     RAssert(This -> Wave, "require wave."); \
     RAssert(This -> RefF0, "require pitch curve.")
 
@@ -111,7 +111,7 @@ RTMethod(void, CSVP_SinusoidalBase, SetPitch, _PMatch* Sorc)
 
 RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
 {
-    _CheckMembers(IterNextTo);
+    _CheckMembers();
     RAssert(Position > This -> LastPosition, "destination position earlier "
         "than last position.");
     
@@ -142,7 +142,7 @@ RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
 
 RTMethod(int , CSVP_SinusoidalBase, PrevTo, int Position)
 {
-    _CheckMembers(PrevTo);
+    _CheckMembers();
     RAssert(Position < This -> InitPosition, "destination position later than "
         "initial position");
     
