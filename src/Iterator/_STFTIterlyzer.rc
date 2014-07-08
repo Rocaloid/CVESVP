@@ -3,17 +3,11 @@
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 
 #define _CheckMembers(Name) \
-    CDSP2_If_Debug_Check \
-    ( \
-        if(This -> Wave == NULL) \
-            RDebugPrint(_RTClassName, _S(Name) ": require wave."); \
-        if(This -> HopSize == 0) \
-            RDebugPrint(_RTClassName, _S(Name) ": require hopsize."); \
-        if(RCall(_RTClassName, GetFrameSize)(This) != \
-            ((_C(CDSP2_Wave, _, _T1)*)This -> Wave) -> WinSize) \
-            RDebugPrint(_RTClassName, _S(Name) ": incompatible winsize of " \
-                "wave."); \
-    )
+    RAssert(This -> Wave, "require wave."); \
+    RAssert(This -> HopSize, "require hopsize."); \
+    RAssert(RCall(_RTClassName, GetFrameSize)(This) == \
+        ((_C(CDSP2_Wave, _, _T1)*)This -> Wave) -> WinSize, \
+        "incompatible winsize of wave.")
 
 RCtor(_RTClassName)
 {
@@ -71,12 +65,8 @@ RTMethod(void, CSVP_STFTIterlyzer, SetWave, void* Sorc)
 
 RTMethod(void, CSVP_STFTIterlyzer, SetPosition, int Position)
 {
-    CDSP2_If_Debug_Check
-    (
-        if(This -> Wave == NULL)
-            RDebugPrint(_RTClassName, "SetPosition: inproper call sequence"
-                "(Wave not set yet).");
-    )
+    RAssert(This -> Wave, "improper call sequence(Wave not set yet).");
+    
     This -> LastPosition = Position;
 }
 

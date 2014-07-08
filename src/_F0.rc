@@ -85,21 +85,9 @@ RTFunc(_T1, CSVP_F0FromSuccSpectrum, _Spectrum* Sorc1, _Spectrum* Sorc2,
 RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,
     int HopSize, int Bin)
 {
-    CDSP2_If_Debug_Check
-    (
-        if(Sorc1 -> NoPhase == 1 || Sorc2 -> NoPhase == 1)
-        {
-            RDebugPrint(CSVP_F0FromSuccSpectrumAndBin,
-                ": expected phase data in source spectrums.");
-            return 0;
-        }
-        if(Sorc1 -> Size != Sorc2 -> Size)
-        {
-            RDebugPrint(CSVP_F0FromSuccSpectrumAndBin,
-                ": unmatched size of spectrums.");
-            return 0;
-        }
-    )
+    RAssert(Sorc1 -> NoPhase != 1 && Sorc2 -> NoPhase != 1,
+        "source spectrums do not contain phase data.");
+    RAssert(Sorc1 -> Size = Sorc2 -> Size, "unmatching size of spectrums.");
     
     int SampleRate = Sorc1 -> SampleRate;
     _T1 Phase1 = Sorc1 -> Phse[Bin];
@@ -114,6 +102,8 @@ RTFunc(_T1, CSVP_F0FromSuccSpectrumAndBin, _Spectrum* Sorc1, _Spectrum* Sorc2,
 RTFunc(static int, CSVP_F0FromWaveB, void* Sorc, int Position,
     int MinFreq, int MaxFreq)
 {
+    RAssert(((_Wave*)Sorc) -> Window, "source Wave does not contain a window.");
+    
     _Spectrum Spec;
     int WinSize = ((_Wave*)Sorc) -> WinSize;
     RCall(_Spectrum, CtorSize)(& Spec, WinSize);
@@ -139,6 +129,8 @@ RTFunc(_T1, CSVP_F0FromWave, void* Sorc, int Position,
 RTFunc(_T1, CSVP_F0FromWave_SpecStep, void* Sorc, int Position,
     int MinFreq, int MaxFreq)
 {
+    RAssert(((_Wave*)Sorc) -> Window, "source Wave does not contain a window.");
+    
     _Spectrum Spec1, Spec2;
     int WinSize = ((_Wave*)Sorc) -> WinSize;
     RCall(_Spectrum, CtorSize)(& Spec1, WinSize);
@@ -197,6 +189,8 @@ RTFunc(static int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition,
 RTFunc(_T1, CSVP_SecureF0FromWave, void* Sorc, int Center, 
     int LPosition, int RPosition, int MinFreq, int MaxFreq)
 {
+    RAssert(((_Wave*)Sorc) -> Window, "source Wave does not contain a window.");
+    
     int BMed = RCall(CSVP_MedianF0FromWaveB, _T1)(Sorc, LPosition, RPosition,
         MinFreq, MaxFreq);
     _T1 FMed = BMed * ((_Wave*)Sorc) -> SampleRate / ((_Wave*)Sorc) -> WinSize;

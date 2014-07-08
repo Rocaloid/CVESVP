@@ -1,6 +1,6 @@
 #include "F0.h"
 #include "PSOLA.h"
-#include "SpecManipulation.h"
+#include "SpecManip.h"
 
 #include <RUtil2.h>
 

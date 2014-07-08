@@ -5,16 +5,10 @@
 #define _IWave _C(CDSP2_IWave, _, _T1)
 
 #define _CheckMembers(Name) \
-    CDSP2_If_Debug_Check \
-    ( \
-        if(This -> Wave == NULL) \
-            RDebugPrint(_RTClassName, _S(Name) ": require wave.") \
-        if(This -> Window == NULL) \
-            RDebugPrint(_RTClassName, _S(Name) ": require fast window.") \
-        if(This -> DataList.FrameNum != This -> PulseList.Frames_Index + 1) \
-            RDebugPrint(_RTClassName, _S(Name) ": unmatching number of pulses" \
-                " and data frames."); \
-    )
+    RAssert(This -> Wave, "require wave."); \
+    RAssert(This -> Window, "require fast window."); \
+    RAssert(This -> DataList.FrameNum == This -> PulseList.Frames_Index + 1, \
+        "unmatching number of pulses and data frames.")
 
 RCtor(_RTClassName)
 {

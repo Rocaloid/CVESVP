@@ -5,13 +5,8 @@
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 
 #define _CheckMembers(Name) \
-    CDSP2_If_Debug_Check \
-    ( \
-        if(((_STFTIterlyzer*)This) -> Wave == NULL) \
-            RDebugPrint(_RTClassName, _S(Name) ": require wave."); \
-        if(((_STFTIterlyzer*)This) -> HopSize == 0) \
-            RDebugPrint(_RTClassName, _S(Name) ": require hopsize."); \
-    )
+    RAssert(This -> Wave, "require wave."); \
+    RAssert(This -> HopSize, "require hopsize.")
 
 RCtor(_RTClassName)
 {
@@ -62,14 +57,10 @@ RTMethod(void, CSVP_STFTItersizer, Clear)
 
 RTMethod(void, CSVP_STFTItersizer, SetWave, void* Sorc)
 {
-    CDSP2_If_Debug_Check
-    (
-        if(RCall(_RTClassName, GetFrameSize)(This) != ((_Wave*)Sorc) -> WinSize)
-            RDebugPrint(_RTClassName, "SetWave: incompatible winsize of "
-                "source wave.");
-        if(((_STFTIterlyzer*)This) -> HopSize == 0)
-            RDebugPrint(_RTClassName, "SetWave: require hopsize.");
-    )
+    RAssert(RCall(_RTClassName, GetFrameSize)(This) ==
+        ((_Wave*)Sorc) -> WinSize, "incompatible winsize of source wave.");
+    RAssert(((_STFTIterlyzer*)This) -> HopSize, "require hopsize");
+    
     RCall(_STFTIterlyzer, SetWave)((_STFTIterlyzer*)This, Sorc);
     This -> WinFactor = RCall(CSVP_WinFactorFromWindow, _T1)
         (((_Wave*)This -> Wave) -> Window,
@@ -171,11 +162,9 @@ RTMethod(void, CSVP_STFTItersizer, IterPrevTo, int Position)
 
 RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position)
 {
-    CDSP2_If_Debug_Check
-    (
-        if(Sorc -> Size != RCall(_RTClassName, GetFrameSize)(This))
-            RDebugPrint(_RTClassName, "Add: incompatible size.");
-    )
+    RAssert(Sorc -> Size == RCall(_RTClassName, GetFrameSize)(This),
+        "incompatible size.");
+    
     int i = CSVP_List_Int_IndexAfter(& This -> PulseList, Position);
     Array_Insert(int, This -> PulseList.Frames, i, Position);
     RCall(_List_Spectrum, Add)(& This -> SpecList, Sorc, i);
@@ -184,12 +173,9 @@ RTMethod(int , CSVP_STFTItersizer, Add, _Spectrum* Sorc, int Position)
 //As a compromise for fewer memory operations, this function is somehow ugly.
 RTMethod(int , CSVP_STFTItersizer, ExtractFrom, _STFTIterlyzer* Sorc)
 {
-    CDSP2_If_Debug_Check
-    (
-        if(RCall(_STFTIterlyzer, GetFrameSize)(Sorc) !=
-           RCall(_RTClassName, GetFrameSize)(This))
-            RDebugPrint(_RTClassName, "ExtractFrom: incompatible frame size.");
-    )
+    RAssert(RCall(_STFTIterlyzer, GetFrameSize)(Sorc) ==
+        RCall(_RTClassName, GetFrameSize)(This), "incompatible frame size.");
+    
     int FrameSize = RCall(_RTClassName, GetFrameSize)(This);
     while(Sorc -> PulseList.Frames_Index >= 0)
     {

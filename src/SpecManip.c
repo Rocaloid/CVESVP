@@ -1,4 +1,4 @@
-#include "SpecManipulation.h"
+#include "SpecManip.h"
 #include <RUtil2.h>
 
 #if 0

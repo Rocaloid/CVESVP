@@ -32,7 +32,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/t/ti0.wsp");
+    String_SetChars(& Path, "/tmp/ch/che0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch);
     
@@ -65,7 +65,7 @@ int main()
     
     HNMItersizer HNMSizer;
     RCall(HNMItersizer, CtorSize)(& HNMSizer, 2048);
-        
+    
     int Offset = HNMIter.PulseList.Frames[0];
     int Last;
     int i, j;

@@ -11,13 +11,8 @@
 #define LPFHOP  CSVP_PSOLAIterlyzer_LPFHopSize
 
 #define _CheckMembers(Name) \
-    CDSP2_If_Debug_Check \
-    ( \
-        if(This -> Wave == NULL) \
-            RDebugPrint(_RTClassName, _S(Name) ": require wave."); \
-        if(This -> RefF0 == NULL) \
-            RDebugPrint(_RTClassName, _S(Name) ": require pitch curve."); \
-    )
+    RAssert(This -> Wave, "require wave."); \
+    RAssert(This -> RefF0, "require pitch curve.")
 
 #define _ACMax _C(_CSVP_ACMax, _, _T1)
 typedef struct
@@ -97,12 +92,8 @@ RTMethod(void, CSVP_PSOLAIterlyzer, SetWave, void* Sorc)
 
 RTMethod(void, CSVP_PSOLAIterlyzer, SetPosition, int Position)
 {
-    CDSP2_If_Debug_Check
-    (
-        if(This -> Wave == NULL)
-            RDebugPrint(_RTClassName, "SetPosition: inproper call sequence"
-                "(Wave not set yet).");
-    )
+    RAssert(This -> Wave, "improper call sequence(Wave not set yet).");
+    
     This -> LastPosition = Position;
     This -> InitPosition = Position;
     RCall(_InfWave, Relocate)(This -> LPFWave, Position - 1024);
@@ -299,6 +290,8 @@ RTMethod(int , CSVP_PSOLAIterlyzer, PreAnalysisTo, int Position)
 RTMethod(int , CSVP_PSOLAIterlyzer, IterNextTo, int Position)
 {
     _CheckMembers(IterNextTo);
+    RAssert(Position > This -> LastPosition, "destination position earlier "
+        "than last position.");
     
     int Ret = 1;
     int IterHopSize = LPFSIZE + 512;
@@ -322,12 +315,8 @@ RTMethod(int , CSVP_PSOLAIterlyzer, IterNextTo, int Position)
 RTMethod(int , CSVP_PSOLAIterlyzer, PrevTo, int Position)
 {
     _CheckMembers(PrevTo);
-    CDSP2_If_Debug_Check
-    (
-        if(Position > This -> InitPosition)
-            RDebugPrint(_RTClassName, "PrevTo: destination position later than "
-                "initial position.");
-    )
+    RAssert(Position < This -> InitPosition, "destination position later than "
+        "initial position.");
     
     int Ret = 1;
     _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
