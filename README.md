@@ -26,7 +26,7 @@ Todo & Plan List
 
 - [x] Replace `CDSP2_If_Debug_Check` with `RAssert`
 - [x] Down integrate Lists to CVEDSP2
-- [ ] Conversion between `HNMFrame` and `HNMContour`
+- [x] Conversion between `HNMFrame` and `HNMContour`
 - [ ] Implement `F0FromWave_YIN`
 - [ ] Implement `GainIterfector` in CVEDSP2(in: `Wave` `Wave`, out: `Wave`)
 - [ ] Implement `MixIterfector` in CVEDSP2(in: `Wave` `Wave`, out: `Wave`)
@@ -43,8 +43,9 @@ Todo & Plan List
 - [ ] EpR manipulating utilities
 - [ ] PSOLA manipulating utilities
 
-####Others
+####Others/External
 
 - [ ] Implement `VMaxIndex`, `VMinIndex`, `VMaxEI`, `VMinEI`, `VLog` in RFNL
+- [ ] More interpolation kernels(Cubic, Sinc) in RFNL
 - [ ] Default analysis window for `_F0.rc`/Window Cache
 

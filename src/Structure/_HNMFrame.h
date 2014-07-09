@@ -1,6 +1,7 @@
 #define _Sinusoid _C(CSVP_Sinusoid, _, _T1)
 #define _DataFrame _C(CDSP2_DataFrame, _, _T1)
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
+#define _HNMContour _C(CSVP_HNMContour, _, _T1)
 
 RClass(_RTClassName)
 {
@@ -8,6 +9,7 @@ RClass(_RTClassName)
     
     //Public
     int Size;
+    int SampleRate;
     
     _Sinusoid Hmnc;
     _T1*      Noiz;
@@ -24,7 +26,13 @@ RTMethod(void, CSVP_HNMFrame, FromSpectrum, _Spectrum* Sorc, _T1 F0,
 RTMethod(void, CSVP_HNMFrame, FromSpectrumWithPhase, _DataFrame* Dest,
     _Spectrum* Sorc, _T1 F0, int SinuNum);
 
+RTMethod(void, CSVP_HNMFrame, ToContour, _HNMContour* Dest);
+RTMethod(void, CSVP_HNMFrame, FromContour, _HNMContour* Sorc, _T1 Pitch,
+    _T1 UFreq);
+RTMethod(void, CSVP_HNMFrame, FromContourA, _HNMContour* Sorc);
+
 #undef  _Sinusoid
 #undef  _DataFrame
 #undef  _Spectrum
+#undef  _HNMContour
 

@@ -104,13 +104,17 @@ RTMethod(static void, _T2, _Analyze)
     RCall(_DataFrame, Ctor)(& TempPhse);
     
     int i, j;
+    int SampleRate = ((_Wave*)This -> _Base.Wave) -> SampleRate;
+    _IfSinuE
+    (
+        _T3, , TempGnrc.SampleRate = SampleRate
+    );
     
     for(i = 0; i <= _MyBase -> FreqList_Index; i ++)
     {
         //Analysis
         _T1 F0 = _MyBase -> FreqList[i];
         int N = This -> UFreq / F0;
-        printf("%d %f\n", _MyBase -> Sublyzer0 -> PulseList.Frames[i], F0);
         _IfSinu
         (
             _T3,
