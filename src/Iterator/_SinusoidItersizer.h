@@ -1,9 +1,9 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
-#define _List_Int CSVP_List_Int
+#define _List_Int CDSP2_List_Int
 #define _List_Sinusoid _C(CSVP_List_Sinusoid, _, _T1)
-#define _List_DataFrame _C(CSVP_List_DataFrame, _, _T1)
+#define _List_DataFrame _C(CDSP2_List_DataFrame, _, _T1)
 #define _Sinusoid _C(CSVP_Sinusoid, _, _T1)
-#define _DataFrame _C(CSVP_DataFrame, _, _T1)
+#define _DataFrame _C(CDSP2_DataFrame, _, _T1)
 
 RClass(_RTClassName)
 {

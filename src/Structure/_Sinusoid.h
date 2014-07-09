@@ -1,5 +1,5 @@
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
-#define _DataFrame _C(CSVP_DataFrame, _, _T1)
+#define _DataFrame _C(CDSP2_DataFrame, _, _T1)
 
 RClass(_RTClassName)
 {

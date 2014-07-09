@@ -1,5 +1,5 @@
-#define _List_Spectrum _C(CSVP_List_Spectrum, _, _T1)
-#define _List_Int CSVP_List_Int
+#define _List_Spectrum _C(CDSP2_List_Spectrum, _, _T1)
+#define _List_Int CDSP2_List_Int
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 

@@ -19,7 +19,8 @@
 #define FFTSIZE 128
 
 int main()
-{    
+{
+    int i, j;
     Wave XWave, YWave;
     RCall(Wave, CtorSize)(& XWave, 20);
     RCall(Wave, CtorSize)(& YWave, 44100 * 5);
@@ -30,7 +31,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/ch/che0.wsp");
+    String_SetChars(& Path, "/tmp/aoe.wav");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch);
     
@@ -39,6 +40,9 @@ int main()
     
     CSVP_F0Iterlyzer_Float F0Iter;
     CSVP_F0Iterlyzer_Float_Ctor(& F0Iter);
+    F0Iter.Option.Adlib = 1;
+    F0Iter.Option.LFreq = 50;
+    F0Iter.Option.HFreq = 300;
     
     CSVP_F0Iterlyzer_Float_SetHopSize(& F0Iter, 256);
     CSVP_F0Iterlyzer_Float_SetWave(& F0Iter, & XWave);
@@ -47,6 +51,8 @@ int main()
     
     CSVP_F0Iterlyzer_Float_IterNextTo(& F0Iter, XWave.Size - 1000);
     CSVP_F0Iterlyzer_Float_PrevTo(& F0Iter, 0);
+    
+    CSVP_F0PostProcess_Float(& F0Iter.F0List, 4000, 0.15);
     
     HNMIterlyzer HNMIter;
     RCall(HNMIterlyzer, CtorSize)(& HNMIter, 2048);
@@ -66,7 +72,6 @@ int main()
     
     int Offset = HNMIter.PulseList.Frames[0];
     int Last;
-    int i, j;
     for(i = 0; i <= HNMIter.PulseList.Frames_Index; i ++)
     {
         //HNMIter.PulseList.Frames[i] -= Offset;
@@ -79,11 +84,11 @@ int main()
     }
     Last = HNMSizer.PulseList.Frames[i * Stretch - 1];
     
-    int f = i - 10;
+    int f = 50;
     
-    for(j = 0; j < HNMIter.PhseList.Frames[f].Size; j ++)
-        HNMIter.PhseList.Frames[f].Data[j] = 2.0 * M_PI
-            + (float)rand() / RAND_MAX * (float) j;
+    //for(j = 0; j < HNMIter.PhseList.Frames[f].Size; j ++)
+    //    HNMIter.PhseList.Frames[f].Data[j] = 2.0 * M_PI;
+//            + (float)rand() / RAND_MAX * (float) j;
     
     RCall(HNMItersizer, SetHopSize)(& HNMSizer, FFTSIZE);
     RCall(HNMItersizer, SetWave)(& HNMSizer, & YWave);

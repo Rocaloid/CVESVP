@@ -1,8 +1,7 @@
-#ifndef CVESVP_F0_H
-#define CVESVP_F0_H
+#ifndef CSVP_F0_H
+#define CSVP_F0_H
 
 #include <CVEDSP2.h>
-#include "Misc/List_Int.h"
 
 #define CSVP_F0_SpecStep 0
 

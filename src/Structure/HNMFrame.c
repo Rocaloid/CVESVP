@@ -1,7 +1,6 @@
 #include <RFNL.h>
 #include <CVEDSP2.h>
 #include "HNMFrame.h"
-#include "DataFrame.h"
 
 #if 0
 #include "_HNMContour.rc"

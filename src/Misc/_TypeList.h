@@ -1,41 +1,22 @@
-#define _T2 _C(CDSP2_Spectrum, _, _T1)
-#define _T3 Spectrum
-#include "_SizeNumList.h"
-#undef  _T2
-#undef  _T3
-
-#define _T2 _C(CSVP_DataFrame, _, _T1)
-#define _T3 DataFrame
-#define _CSVP_NOSIZE
-
-#include "_SizeNumList.h"
-
-RTMethod(void, CSVP_List_DataFrame, FromWave, void* SorcWave,
-    CSVP_List_Int* SorcPulse);
-
-#undef  _CSVP_NOSIZE
-#undef  _T2
-#undef  _T3
-
 #define _T2 _C(CSVP_Sinusoid, _, _T1)
 #define _T3 Sinusoid
-#define _CSVP_NOSIZE
-#include "_SizeNumList.h"
-#undef  _CSVP_NOSIZE
+#define _CDSP2_NOSIZE
+#include <CVEDSP2/List/_SizeNumList.h>
+#undef  _CDSP2_NOSIZE
 #undef  _T2
 #undef  _T3
 
 #define _T2 _C(CSVP_HNMFrame, _, _T1)
 #define _T3 HNMFrame
-#define _CSVP_NOSIZE
-#include "_SizeNumList.h"
-#undef  _CSVP_NOSIZE
+#define _CDSP2_NOSIZE
+#include <CVEDSP2/List/_SizeNumList.h>
+#undef  _CDSP2_NOSIZE
 #undef  _T2
 #undef  _T3
 
 #define _T2 _C(CSVP_HNMContour, _, _T1)
 #define _T3 HNMContour
-#include "_SizeNumList.h"
+#include <CVEDSP2/List/_SizeNumList.h>
 #undef  _T2
 #undef  _T3
 

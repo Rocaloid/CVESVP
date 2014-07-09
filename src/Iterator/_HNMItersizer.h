@@ -1,8 +1,8 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
-#define _List_Int CSVP_List_Int
+#define _List_Int CDSP2_List_Int
 #define _List_HNMFrame _C(CSVP_List_HNMFrame, _, _T1)
 #define _HNMFrame _C(CSVP_HNMFrame, _, _T1)
-#define _DataFrame _C(CSVP_DataFrame, _, _T1)
+#define _DataFrame _C(CDSP2_DataFrame, _, _T1)
 #define _SinusoidItersizer _C(CSVP_SinusoidItersizer, _, _T1)
 #define _STFTItersizer _C(CSVP_STFTItersizer, _, _T1)
 

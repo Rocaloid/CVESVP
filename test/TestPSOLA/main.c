@@ -1,7 +1,7 @@
 #include "PSOLA.h"
 #include "F0.h"
-#include "Misc/Lists.h"
 #include "EndPoint.h"
+#include <CVEDSP2.h>
 
 #define Wave CDSP2_Wave_Float
 #define InfWave CDSP2_InfWave_Float
@@ -9,8 +9,8 @@
 #define PSOLAIterlyzer CSVP_PSOLAIterlyzer_Float
 #define PSOLAItersizer CSVP_PSOLAItersizer_Float
 #define F0Iterlyzer CSVP_F0Iterlyzer_Float
-#define List_DataFrame CSVP_List_DataFrame_Float
-#define List_Int CSVP_List_Int
+#define List_DataFrame CDSP2_List_DataFrame_Float
+#define List_Int CDSP2_List_Int
 #define FWindow_T RFNL_FWindow_Gnrc_Float
 #define FWindow CDSP2_FWindow_Float
 
@@ -91,6 +91,7 @@ int main()
     RCall(PSOLAItersizer, Ctor)(& PSyn);
     RCall(List_DataFrame, From)(& PSyn.DataList, & PSOLAFrame);
     RCall(List_Int, From)(& PSyn.PulseList, & PAna.PulseList);
+    
     
     for(i = 1; i <= PSyn.PulseList.Frames_Index; i ++)
     {

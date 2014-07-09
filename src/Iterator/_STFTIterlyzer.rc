@@ -1,5 +1,5 @@
-#define _List_Spectrum _C(CSVP_List_Spectrum, _, _T1)
-#define _List_Int CSVP_List_Int
+#define _List_Spectrum _C(CDSP2_List_Spectrum, _, _T1)
+#define _List_Int CDSP2_List_Int
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 
 #define _CheckMembers() \
@@ -104,7 +104,7 @@ RTMethod(void, CSVP_STFTIterlyzer, IterNextTo, int Position)
     RCall(_Spectrum, CtorSize)(& TmpSpec, FrameSize);
     while(This -> LastPosition < Position)
     {
-        int Index = CSVP_List_Int_Add(& This -> PulseList,
+        int Index = CDSP2_List_Int_Add(& This -> PulseList,
             This -> LastPosition);
         RCall(_Spectrum, FromWaveW)(& TmpSpec, This -> Wave,
             This -> LastPosition - FrameSize / 2);
@@ -126,7 +126,7 @@ RTMethod(void, CSVP_STFTIterlyzer, IterPrevTo, int Position)
     while(This -> LastPosition > Position + This -> HopSize)
     {
         This -> LastPosition -= This -> HopSize;
-        int Index = CSVP_List_Int_Add(& This -> PulseList,
+        int Index = CDSP2_List_Int_Add(& This -> PulseList,
             This -> LastPosition);
         RCall(_Spectrum, FromWaveW)(& TmpSpec, This -> Wave,
             This -> LastPosition - FrameSize / 2);
@@ -151,14 +151,14 @@ RTMethod(void, CSVP_STFTIterlyzer, PrevTo, int Position)
 
 RTMethod(int , CSVP_STFTIterlyzer, Extract, _Spectrum* Dest, int Index)
 {
-    int Ret = CSVP_List_Int_Extract(& This -> PulseList, Index);
+    int Ret = CDSP2_List_Int_Extract(& This -> PulseList, Index);
     RCall(_List_Spectrum, Extract)(& This -> SpecList, Dest, Index);
     return Ret;
 }
 
 RTMethod(int , CSVP_STFTIterlyzer, Fetch, _Spectrum* Dest, int Index)
 {
-    int Ret = CSVP_List_Int_Fetch(& This -> PulseList, Index);
+    int Ret = CDSP2_List_Int_Fetch(& This -> PulseList, Index);
     RCall(_List_Spectrum, Fetch)(& This -> SpecList, Dest, Index);
     return Ret;
 }

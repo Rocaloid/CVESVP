@@ -1,16 +1,12 @@
-#ifndef CVESVP_LISTS_H
-#define CVESVP_LISTS_H
+#ifndef CSVP_LISTS_H
+#define CSVP_LISTS_H
 
 #include <CVEDSP2.h>
-#include "../Structure/DataFrame.h"
 #include "../Structure/HNMFrame.h"
 
 #if 0
-#include "_List.h"
 #include "_TypeList.h"
 #endif
-
-#include "List_Int.h"
 
 //-----
 #include <RUtil2.h>

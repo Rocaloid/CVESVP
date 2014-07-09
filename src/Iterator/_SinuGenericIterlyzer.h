@@ -1,7 +1,7 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
-#define _List_Int CSVP_List_Int
+#define _List_Int CDSP2_List_Int
 #define _List_GnrcFrame _C(CSVP_List_, _T3, _, _T1)
-#define _List_DataFrame _C(CSVP_List_DataFrame, _, _T1)
+#define _List_DataFrame _C(CDSP2_List_DataFrame, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 #define _SinusoidalBase _C(CSVP_SinusoidalBase, _, _T1)
 #define _PMatch _C(PMatch_, _T1, _, _T1)

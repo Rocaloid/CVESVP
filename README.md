@@ -25,7 +25,7 @@ Todo & Plan List
 ####Step2: Structural Changes & Minor Improvements
 
 - [x] Replace `CDSP2_If_Debug_Check` with `RAssert`
-- [ ] Down integrate Lists to CVEDSP2
+- [x] Down integrate Lists to CVEDSP2
 - [ ] Conversion between `HNMFrame` and `HNMContour`
 - [ ] Implement `F0FromWave_YIN`
 - [ ] Implement `GainIterfector` in CVEDSP2(in: `Wave` `Wave`, out: `Wave`)

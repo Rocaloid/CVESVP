@@ -1,5 +1,5 @@
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
-#define _List_Spectrum _C(CSVP_List_Spectrum, _, _T1)
+#define _List_Spectrum _C(CDSP2_List_Spectrum, _, _T1)
 
 RTFunc(void, CSVP_SpecLowPass, _Spectrum* Dest, _T1 Freq);
 RTFunc(void, CSVP_SpecHighPass, _Spectrum* Dest, _T1 Freq);
