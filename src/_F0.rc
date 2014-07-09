@@ -50,10 +50,10 @@ RTFunc(_T1, CSVP_F0FromSpectrumB_SpecStep, _Spectrum* Sorc, _T1 MinFreq,
             }
         }
     }
-    
+    /*
     if(F0 <= F2B(MinFreq) + 1 || F0 >= UBound)
         F0 = -1;
-    
+    */
     RFree(OrigMagn);
     RCall(_Spectrum, Dtor)(& NewSorc);
     return F0;
@@ -164,15 +164,15 @@ RTFunc(static int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition,
 {
     int p = 0;
     int Ret = 1;
-    CSVP_List_Int FundBins;
-    RCall(CSVP_List_Int, Ctor)(& FundBins);
+    CDSP2_List_Int FundBins;
+    RCall(CDSP2_List_Int, Ctor)(& FundBins);
     
     p = LPosition;
     while(p < RPosition)
     {   
         int Bin = RCall(CSVP_F0FromWaveB, _T1)(Sorc, p, MinFreq, MaxFreq);
         if(Bin > 0)
-            RCall(CSVP_List_Int, Add)(& FundBins, Bin);
+            RCall(CDSP2_List_Int, Add)(& FundBins, Bin);
         p += 512;
     }
     
@@ -182,7 +182,7 @@ RTFunc(static int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition,
     else
         Ret = FundBins.Frames[FundBins.Frames_Index / 2]; 
     
-    RCall(CSVP_List_Int, Dtor)(& FundBins);
+    RCall(CDSP2_List_Int, Dtor)(& FundBins);
     return Ret;
 }
 

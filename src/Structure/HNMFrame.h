@@ -2,7 +2,6 @@
 #define CSVP_HNMFRAME_H
 
 #include <CVEDSP2.h>
-#include "DataFrame.h"
 
 #if 0
 #include "_HNMContour.h"

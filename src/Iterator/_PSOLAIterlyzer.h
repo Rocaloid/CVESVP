@@ -1,5 +1,5 @@
 #define _InfWave _C(CDSP2_InfWave, _, _T1)
-#define _List_Int CSVP_List_Int
+#define _List_Int CDSP2_List_Int
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 #define _STFTItersizer _C(CSVP_STFTItersizer, _, _T1)
 #define _PMatch _C(PMatch_, _T1, _, _T1)

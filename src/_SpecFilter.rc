@@ -1,5 +1,5 @@
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
-#define _List_Spectrum _C(CSVP_List_Spectrum, _, _T1)
+#define _List_Spectrum _C(CDSP2_List_Spectrum, _, _T1)
 
 #define F2B(F, FS, Size) ((Size) * (F) / (FS))
 #define _Init_1P \

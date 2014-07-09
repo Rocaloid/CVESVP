@@ -1,5 +1,5 @@
-#ifndef CVESVP_STFT_H
-#define CVESVP_STFT_H
+#ifndef CSVP_STFT_H
+#define CSVP_STFT_H
 
 #include "Misc/Lists.h"
 #include <CVEDSP2.h>

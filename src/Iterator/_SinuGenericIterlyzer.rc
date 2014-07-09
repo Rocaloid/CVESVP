@@ -1,11 +1,11 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
-#define _List_Int CSVP_List_Int
+#define _List_Int CDSP2_List_Int
 #define _List_GnrcFrame _C(CSVP_List_, _T3, _, _T1)
-#define _List_DataFrame _C(CSVP_List_DataFrame, _, _T1)
+#define _List_DataFrame _C(CDSP2_List_DataFrame, _, _T1)
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 #define _SinusoidalBase _C(CSVP_SinusoidalBase, _, _T1)
 #define _GnrcFrame _C(CSVP_, _T3, _, _T1)
-#define _DataFrame _C(CSVP_DataFrame, _, _T1)
+#define _DataFrame _C(CDSP2_DataFrame, _, _T1)
 #define _MyBase ((_SinusoidalBase*)This)
 #define _PMatch _C(PMatch_, _T1, _, _T1)
 
@@ -138,7 +138,7 @@ RTMethod(static void, _T2, _Analyze)
                     & _MyBase -> Sublyzer0 -> SpecList.Frames[i], F0, N)
             );
         }
-        int Index = CSVP_List_Int_Add(& This -> PulseList,
+        int Index = CDSP2_List_Int_Add(& This -> PulseList,
             _MyBase -> PulseList.Frames[i]);
         RCall(_List_GnrcFrame, Add)(& This -> _T4, & TempGnrc, Index);
         if(This -> GenPhase)

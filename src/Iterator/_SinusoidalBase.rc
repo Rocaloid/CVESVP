@@ -1,5 +1,5 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
-#define _List_Int CSVP_List_Int
+#define _List_Int CDSP2_List_Int
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 #define _PMatch _C(PMatch_, _T1, _, _T1)
 
@@ -132,7 +132,7 @@ RTMethod(int , CSVP_SinusoidalBase, IterNextTo, int Position)
         _T1 Candidate = RCall(CSVP_F0FromSuccSpectrum, _T1)(
             & This -> Sublyzer0 -> SpecList.Frames[i],
             & This -> Sublyzer1 -> SpecList.Frames[i], 1,
-            Freq * 0.85, Freq * 1.3);
+            Freq * 0.7, Freq * 1.6);
         if(! (Candidate > 50 && Candidate < 1500))
             return -1;
         This -> FreqList[i] = Candidate;
