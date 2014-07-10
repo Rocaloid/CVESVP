@@ -4,14 +4,21 @@
 #define _List_DataFrame _C(CDSP2_List_DataFrame, _, _T1)
 #define _Sinusoid _C(CSVP_Sinusoid, _, _T1)
 #define _DataFrame _C(CDSP2_DataFrame, _, _T1)
+#define _PMatch _C(PMatch_, _T1, _, _T1)
 
 RClass(_RTClassName)
 {
     RInherit(RObject);
     
     //Public
-    _List_Int      PulseList;
-    _List_Sinusoid SinuList;
+    _List_Int       PulseList;
+    _List_Sinusoid  SinuList;
+    
+    struct
+    {
+        _PMatch PulseList;
+        _List_DataFrame PhseList;
+    } PhseMatch;
     
     //Private
     _List_DataFrame PhseList;
@@ -44,4 +51,5 @@ RTMethod(void, CSVP_SinusoidItersizer, Add, _Sinusoid* Sorc, int Position);
 #undef  _List_DataFrame
 #undef  _Sinusoid
 #undef  _DataFrame
+#undef  _PMatch
 

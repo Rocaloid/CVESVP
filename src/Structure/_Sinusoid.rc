@@ -209,8 +209,9 @@ RTMethod(static void, CSVP_Sinusoid, _FromSpectrum, _DataFrame* Dest,
         This -> Freq[i] = TempPair.X;
         This -> Ampl[i] = TempPair.Y;
         
+        //[-2pi, 2pi]
         if(GenPhase)
-            Dest -> Data[i] = Sorc -> Phse[TempPair.IntX];
+            Dest -> Data[i] = Sorc -> Phse[TempPair.IntX] + M_PI;
     }
 }
 
