@@ -97,7 +97,7 @@ RTMethod(void, CSVP_F0Iterlyzer, _IterProcess, _T1* Temp)
     
     if(This -> Option.Adlib)
     {
-        _T1 Candidate = RCall(CSVP_F0FromWave, _T1)
+        _T1 Candidate = RCall(CSVP_F0FromWave_SpecStep, _T1)
         (
             This -> Wave, This -> LastPosition,
             This -> Option.LFreq / 2,
@@ -108,7 +108,7 @@ RTMethod(void, CSVP_F0Iterlyzer, _IterProcess, _T1* Temp)
                 Candidate);
     }else
     {
-        _T1 Candidate = RCall(CSVP_F0FromWave, _T1)
+        _T1 Candidate = RCall(CSVP_F0FromWave_SpecStep, _T1)
         (
             This -> Wave, This -> LastPosition,
             This -> RefF0 / Var,

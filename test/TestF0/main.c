@@ -13,15 +13,15 @@ int main()
     CDSP2_GenHanning_Float(wind, 2048);
     CDSP2_Wave_Float_SetWindow(& MyWave, wind, 2048);
     
-    String_FromChars(Path, "/tmp/t/ta0.wsp");
+    String_FromChars(Path, "/tmp/sound2.wav");
     
     CDSP2_Wave_Float_FromFile(& MyWave, & Path);
     
     CSVP_F0Iterlyzer_Float F0Iter;
     CSVP_F0Iterlyzer_Float_Ctor(& F0Iter);
     F0Iter.Option.Adlib = 1;
-    F0Iter.Option.LFreq = 50;
-    F0Iter.Option.HFreq = 800;
+    F0Iter.Option.LFreq = 70;
+    F0Iter.Option.HFreq = 700;
     F0Iter.Option.Threshold = 0.01;
     
     int Onset = CSVP_OnsetFromWave_Float(& MyWave, 0.0005, 0, MyWave.Size);
