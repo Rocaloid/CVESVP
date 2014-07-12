@@ -14,6 +14,11 @@ RClass(_RTClassName)
     _List_Int      PulseList;
     _List_HNMFrame HNMList;
     
+    struct
+    {
+        char PhaseControl;
+    } Option;
+    
     //Private
     _SinusoidItersizer* SubsizerS;
     _STFTItersizer* SubsizerF;

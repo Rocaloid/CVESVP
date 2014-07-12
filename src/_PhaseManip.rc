@@ -66,7 +66,7 @@ RTFunc(void, CSVP_PhaseSyncH, _DataFrame* Dest, _T1 Phse0)
     
     int i;
     for(i = 0; i < Dest -> Size; i ++)
-        Dest -> Data[i] = fmod(Dest -> Data[i] + d * (_T1)i + 2.0 * M_PI,
+        Dest -> Data[i] = fmod(Dest -> Data[i] + d * (_T1)(i + 1) + 2.0 * M_PI,
             2.0 * M_PI);
 }
 
@@ -75,9 +75,11 @@ RTFunc(void, CSVP_PhaseShift, _DataFrame* Dest, _DataFrame* Sorc, _T1* Freq,
 {
     int i;
     _T1 l, F;
+    int MinSize = Sorc -> Size;
+    if(Dest -> Size < MinSize) MinSize = Dest -> Size;
     
     l = (_T1)DeltaPos / (_T1)SampleRate;
-    for(i = 0; i < Dest -> Size; i ++)
+    for(i = 0; i < MinSize; i ++)
     {
         F = Freq[i];
         Dest -> Data[i] = Sorc -> Data[i] + 2.0 * M_PI * F * l + 2.0 * M_PI;

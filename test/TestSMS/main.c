@@ -19,8 +19,8 @@
 #define Wave CDSP2_Wave_Float
 #define IWave CDSP2_IWave_Float
 
-#define Stretch 5
-#define FFTSIZE 128
+#define Stretch 1
+#define FFTSIZE 256
 
 int main()
 {
@@ -36,7 +36,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/t/ta0.wsp");
+    String_SetChars(& Path, "/tmp/d/da0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch);
     
@@ -79,7 +79,10 @@ int main()
     int Last;
     for(i = 0; i <= HNMIter.PulseList.Frames_Index; i ++)
     {
-        //HNMIter.PulseList.Frames[i] -= Offset;
+        if(i % 10 == 0)
+        RCall(HNMItersizer, AddPhase)(& HNMSizer,
+            & HNMIter.PhseList.Frames[i], Offset);
+        
         for(j = 0; j < Stretch; j ++)
         {
             RCall(HNMItersizer, Add)(& HNMSizer, & HNMIter.HNMList.Frames[i],
@@ -89,7 +92,7 @@ int main()
     }
     Last = HNMSizer.PulseList.Frames[i * Stretch - 1];
     
-    int f = 50;
+    //int f = i / 2;
     
     //for(j = 0; j < HNMIter.PhseList.Frames[f].Size; j ++)
     //    HNMIter.PhseList.Frames[f].Data[j] = 2.0 * M_PI;
@@ -97,18 +100,20 @@ int main()
     
     RCall(HNMItersizer, SetHopSize)(& HNMSizer, FFTSIZE);
     RCall(HNMItersizer, SetWave)(& HNMSizer, & YWave);
-    RCall(HNMItersizer, SetPosition)(& HNMSizer, HNMIter.PulseList.Frames[f]);
     
+    RCall(HNMItersizer, SetPosition)(& HNMSizer,
+        HNMSizer.SubsizerS -> PhseMatch.PulseList.X[5]);
     RCall(HNMItersizer, SetInitPhase)(& HNMSizer,
-        & HNMIter.PhseList.Frames[f]);
-    RCall(HNMItersizer, AddPhase)(& HNMSizer,
-        & HNMIter.PhseList.Frames[f + 5], HNMIter.PulseList.Frames[f + 5]);
-    RCall(HNMItersizer, AddPhase)(& HNMSizer,
-        & HNMIter.PhseList.Frames[f + 8], HNMIter.PulseList.Frames[f + 8]);
+        & HNMSizer.SubsizerS -> PhseMatch.PhseList.Frames[5]);
+    printf("%f\n", HNMSizer.SubsizerS -> PhseMatch.PulseList.X[5]);
+    
+    HNMSizer.Option.PhaseControl = 1;
+    
     
     //printf("%d %d\n", Last - 1000, HNMIter.PulseList.Frames[f]);
     
     RCall(HNMItersizer, PrevTo    )(& HNMSizer, 0);
+    RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 8000);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 1000);
     
     String_SetChars(& Path, "/tmp/out.wav");
@@ -122,20 +127,10 @@ int main()
     RCall(HNMFrame, FromContour)(& TestFrame, & TestCont, 200, 8000);
     //for(i = 0; i < TestFrame.Hmnc.Size; i ++)
     //    printf("%f, %f\n", TestFrame.Hmnc.Freq[i], TestFrame.Hmnc.Ampl[i]);
-    
-    DataFrame* P1, *P2;
-    DataFrame P;
-    RCall(DataFrame, Ctor)(& P);
-    P1 = & HNMIter.PhseList.Frames[20];
-    P2 = & HNMIter.PhseList.Frames[50];
-    CSVP_PhaseSync_Float(P1, HNMIter.HNMList.Frames[20].Hmnc.Freq, 0);
-    CSVP_PhaseSync_Float(P2, HNMIter.HNMList.Frames[50].Hmnc.Freq, 0);
-    CSVP_PhaseInterp_Float(& P, P1, P2, 0.5);
-    for(i = 0; i < 5; i ++)
-        printf("%f\n", P.Data[i]);
+        
     
     RFree(Win);
-    RDelete(& Path, & TestCont, & TestFrame, & P);
+    RDelete(& Path, & TestCont, & TestFrame);
     RDelete(& XWave, & YWave, & HNMIter, & HNMSizer, & F0Iter);
     return 0;
 }

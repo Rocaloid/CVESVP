@@ -14,6 +14,11 @@ RClass(_RTClassName)
     _List_Int       PulseList;
     _List_Sinusoid  SinuList;
     
+    struct
+    {
+        char PhaseControl;
+    } Option;
+    
     //Private
     struct
     {

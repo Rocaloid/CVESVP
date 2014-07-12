@@ -6,6 +6,8 @@
 #include <CVEDSP2.h>
 #include <RUtil2.h>
 
+#define CSVP_SinusoidalPreserveSize 1024
+
 #if 0
 #include "Iterator/_SinusoidalBase.h"
 #include "Iterator/_SinuGenericIterlyzer.h"
