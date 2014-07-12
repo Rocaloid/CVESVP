@@ -101,6 +101,10 @@ int main()
     
     RCall(HNMItersizer, SetInitPhase)(& HNMSizer,
         & HNMIter.PhseList.Frames[f]);
+    RCall(HNMItersizer, AddPhase)(& HNMSizer,
+        & HNMIter.PhseList.Frames[f + 5], HNMIter.PulseList.Frames[f + 5]);
+    RCall(HNMItersizer, AddPhase)(& HNMSizer,
+        & HNMIter.PhseList.Frames[f + 8], HNMIter.PulseList.Frames[f + 8]);
     
     //printf("%d %d\n", Last - 1000, HNMIter.PulseList.Frames[f]);
     

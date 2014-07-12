@@ -14,13 +14,13 @@ RClass(_RTClassName)
     _List_Int       PulseList;
     _List_Sinusoid  SinuList;
     
+    //Private
     struct
     {
         _PMatch PulseList;
         _List_DataFrame PhseList;
     } PhseMatch;
     
-    //Private
     _List_DataFrame PhseList;
     void* Wave;
     int LastPosition;
@@ -34,6 +34,7 @@ RClass(_RTClassName)
 
 RTMethod(void, CSVP_SinusoidItersizer, From, _RTClassName* Sorc);
 RTMethod(void, CSVP_SinusoidItersizer, Clear);
+RTMethod(void, CSVP_SinusoidItersizer, PPClear); //Clear while Preserving Phase
 
 RTMethod(void, CSVP_SinusoidItersizer, SetWave, void* Sorc);
 RTMethod(void, CSVP_SinusoidItersizer, SetInitPhase, _DataFrame* Sorc);
@@ -44,6 +45,8 @@ RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position);
 RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position);
 
 RTMethod(void, CSVP_SinusoidItersizer, Add, _Sinusoid* Sorc, int Position);
+RTMethod(void, CSVP_SinusoidItersizer, AddPhase, _DataFrame* Sorc,
+    int Position);
 
 #undef  _Wave
 #undef  _List_Int

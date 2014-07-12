@@ -37,6 +37,7 @@ RTMethod(void, CSVP_HNMItersizer, IterNextTo, int Position);
 RTMethod(void, CSVP_HNMItersizer, PrevTo, int Position);
 
 RTMethod(void, CSVP_HNMItersizer, Add, _HNMFrame* Sorc, int Position);
+RTMethod(void, CSVP_HNMItersizer, AddPhase, _DataFrame* Sorc, int Position);
 
 #undef  _Wave
 #undef  _List_Int

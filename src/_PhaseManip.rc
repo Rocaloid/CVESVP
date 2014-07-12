@@ -56,5 +56,56 @@ RTFunc(void, CSVP_PhaseSync, _DataFrame* Dest, _T1* Freq, _T1 Phse0)
             2.0 * M_PI);
 }
 
+RTFunc(void, CSVP_PhaseSyncH, _DataFrame* Dest, _T1 Phse0)
+{
+    _T1 POrig = Dest -> Data[0];
+    if(fabs(POrig - Phse0) > M_PI)
+        if(POrig < Phse0) POrig += 2.0 * M_PI;
+        else Phse0 += 2.0 * M_PI;
+    _T1 d = Phse0 - POrig;
+    
+    int i;
+    for(i = 0; i < Dest -> Size; i ++)
+        Dest -> Data[i] = fmod(Dest -> Data[i] + d * (_T1)i + 2.0 * M_PI,
+            2.0 * M_PI);
+}
+
+RTFunc(void, CSVP_PhaseShift, _DataFrame* Dest, _DataFrame* Sorc, _T1* Freq,
+    int DeltaPos, int SampleRate)
+{
+    int i;
+    _T1 l, F;
+    
+    l = (_T1)DeltaPos / (_T1)SampleRate;
+    for(i = 0; i < Dest -> Size; i ++)
+    {
+        F = Freq[i];
+        Dest -> Data[i] = Sorc -> Data[i] + 2.0 * M_PI * F * l + 2.0 * M_PI;
+    }
+}
+
+RTFunc(void, CSVP_PhaseUnwrap, _DataFrame* Dest, _DataFrame* Sorc, _T1* SFreq,
+    _T1* DFreq, int DeltaPos, int SampleRate, int Direction)
+{
+    _T1 t = (_T1)DeltaPos / (_T1)SampleRate;
+    
+    int i;
+    for(i = 0; i < Dest -> Size; i ++)
+    {
+        _T1 Phi = Sorc -> Data[i] / 2.0 / M_PI
+                + (SFreq[i] * t + (DFreq[i] - SFreq[i]) / 2.0 * t * t)
+                * Direction
+                - Dest -> Data[i] / 2.0 / M_PI;
+        Dest -> Data[i] += round(Phi) * 2.0 * M_PI;
+    }
+}
+
+RTFunc(void, CSVP_PhaseWrap, _DataFrame* Dest)
+{
+    int i;
+    for(i = 0; i < Dest -> Size; i ++)
+        Dest -> Data[i] = fmod(Dest -> Data[i] + 2.0 * M_PI, 2.0 * M_PI);
+}
+
 #undef  _DataFrame
 

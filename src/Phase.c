@@ -2,10 +2,10 @@
 #include <RUtil2.h>
 
 #if 0
-#include "_PhaseInterp.rc"
+#include "_PhaseManip.rc"
 #endif
 
-#define _RTAddress "_PhaseInterp.rc"
+#define _RTAddress "_PhaseManip.rc"
 
 #define _ClassName _
 #define _Attr 1

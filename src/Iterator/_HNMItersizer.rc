@@ -165,8 +165,8 @@ RTMethod(void, CSVP_HNMItersizer, IterNextTo, int Position)
     RCall(_List_Int, RemoveRange)(& This -> PulseList, LIndex + 1, HIndex - 1);
     RCall(_List_HNMFrame, RemoveRange)(& This -> HNMList,
         LIndex + 1, HIndex - 1);
-    RCall(_SinusoidItersizer, Clear)(This -> SubsizerS);
-    RCall(_STFTItersizer    , Clear)(This -> SubsizerF);
+    RCall(_SinusoidItersizer, PPClear)(This -> SubsizerS);
+    RCall(_STFTItersizer, Clear)(This -> SubsizerF);
 }
 
 RTMethod(void, CSVP_HNMItersizer, PrevTo, int Position)
@@ -209,14 +209,19 @@ RTMethod(void, CSVP_HNMItersizer, PrevTo, int Position)
     RCall(_List_Int, RemoveRange)(& This -> PulseList, LIndex + 1, HIndex - 1);
     RCall(_List_HNMFrame, RemoveRange)(& This -> HNMList,
         LIndex + 1, HIndex - 1);
-    RCall(_SinusoidItersizer, Clear)(This -> SubsizerS);
-    RCall(_STFTItersizer    , Clear)(This -> SubsizerF);
+    RCall(_SinusoidItersizer, PPClear)(This -> SubsizerS);
+    RCall(_STFTItersizer, Clear)(This -> SubsizerF);
 }
 
 RTMethod(void, CSVP_HNMItersizer, Add, _HNMFrame* Sorc, int Position)
 {
     int i = RCall(_List_Int, Add)(& This -> PulseList, Position);
     RCall(_List_HNMFrame, Add)(& This -> HNMList, Sorc, i);
+}
+
+RTMethod(void, CSVP_HNMItersizer, AddPhase, _DataFrame* Sorc, int Position)
+{
+    RCall(_SinusoidItersizer, AddPhase)(This -> SubsizerS, Sorc, Position);
 }
 
 #undef  _Wave
