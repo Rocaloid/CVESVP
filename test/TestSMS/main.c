@@ -20,6 +20,7 @@
 #define IWave CDSP2_IWave_Float
 
 #define Stretch 1
+#define Speed 1.5
 #define FFTSIZE 256
 
 int main()
@@ -36,7 +37,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/d/da0.wsp");
+    String_SetChars(& Path, "/tmp/s/sa0.wsp");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch);
     
@@ -82,6 +83,10 @@ int main()
         if(i % 10 == 0)
         RCall(HNMItersizer, AddPhase)(& HNMSizer,
             & HNMIter.PhseList.Frames[i], Offset);
+        for(j = 0; j < HNMIter.HNMList.Frames[i].Hmnc.Size; j ++)
+        {
+            HNMIter.HNMList.Frames[i].Hmnc.Freq[j] *= Speed;
+        }
         
         for(j = 0; j < Stretch; j ++)
         {
