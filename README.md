@@ -20,7 +20,7 @@ Todo & Plan List
 - [x] Glottal pulse & phase reconstruction in `SinusoidItersizer`
 - [x] Implement `HNMItersizer` based on `SinusoidItersizer`(in: `Position` `HNMFrame`, out: `Wave`)
 - [x] Implement `F0Iterlyzer`(in: `Wave`, out: `Real`)
-- [ ] Phase control points for `SinusoidItersizer`
+- [x] Phase control points for `SinusoidItersizer`
 
 ####Step2: Structural Changes & Minor Improvements
 
