@@ -237,7 +237,8 @@ RTFunc(static _T1, _CSVP_Mode, _T1* Sorc, int Num)
     return Ret;
 }
 
-RTFunc(void, CSVP_F0PostProcess, _PMatch* Dest, int AnaSize, _T1 Variance)
+RTFunc(void, CSVP_F0PostProcess, _PMatch* Dest, int AnaSize, _T1 Variance,
+    _T1 LFreq, _T1 HFreq)
 {
     int i, j;
     if(Dest -> X_Index < 5) return;
@@ -253,7 +254,8 @@ RTFunc(void, CSVP_F0PostProcess, _PMatch* Dest, int AnaSize, _T1 Variance)
         
         _T1 Mode = RCall(_CSVP_Mode, _T1)(& Dest -> Y[LIndex],
            HIndex - LIndex + 1);
-        if(fabs(Dest -> Y[i] - Mode) > Mode * Variance || LIndex == HIndex)
+        if(fabs(Dest -> Y[i] - Mode) > Mode * Variance || LIndex == HIndex ||
+           Dest -> Y[i] < LFreq || Dest -> Y[i] > HFreq)
             Array_Push(int, RmList, i);
     }
     int RmAcc = 0;

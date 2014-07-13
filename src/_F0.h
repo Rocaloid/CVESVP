@@ -23,7 +23,8 @@ RTFunc(_T1, CSVP_F0FromWave_YIN, void* Sorc, int Position, _T1 MinFreq, int W,
 RTFunc(_T1, CSVP_SecureF0FromWave, void* Sorc, int Center, 
     int LPosition, int RPosition, int MinFreq, int MaxFreq);
 
-RTFunc(void, CSVP_F0PostProcess, _PMatch* Dest, int AnaSize, _T1 Variance);
+RTFunc(void, CSVP_F0PostProcess, _PMatch* Dest, int AnaSize, _T1 Variance,
+    _T1 LFreq, _T1 HFreq);
 
 #undef  _Spectrum
 #undef  _PMatch
