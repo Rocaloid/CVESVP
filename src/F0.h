@@ -4,6 +4,7 @@
 #include <CVEDSP2.h>
 
 #define CSVP_F0_SpecStep 0
+#define CSVP_F0_YIN 1
 
 typedef struct
 {
@@ -14,6 +15,12 @@ typedef struct
     
     char Adlib;
     char Method;
+    
+    struct
+    {
+        int W;
+        float Threshold;
+    } YIN;
 } CSVP_F0Option;
 
 #include <RUtil2.h>

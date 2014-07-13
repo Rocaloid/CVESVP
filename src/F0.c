@@ -7,9 +7,9 @@
 #include "Iterator/_F0Iterlyzer.rc"
 #endif
 
-#define SPECSTEP 1
-#define PEAK 2
-#define YIN 3
+#define M_SPECSTEP 1
+#define M_PEAK 2
+#define M_YIN 3
 
 #ifdef __CSVP_Install
 #define _RTAddress "CVESVP/_F0.rc"

@@ -19,6 +19,10 @@ RCtor(_RTClassName)
     This -> Option.Variance = 0.3;
     This -> Option.Adlib = 0;
     This -> Option.Threshold = 0.001;
+    This -> Option.Method = CSVP_F0_SpecStep;
+    
+    This -> Option.YIN.W = 500;
+    This -> Option.YIN.Threshold = 0.2;
     RCall(_PMatch, AddPair)(& This -> F0List, 0, 0);
     
     RInit(_RTClassName);
@@ -97,23 +101,44 @@ RTMethod(void, CSVP_F0Iterlyzer, _IterProcess, _T1* Temp)
     
     if(This -> Option.Adlib)
     {
-        _T1 Candidate = RCall(CSVP_F0FromWave_SpecStep, _T1)
-        (
-            This -> Wave, This -> LastPosition,
-            This -> Option.LFreq / 2,
-            This -> Option.HFreq
-        );
+        _T1 Candidate;
+        if(This -> Option.Method == CSVP_F0_SpecStep)
+            Candidate = RCall(CSVP_F0FromWave_SpecStep, _T1)
+            (
+                This -> Wave, This -> LastPosition,
+                This -> Option.LFreq / 2,
+                This -> Option.HFreq
+            );
+        else if(This -> Option.Method == CSVP_F0_YIN)
+            Candidate = RCall(CSVP_F0FromWave_YIN, _T1)
+            (
+                This -> Wave, This -> LastPosition,
+                This -> Option.LFreq / 2,
+                This -> Option.YIN.W, This -> Option.YIN.Threshold
+            );
+        else RAssert(0, "No method assigned.");
         if(Candidate > This -> Option.LFreq && Candidate < This -> Option.HFreq)
             RCall(_PMatch, AddPair)(& This -> F0List, This -> LastPosition,
                 Candidate);
     }else
     {
-        _T1 Candidate = RCall(CSVP_F0FromWave_SpecStep, _T1)
-        (
-            This -> Wave, This -> LastPosition,
-            This -> RefF0 / Var,
-            This -> RefF0 * Var
-        );
+        _T1 Candidate;
+        
+        if(This -> Option.Method == CSVP_F0_SpecStep)
+            Candidate = RCall(CSVP_F0FromWave_SpecStep, _T1)
+            (
+                This -> Wave, This -> LastPosition,
+                This -> RefF0 / Var,
+                This -> RefF0 * Var
+            );
+        else if(This -> Option.Method == CSVP_F0_YIN)
+            Candidate = RCall(CSVP_F0FromWave_YIN, _T1)
+            (
+                This -> Wave, This -> LastPosition,
+                This -> RefF0 / Var,
+                This -> Option.YIN.W, This -> Option.YIN.Threshold
+            );
+        else RAssert(0, "No method assigned.");
         if(fabs(Candidate - This -> RefF0) <
             This -> RefF0 * This -> Option.Variance)
         {

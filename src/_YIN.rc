@@ -42,7 +42,14 @@ RTFunc(_T1, CSVP_F0FromWave_YIN, void* Sorc, int Position, _T1 MinFreq, int W,
         if(i == LMark) break;
     }
     
-    if(LMark < 0) LMark = L;
+    //Neglect undefinite estimations.
+    if(LMark < 0)
+    {
+        RFree(Temp);
+        RFree(d);
+        RFree(d2);
+        return 0;
+    }
     
     int Pos = 1;
     _T1 Min = d2[1];

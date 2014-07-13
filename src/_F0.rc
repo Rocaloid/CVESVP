@@ -155,10 +155,10 @@ RTFunc(static _T1, _CSVP_F0FromWave, void* Sorc, int Position,
     RCall(_Spectrum, FromWaveW)(& Spec2, Sorc, Position - WinSize / 2 + 1);
     
     int Bin;
-    if(Method == SPECSTEP)
+    if(Method == M_SPECSTEP)
         Bin = RCall(CSVP_F0FromSpectrumB_SpecStep, _T1)(& Spec1, MinFreq,
             MaxFreq);
-    else if(Method == PEAK)
+    else if(Method == M_PEAK)
         Bin = RCall(CSVP_F0FromSpectrumB_Peak, _T1)(& Spec1, MinFreq, MaxFreq);
     if(Bin < 2)
     {
@@ -177,13 +177,14 @@ RTFunc(_T1, CSVP_F0FromWave_SpecStep, void* Sorc, int Position,
     int MinFreq, int MaxFreq)
 {
     return RCall(_CSVP_F0FromWave, _T1)(Sorc, Position, MinFreq, MaxFreq,
-        SPECSTEP);
+        M_SPECSTEP);
 }
 
 RTFunc(_T1, CSVP_F0FromWave_Peak, void* Sorc, int Position,
     int MinFreq, int MaxFreq)
 {
-    return RCall(_CSVP_F0FromWave, _T1)(Sorc, Position, MinFreq, MaxFreq, PEAK);
+    return RCall(_CSVP_F0FromWave, _T1)(Sorc, Position, MinFreq, MaxFreq,
+        M_PEAK);
 }
 
 RTFunc(static int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition,
