@@ -70,7 +70,7 @@ RTFunc(void, CSVP_PhaseSyncH, _DataFrame* Dest, _T1 Phse0)
             2.0 * M_PI);
 }
 
-RTFunc(void, CSVP_PhaseRetract, _DataFrame* Dest, _T1 Ratio)
+RTFunc(void, CSVP_PhaseContract, _DataFrame* Dest, _T1 Ratio)
 {
     int i;
     for(i = 0; i < Dest -> Size; i ++)

@@ -2,6 +2,7 @@
 #include "F0.h"
 #include "EndPoint.h"
 #include "Phase.h"
+#include "Spectral/Pitch.h"
 #include <CVEDSP2.h>
 #include <RUtil2.h>
 #include <stdlib.h>
@@ -41,7 +42,7 @@ int main()
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch);
     
-    int VOT = CSVP_VOTFromWave_Float(& XWave, 0, XWave.Size / 2);
+    int VOT = CSVP_VOTFromWave_Float(& XWave, 0, XWave.Size);
     //printf("VOT: %d\n", VOT);
     
     CSVP_F0Iterlyzer_Float F0Iter;
@@ -68,7 +69,7 @@ int main()
     RCall(HNMIterlyzer, SetHopSize)(& HNMIter, FFTSIZE);
     RCall(HNMIterlyzer, SetWave)(& HNMIter, & XWave);
     RCall(HNMIterlyzer, SetPosition)(& HNMIter, VOT + 1000);
-    RCall(HNMIterlyzer, SetUpperFreq)(& HNMIter, 8000);
+    RCall(HNMIterlyzer, SetUpperFreq)(& HNMIter, 10000);
     RCall(HNMIterlyzer, SetPitch)(& HNMIter, & F0Iter.F0List);
     
     RCall(HNMIterlyzer, PrevTo)(& HNMIter, VOT);
@@ -82,27 +83,46 @@ int main()
     RCall(HNMContour, Ctor)(& TempCont);
     RCall(HNMFrame, Ctor)(& TempHNM);
     
+    CSVP_PitchModel PM;
+    CSVP_PitchModel_Ctor(& PM);
+    
     int Offset = HNMIter.PulseList.Frames[0];
     int Last;
     for(i = 0; i <= HNMIter.PulseList.Frames_Index; i ++)
     {
+        HNMFrame* OrigHNM = & HNMIter.HNMList.Frames[i];
+        RCall(HNMFrame, ToContour)(OrigHNM, & TempCont);
+        float Sum1, Sum2, Ratio;
+        float F0 = OrigHNM -> Hmnc.Freq[0] * 1.5;
+        Sum1 = CSVP_EnergyFromHNMFrame_Float(OrigHNM);
+        
+        RCall(HNMFrame, FromContour)(& TempHNM, & TempCont, F0, 12000);
+        Sum2 = CSVP_EnergyFromHNMFrame_Float(& TempHNM);
+        Ratio = sqrt(Sum1 / Sum2);
+        
+        CSVP_PitchAdjustHNMContour_Float(& TempCont, & PM, F0,
+            XWave.SampleRate);
+        //RCall(CDSP2_VCAdd, Float)(TempCont.Noiz, TempCont.Noiz, 0.5, 1025);
+        RCall(HNMFrame, FromContour)(& TempHNM, & TempCont, F0, 12000);
+        
         if(i % 10 == 0)
         {
+            float PhaseAdj = CSVP_PitchModel_GetPhseCoh(& PM, F0);
             CSVP_PhaseSyncH_Float(& HNMIter.PhseList.Frames[i], 0);
-            CSVP_PhaseRetract_Float(& HNMIter.PhseList.Frames[i], 1.5);
+            CSVP_PhaseContract_Float(& HNMIter.PhseList.Frames[i], PhaseAdj);
             RCall(HNMItersizer, AddPhase)(& HNMSizer,
                 & HNMIter.PhseList.Frames[i], Offset);
         }
-        HNMFrame* OrigHNM = & HNMIter.HNMList.Frames[i];
-        RCall(HNMFrame, ToContour)(OrigHNM, & TempCont);
-        RCall(CDSP2_VCAdd, Float)(TempCont.Noiz, TempCont.Noiz, -1, 1024);
-        RCall(HNMFrame, FromContour)(& TempHNM, & TempCont,
-            OrigHNM -> Hmnc.Freq[0] * 2, 8000);
-        /*
-        for(j = 0; j < TempHNM -> Hmnc.Size; j ++)
+        /* Uncomment to plot the spectral env.
+        if(Offset > 10000)
         {
-            TempHNM -> Hmnc.Freq[j] *= Speed;
+            for(j = 0; j < 1024; j ++)
+                printf("%f\n", TempCont.Hmnc[j]);
+            exit(0);
         }*/
+        
+        for(j = 0; j < TempHNM.Hmnc.Size; j ++)
+            TempHNM.Hmnc.Ampl[j] *= Ratio;
         
         for(j = 0; j < Stretch; j ++)
         {
@@ -111,7 +131,7 @@ int main()
         }
     }
     Last = HNMSizer.PulseList.Frames[i * Stretch - 1];
-    RDelete(& TempCont, & TempHNM);
+    RDelete(& TempCont, & TempHNM, & PM);
     
     //int f = i / 2;
     

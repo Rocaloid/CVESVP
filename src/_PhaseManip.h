@@ -6,7 +6,7 @@ RTFunc(void, CSVP_PhaseInterp, _DataFrame* Dest, _DataFrame* Sorc1,
 RTFunc(void, CSVP_PhaseSync, _DataFrame* Dest, _T1* Freq, _T1 Phse0);
 RTFunc(void, CSVP_PhaseSyncH, _DataFrame* Dest, _T1 Phse0);
 
-RTFunc(void, CSVP_PhaseRetract, _DataFrame* Dest, _T1 Ratio);
+RTFunc(void, CSVP_PhaseContract, _DataFrame* Dest, _T1 Ratio);
 
 RTFunc(void, CSVP_PhaseShift, _DataFrame* Dest, _DataFrame* Sorc, _T1* Freq,
     int DeltaPos, int SampleRate);

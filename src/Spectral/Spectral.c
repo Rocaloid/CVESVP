@@ -6,7 +6,7 @@
 
 #include <RUtil2.h>
 
-#define _RTAddress "Spectral/_Spectral.h"
+#define _RTAddress "Spectral/_Spectral.rc"
 
 #define _ClassName _
 #define _Attr 1

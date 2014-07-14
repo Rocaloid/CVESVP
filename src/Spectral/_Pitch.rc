@@ -1,0 +1,18 @@
+#define _HNMFrame _C(CSVP_HNMFrame, _, _T1)
+#define _HNMContour _C(CSVP_HNMContour, _, _T1)
+
+RTFunc(void, CSVP_PitchAdjustHNMContour, _HNMContour* Dest,
+    CSVP_PitchModel* Sorc, _T1 F0, int SampleRate)
+{
+    int Size = Dest -> Size / 2 + 1;
+    CSVP_SpectralDecay Decay = CSVP_PitchModel_GetDecay(Sorc, F0);
+    RCall(CSVP_ApplyDecay, _T1)(Dest, & Decay, SampleRate);
+    _T1 HmncAmp = CSVP_PitchModel_GetHmncAmp(Sorc, F0);
+    _T1 NoizAmp = CSVP_PitchModel_GetNoizAmp(Sorc, F0);
+    RCall(CDSP2_VCAdd, _T1)(Dest -> Hmnc, Dest -> Hmnc, HmncAmp, Size);
+    RCall(CDSP2_VCAdd, _T1)(Dest -> Noiz, Dest -> Noiz, NoizAmp, Size);
+}
+
+#undef  _HNMFrame
+#undef  _HNMContour
+

@@ -169,7 +169,7 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
             _IfFrwd(Cond, _Pk4InterpMul(Ampl, LAmpl, HAmpl, 1.0)); \
             _IfBkwd(Cond, _Pk4InterpMul(Ampl, HAmpl, LAmpl, 1.0)); \
             \
-            _IfFrwd(Cond, RCall(RFNL_Pk4PCos_Gnrc, _T1)(Y, X)); \
+            _IfFrwd(Cond, RCall(RFNL_Pk4Cos_Gnrc, _T1)(Y, X)); \
             _IfBkwd(Cond, RCall(RFNL_Pk4Cos_Gnrc,  _T1)(Y, X)); \
             \
             Accum += Y[0] * Ampl[0]; \
@@ -180,7 +180,7 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
         } \
         for(; k < LSinu -> Size; k ++) \
         { \
-            Accum += _IfFrwd(Cond, RCall(RFNL_PCos_Gnrc, _T1)) \
+            Accum += _IfFrwd(Cond, RCall(RFNL_Cos_Gnrc, _T1)) \
                      _IfBkwd(Cond, RCall(RFNL_Cos_Gnrc,  _T1))( \
                 RCall(RFNL_Interp_Linear_Gnrc, _T1) \
                     (Phse[k], TempPhse.Data[k], Ratio)) * \

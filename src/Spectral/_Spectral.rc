@@ -34,7 +34,7 @@ RTFunc(_T1 , CSVP_EnergyFromHNMContour, _HNMContour* Sorc)
 {
     int i;
     _T1 Ret = 0;
-    for(i = 0; i < Sorc -> Size; i ++)
+    for(i = 0; i < Sorc -> Size / 2 + 1; i ++)
         Ret += exp(2.0 * Sorc -> Hmnc[i]);
     return Ret;
 }
