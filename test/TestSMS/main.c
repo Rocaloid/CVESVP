@@ -91,10 +91,13 @@ int main()
     for(i = 0; i <= HNMIter.PulseList.Frames_Index; i ++)
     {
         HNMFrame* OrigHNM = & HNMIter.HNMList.Frames[i];
+        
         RCall(HNMFrame, ToContour)(OrigHNM, & TempCont);
         float Sum1, Sum2, Ratio;
-        float F0 = OrigHNM -> Hmnc.Freq[0] * 1.5;
+        float F0 = OrigHNM -> Hmnc.Freq[0] * 2.0;
         Sum1 = CSVP_EnergyFromHNMFrame_Float(OrigHNM);
+        CSVP_PitchShiftHNMContour_Float(& TempCont, & PM,
+            F0 - OrigHNM -> Hmnc.Freq[0], XWave.SampleRate);
         
         RCall(HNMFrame, FromContour)(& TempHNM, & TempCont, F0, 12000);
         Sum2 = CSVP_EnergyFromHNMFrame_Float(& TempHNM);
@@ -102,7 +105,8 @@ int main()
         
         CSVP_PitchAdjustHNMContour_Float(& TempCont, & PM, F0,
             XWave.SampleRate);
-        //RCall(CDSP2_VCAdd, Float)(TempCont.Noiz, TempCont.Noiz, 0.5, 1025);
+        RCall(CDSP2_VCAdd, Float)(TempCont.Noiz, TempCont.Noiz, 0.5, 1025);
+        RCall(HNMFrame, From)(& TempHNM, OrigHNM);
         RCall(HNMFrame, FromContour)(& TempHNM, & TempCont, F0, 12000);
         
         if(i % 10 == 0)
@@ -113,16 +117,15 @@ int main()
             RCall(HNMItersizer, AddPhase)(& HNMSizer,
                 & HNMIter.PhseList.Frames[i], Offset);
         }
-        /* Uncomment to plot the spectral env.
+        
+        // Uncomment to plot the spectral env.
+        /*
         if(Offset > 10000)
         {
             for(j = 0; j < 1024; j ++)
                 printf("%f\n", TempCont.Hmnc[j]);
             exit(0);
         }*/
-        
-        for(j = 0; j < TempHNM.Hmnc.Size; j ++)
-            TempHNM.Hmnc.Ampl[j] *= Ratio;
         
         for(j = 0; j < Stretch; j ++)
         {

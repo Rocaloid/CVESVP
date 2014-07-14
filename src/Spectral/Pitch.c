@@ -32,19 +32,19 @@ void CSVP_PitchModel_SetDefault(First, int Gender)
     This -> LDecay_Sensitivity = 0.02;
     This -> LDecay_Center = 4000.0;
     This -> LDecay_Bound = 9000.0;
-    This -> HDecay_F0 = 400.0;
-    This -> HDecay_Sensitivity = 0.002;
-    This -> HDecay_Center = 4000.0;
-    This -> HDecay_Bound = 9000.0;
+    This -> HDecay_F0 = 450.0;
+    This -> HDecay_Sensitivity = 0;
+    This -> HDecay_Center = 5000.0;
+    This -> HDecay_Bound = 6000.0;
     
-    RCall(_PMatch, AddPair)(& This -> HmncCurve, 700.0, +0.3);
-    RCall(_PMatch, AddPair)(& This -> HmncCurve, 360.0, +0.1);
+    RCall(_PMatch, AddPair)(& This -> HmncCurve, 700.0, +0.8);
+    RCall(_PMatch, AddPair)(& This -> HmncCurve, 360.0, +0.3);
     RCall(_PMatch, AddPair)(& This -> HmncCurve, 260.0, +0.0);
     RCall(_PMatch, AddPair)(& This -> HmncCurve, 150.0, -0.6);
     RCall(_PMatch, AddPair)(& This -> HmncCurve,   0.0, -1.5);
     
     RCall(_PMatch, AddPair)(& This -> NoizCurve, 700.0, -1.0);
-    RCall(_PMatch, AddPair)(& This -> NoizCurve, 300.0, +0.0);
+    RCall(_PMatch, AddPair)(& This -> NoizCurve, 300.0, -0.2);
     RCall(_PMatch, AddPair)(& This -> NoizCurve, 200.0, +0.0);
     RCall(_PMatch, AddPair)(& This -> NoizCurve, 150.0, -0.5);
     RCall(_PMatch, AddPair)(& This -> NoizCurve,   0.0, -1.5);

@@ -1,6 +1,23 @@
 #define _HNMFrame _C(CSVP_HNMFrame, _, _T1)
 #define _HNMContour _C(CSVP_HNMContour, _, _T1)
 
+RTFunc(void, CSVP_PitchShiftHNMContour, _HNMContour* Dest,
+    CSVP_PitchModel* Sorc, _T1 FDelta, int SampleRate)
+{
+    int Bound = 800 * Dest -> Size / SampleRate;
+    int Shift = FDelta * Dest -> Size / SampleRate / 2;
+    int i;
+    if(Shift < 0) return;
+    for(i = Bound; i < Bound + Shift; i ++)
+    {
+        _T1 R = (_T1)(i - Bound) / (Shift + 1);
+        Dest -> Hmnc[i] *= R;
+        Dest -> Hmnc[i] += (1.0 - R) * Dest -> Hmnc[i - Shift];
+    }
+    for(i = Bound; i > Shift; i --)
+        Dest -> Hmnc[i] = Dest -> Hmnc[i - Shift];
+}
+
 RTFunc(void, CSVP_PitchAdjustHNMContour, _HNMContour* Dest,
     CSVP_PitchModel* Sorc, _T1 F0, int SampleRate)
 {

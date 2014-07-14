@@ -15,7 +15,7 @@ RTFunc(void, CSVP_ApplyDecay, _HNMContour* Dest, CSVP_SpectralDecay* Sorc,
     }
     for(; i < Bound; i ++)
     {
-        _T1 R = (_T1)(i - Center) / (_T1)(Bound - Center);
+        _T1 R = 1.0 - (_T1)(i - Center) / (_T1)(Bound - Center);
         Dest -> Hmnc[i] -= R * Sorc -> Intensity;
         Dest -> Noiz[i] -= R * Sorc -> Intensity;
     }
@@ -38,6 +38,7 @@ RTFunc(_T1 , CSVP_EnergyFromHNMContour, _HNMContour* Sorc)
         Ret += exp(2.0 * Sorc -> Hmnc[i]);
     return Ret;
 }
+
 
 #undef  _HNMFrame
 #undef  _HNMContour
