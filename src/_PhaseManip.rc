@@ -70,6 +70,19 @@ RTFunc(void, CSVP_PhaseSyncH, _DataFrame* Dest, _T1 Phse0)
             2.0 * M_PI);
 }
 
+RTFunc(void, CSVP_PhaseRetract, _DataFrame* Dest, _T1 Ratio)
+{
+    int i;
+    for(i = 0; i < Dest -> Size; i ++)
+    {
+        if(Dest -> Data[i] < M_PI)
+            Dest -> Data[i] *= Ratio;
+        else
+            Dest -> Data[i] = (Dest -> Data[i] - 2.0 * M_PI) * Ratio
+                            + 2.0 * M_PI;
+    }
+}
+
 RTFunc(void, CSVP_PhaseShift, _DataFrame* Dest, _DataFrame* Sorc, _T1* Freq,
     int DeltaPos, int SampleRate)
 {

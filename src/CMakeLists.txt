@@ -1,5 +1,5 @@
 aux_source_directory(./Misc SRC_LIST)
-aux_source_directory(./EpR SRC_LIST)
+aux_source_directory(./Spectral SRC_LIST)
 aux_source_directory(./Structure SRC_LIST)
 aux_source_directory(./ SRC_LIST)
 
@@ -12,14 +12,14 @@ target_link_libraries(CVESVP RFNL)
 target_link_libraries(CVESVP m)
 
 file(GLOB Header_Misc "./Misc/*.h")
-file(GLOB Header_EpR "./EpR/*.h")
+file(GLOB Header_Spectral "./Spectral/*.h")
 file(GLOB Header_Structure "./Structure/*.h")
 file(GLOB Header_Iterator "./Iterator/*.h")
 file(GLOB Header_ROOT "./*.h")
 install(FILES ${Header_Misc}
               DESTINATION ${CMAKE_INSTALL_PREFIX}/include/CVESVP/Misc)
-install(FILES ${Header_EpR}
-              DESTINATION ${CMAKE_INSTALL_PREFIX}/include/CVESVP/EpR)
+install(FILES ${Header_Spectral}
+              DESTINATION ${CMAKE_INSTALL_PREFIX}/include/CVESVP/Spectral)
 install(FILES ${Header_Structure}
               DESTINATION ${CMAKE_INSTALL_PREFIX}/include/CVESVP/Structure)
 install(FILES ${Header_Iterator}
@@ -32,3 +32,4 @@ install(FILES Include/CVESVP.h
 install(TARGETS CVESVP LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
                        ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
                        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+

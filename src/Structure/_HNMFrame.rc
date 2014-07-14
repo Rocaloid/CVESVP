@@ -139,7 +139,7 @@ RTMethod(void, CSVP_HNMFrame, FromContour, _HNMContour* Sorc, _T1 Pitch,
     int N = UFreq / Pitch;
     RCall(_RTClassName, Resize)(This, Sorc -> Size, N);
     for(i = 0; i < This -> Hmnc.Size; i ++)
-        This -> Hmnc.Freq[i] = Pitch * i;
+        This -> Hmnc.Freq[i] = Pitch * (i + 1);
     RCall(_RTClassName, FromContourA)(This, Sorc);
 }
 

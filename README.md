@@ -27,7 +27,7 @@ Todo & Plan List
 - [x] Replace `CDSP2_If_Debug_Check` with `RAssert`
 - [x] Down integrate Lists to CVEDSP2
 - [x] Conversion between `HNMFrame` and `HNMContour`
-- [ ] Implement `F0FromWave_YIN`
+- [x] Implement `F0FromWave_YIN`
 - [ ] Implement `GainIterfector` in CVEDSP2(in: `Wave` `Wave`, out: `Wave`)
 - [ ] Implement `MixIterfector` in CVEDSP2(in: `Wave` `Wave`, out: `Wave`)
 - [ ] Implement `PulseItersizer` in CVEDSP2(in: `Position`, out: `Wave`)
