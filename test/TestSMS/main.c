@@ -38,7 +38,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/duan.wav");
+    String_SetChars(& Path, "/tmp/yao.wav");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch + 5000);
     
@@ -93,19 +93,9 @@ int main()
     {
         HNMFrame* OrigHNM = & HNMIter.HNMList.Frames[i];
         
-        RCall(HNMFrame, ToContour)(OrigHNM, & TempCont);
-        float Sum1, Sum2, Ratio;
-        float F0 = OrigHNM -> Hmnc.Freq[0] * 2;
-        Sum1 = CSVP_EnergyFromHNMFrame_Float(OrigHNM);
-        CSVP_PitchShiftHNMContour_Float(& TempCont, & PM,
-            F0 - OrigHNM -> Hmnc.Freq[0], XWave.SampleRate);
+        float F0 = OrigHNM -> Hmnc.Freq[0] * 1.5;
         
-        RCall(HNMFrame, FromContour)(& TempHNM, & TempCont, F0, 12000);
-        Sum2 = CSVP_EnergyFromHNMFrame_Float(& TempHNM);
-        Ratio = sqrt(Sum1 / Sum2);
-        
-        RCall(CDSP2_VCAdd, Float)(TempCont.Noiz, TempCont.Noiz, 1.0, 1025);
-        CSVP_PitchAdjustHNMContour_Float(& TempCont, & PM, F0,
+        CSVP_PitchConvertHNMFrame_Float(& TempCont, OrigHNM, & PM, F0, 12000,
             XWave.SampleRate);
         RCall(HNMFrame, From)(& TempHNM, OrigHNM);
         RCall(HNMFrame, FromContour)(& TempHNM, & TempCont, F0, 12000);
@@ -127,8 +117,6 @@ int main()
                 printf("%f\n", TempCont.Hmnc[j]);
             exit(0);
         }*/
-        for(j = 0; j < TempHNM.Hmnc.Size; j ++)
-            TempHNM.Hmnc.Ampl[j] *= (1.0 + Ratio) / 2;
         
         for(j = 0; j < Stretch; j ++)
         {
@@ -138,13 +126,7 @@ int main()
     }
     Last = HNMSizer.PulseList.Frames[i * Stretch - 1];
     RDelete(& TempCont, & TempHNM, & PM);
-    
-    //int f = i / 2;
-    
-    //for(j = 0; j < HNMIter.PhseList.Frames[f].Size; j ++)
-    //    HNMIter.PhseList.Frames[f].Data[j] = 2.0 * M_PI;
-//            + (float)rand() / RAND_MAX * (float) j;
-    
+        
     RCall(HNMItersizer, SetHopSize)(& HNMSizer, FFTSIZE);
     RCall(HNMItersizer, SetWave)(& HNMSizer, & YWave);
     
@@ -155,10 +137,7 @@ int main()
     printf("%f\n", HNMSizer.SubsizerS -> PhseMatch.PulseList.X[5]);
     
     HNMSizer.Option.PhaseControl = 1;
-    
-    
-    //printf("%d %d\n", Last - 1000, HNMIter.PulseList.Frames[f]);
-    
+        
     RCall(HNMItersizer, PrevTo    )(& HNMSizer, 0);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 8000);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 1000);
@@ -166,19 +145,10 @@ int main()
     
     String_SetChars(& Path, "/tmp/out.wav");
     RCall(Wave, ToFile)(& YWave, & Path);
-    
-    HNMContour TestCont;
-    HNMFrame TestFrame;
-    RCall(HNMFrame, Ctor)(& TestFrame);
-    RCall(HNMContour, Ctor)(& TestCont);
-    RCall(HNMFrame, ToContour)(& HNMIter.HNMList.Frames[i / 2], & TestCont);
-    RCall(HNMFrame, FromContour)(& TestFrame, & TestCont, 200, 8000);
-    //for(i = 0; i < TestFrame.Hmnc.Size; i ++)
-    //    printf("%f, %f\n", TestFrame.Hmnc.Freq[i], TestFrame.Hmnc.Ampl[i]);
-    
+        
     
     RFree(Win);
-    RDelete(& Path, & TestCont, & TestFrame);
+    RDelete(& Path);
     RDelete(& XWave, & YWave, & HNMIter, & HNMSizer, & F0Iter);
     return 0;
 }

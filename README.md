@@ -31,11 +31,11 @@ Todo & Plan List
 - [ ] Implement `GainIterfector` in CVEDSP2(in: `Wave` `Wave`, out: `Wave`)
 - [ ] Implement `MixIterfector` in CVEDSP2(in: `Wave` `Wave`, out: `Wave`)
 - [ ] Implement `PulseItersizer` in CVEDSP2(in: `Position`, out: `Wave`)
-- [ ] Implement `TurbIterfector`(in: `Wave` `Wave`, out: `Wave`)
 
 ####Step3: Voice Manipulation
 
-- [ ] Timbre adjustment related to pitch scaling
+- [x] Timbre adjustment related to pitch scaling
+- [ ] Turbulent Noise regeneration in `HNMItersizer`
 - [ ] Implement `GenKlatt` based on `FWindow`
 - [ ] Implement `EpRParam` structure
 - [ ] Implement `EpRParam_ToHNMContour`

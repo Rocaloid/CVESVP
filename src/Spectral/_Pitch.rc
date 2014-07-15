@@ -30,6 +30,29 @@ RTFunc(void, CSVP_PitchAdjustHNMContour, _HNMContour* Dest,
     RCall(CDSP2_VCAdd, _T1)(Dest -> Noiz, Dest -> Noiz, NoizAmp, Size);
 }
 
+RTFunc(void, CSVP_PitchConvertHNMFrame, _HNMContour* Dest, _HNMFrame* Sorc,
+    CSVP_PitchModel* Model, _T1 F0, int UFreq, int SampleRate)
+{
+    float Sum1, Sum2, Ratio;
+    
+    _HNMFrame TempHNM;
+    RCall(_HNMFrame, Ctor)(& TempHNM);
+    
+    RCall(_HNMFrame, ToContour)(Sorc, Dest);
+    CSVP_PitchShiftHNMContour_Float(Dest, Model, F0 - Sorc -> Hmnc.Freq[0],
+        SampleRate);
+    
+    Sum1 = CSVP_EnergyFromHNMFrame_Float(Sorc);
+    RCall(_HNMFrame, FromContour)(& TempHNM, Dest, F0, UFreq);
+    Sum2 = CSVP_EnergyFromHNMFrame_Float(& TempHNM);
+    Ratio = log((1.0 + sqrt(Sum1 / Sum2)) / 2.0);
+    
+    CSVP_PitchAdjustHNMContour_Float(Dest, Model, F0, SampleRate);
+    CDSP2_VCAdd_Float(Dest -> Hmnc, Dest -> Hmnc, Ratio, Dest -> Size / 2 + 1);
+    
+    RCall(_HNMFrame, Dtor)(& TempHNM);
+}
+
 #undef  _HNMFrame
 #undef  _HNMContour
 

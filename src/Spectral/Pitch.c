@@ -43,17 +43,17 @@ void CSVP_PitchModel_SetDefault(First, int Gender)
     RCall(_PMatch, AddPair)(& This -> HmncCurve, 150.0, -1.0);
     RCall(_PMatch, AddPair)(& This -> HmncCurve,   0.0, -2.0);
     
-    RCall(_PMatch, AddPair)(& This -> NoizCurve, 700.0, -2.0);
-    RCall(_PMatch, AddPair)(& This -> NoizCurve, 300.0, +0.0);
-    RCall(_PMatch, AddPair)(& This -> NoizCurve, 200.0, +0.0);
-    RCall(_PMatch, AddPair)(& This -> NoizCurve, 150.0, -0.5);
-    RCall(_PMatch, AddPair)(& This -> NoizCurve,   0.0, -1.5);
+    RCall(_PMatch, AddPair)(& This -> NoizCurve, 700.0, -1.0);
+    RCall(_PMatch, AddPair)(& This -> NoizCurve, 300.0, +1.0);
+    RCall(_PMatch, AddPair)(& This -> NoizCurve, 200.0, +1.0);
+    RCall(_PMatch, AddPair)(& This -> NoizCurve, 150.0, +0.5);
+    RCall(_PMatch, AddPair)(& This -> NoizCurve,   0.0, -0.5);
     
     RCall(_PMatch, AddPair)(& This -> PhseCurve, 700.0,  1.7);
     RCall(_PMatch, AddPair)(& This -> PhseCurve, 360.0,  1.0);
     RCall(_PMatch, AddPair)(& This -> PhseCurve, 260.0,  1.0);
-    RCall(_PMatch, AddPair)(& This -> PhseCurve, 200.0,  0.6);
-    RCall(_PMatch, AddPair)(& This -> PhseCurve, 150.0,  0.3);
+    RCall(_PMatch, AddPair)(& This -> PhseCurve, 200.0,  0.5);
+    RCall(_PMatch, AddPair)(& This -> PhseCurve, 150.0,  0.2);
     RCall(_PMatch, AddPair)(& This -> PhseCurve,   0.0,  0.0);
 }
 
