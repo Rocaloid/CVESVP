@@ -146,12 +146,22 @@ RTMethod(void, CSVP_HNMItersizer, IterNextTo, int Position)
     int End    = Position;
     int LIndex = RCall(_List_Int, IndexAfter )(& This -> PulseList, Start);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList, End);
+    int HNext  = HIndex + 1;
+    int LPrev  = LIndex - 4;
+    //Overflow protection
+    if(HIndex >= This -> PulseList.Frames_Index)
+    {
+        HNext  = This -> PulseList.Frames_Index;
+        RCall(_SinusoidItersizer, Add)(This -> SubsizerS,
+            & This -> HNMList.Frames[HNext].Hmnc,
+            This -> PulseList.Frames[HNext] + This -> HopSize);
+    }
     
     if(LIndex == HIndex) return;
     
     //Dump data into SubsizerS.
     int i;
-    for(i = LIndex - 4; i <= HIndex + 1; i ++)
+    for(i = LPrev; i <= HNext; i ++)
     {
         RCall(_SinusoidItersizer, Add)(This -> SubsizerS,
             & This -> HNMList.Frames[i].Hmnc, This -> PulseList.Frames[i]);

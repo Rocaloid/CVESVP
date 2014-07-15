@@ -166,6 +166,7 @@ RTMethod(int , CSVP_F0Iterlyzer, IterNextTo, int Position)
 RTMethod(int , CSVP_F0Iterlyzer, IterPrevTo, int Position)
 {
     RAssert(This -> RefF0, "require pre-analysis.");
+    if(Position < This -> HopSize) Position = This -> HopSize;
     
     _T1* Temp = RCall(RAlloc, _T1)(((_Wave*)This -> Wave) -> WinSize);
     while(This -> LastPosition > Position)
