@@ -37,8 +37,8 @@ void CSVP_PitchModel_SetDefault(First, int Gender)
     This -> HDecay_Center = 2500.0;
     This -> HDecay_Bound = 6500.0;
     
-    RCall(_PMatch, AddPair)(& This -> HmncCurve, 700.0, +0.5);
-    RCall(_PMatch, AddPair)(& This -> HmncCurve, 360.0, +0.5);
+    RCall(_PMatch, AddPair)(& This -> HmncCurve, 700.0, +0.0);
+    RCall(_PMatch, AddPair)(& This -> HmncCurve, 360.0, +0.0);
     RCall(_PMatch, AddPair)(& This -> HmncCurve, 260.0, +0.0);
     RCall(_PMatch, AddPair)(& This -> HmncCurve, 150.0, -1.0);
     RCall(_PMatch, AddPair)(& This -> HmncCurve,   0.0, -2.0);

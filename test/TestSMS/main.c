@@ -38,7 +38,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/yao.wav");
+    String_SetChars(& Path, "/tmp/i.wav");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch + 5000);
     
@@ -143,9 +143,9 @@ int main()
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 1000);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last);
     
+    YWave.SampleRate = XWave.SampleRate;
     String_SetChars(& Path, "/tmp/out.wav");
     RCall(Wave, ToFile)(& YWave, & Path);
-        
     
     RFree(Win);
     RDelete(& Path);

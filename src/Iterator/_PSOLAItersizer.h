@@ -31,7 +31,7 @@ RTMethod(void, CSVP_PSOLAItersizer, IterNextTo, int Position);
 RTMethod(void, CSVP_PSOLAItersizer, IterPrevTo, int Position);
 RTMethod(void, CSVP_PSOLAItersizer, PrevTo, int Position);
 
-RTMethod(void, CSVP_PSOLAItersizer, Add, int Position, _DataFrame* Sorc);
+RTMethod(void, CSVP_PSOLAItersizer, Add, _DataFrame* Sorc, int Position);
 
 #undef  _List_DataFrame
 #undef  _DataFrame

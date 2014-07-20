@@ -137,7 +137,7 @@ RTMethod(void, CSVP_PSOLAItersizer, PrevTo, int Position)
     This -> LastPosition = LastPosition;
 }
 
-RTMethod(void, CSVP_PSOLAItersizer, Add, int Position, _DataFrame* Sorc)
+RTMethod(void, CSVP_PSOLAItersizer, Add, _DataFrame* Sorc, int Position)
 {
     int i = RCall(_List_Int, IndexAfter)(& This -> PulseList, Position);
     Array_Insert(int, This -> PulseList.Frames, i, Position);
