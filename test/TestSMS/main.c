@@ -38,7 +38,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/i.wav");
+    String_SetChars(& Path, "/tmp/test.wav");
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch + 5000);
     

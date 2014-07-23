@@ -84,10 +84,10 @@ RTMethod(int , CSVP_F0Iterlyzer, PreAnalysisTo, int Position)
         This -> InitPosition, This -> InitPosition, Position,
         This -> Option.LFreq, This -> Option.HFreq);
     if(Candidate < This -> Option.LFreq)
-        return 1;
+        return 0;
     This -> RefF0 = Candidate;
     This -> InitF0 = Candidate;
-    return 0;
+    return 1;
 }
 
 RTMethod(void, CSVP_F0Iterlyzer, _IterProcess, _T1* Temp)
