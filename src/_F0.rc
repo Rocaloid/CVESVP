@@ -63,7 +63,7 @@ RTFunc(int, CSVP_F0FromSpectrumB_Peak, _Spectrum* Sorc, _T1 MinFreq,
     
     int LBound = F2B(MinFreq);
     int UBound = F2B(MaxFreq);
-    int F0;
+    int F0 = 0;
     _T1 Max = Magn[0];
     
     for(; LBound <= UBound; LBound ++)
@@ -192,14 +192,15 @@ RTFunc(static int, CSVP_MedianF0FromWaveB, void* Sorc, int LPosition,
 {
     int p = 0;
     int Ret = 1;
+    _Wave* Wave = Sorc;
     CDSP2_List_Int FundBins;
     RCall(CDSP2_List_Int, Ctor)(& FundBins);
     
     p = LPosition;
     while(p < RPosition)
     {   
-        int Bin = RCall(CSVP_F0FromWaveB, _T1)(Sorc, p,
-            MinFreq, MaxFreq);
+        int Bin = RCall(CSVP_F0FromWave_YIN, _T1)(Sorc, p,
+            MinFreq, 300, 0.2) * Wave -> WinSize / Wave -> SampleRate;
         if(Bin > 0)
             RCall(CDSP2_List_Int, Add)(& FundBins, Bin);
         p += 512;

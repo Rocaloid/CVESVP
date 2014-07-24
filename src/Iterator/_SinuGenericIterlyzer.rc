@@ -148,7 +148,6 @@ RTMethod(static void, _T2, _Analyze)
         if(This -> GenPhase)
             RCall(_List_DataFrame, Add)(& This -> PhseList, & TempPhse, Index);
     }
-    
     RCall(_GnrcFrame, Dtor)(& TempGnrc);
     RCall(_DataFrame, Dtor)(& TempPhse);
 }
