@@ -172,11 +172,10 @@ RTMethod(int , CSVP_SinusoidalBase, PrevTo, int Position)
             Freq * 0.7, Freq * 1.4);
         if(! (Candidate > 50 && Candidate < 1500))
             if(i == This -> PulseList.Frames_Index)
-                i = Freq;
+                Candidate = Freq;
             else
                 Candidate = This -> FreqList[i + 1];
         This -> FreqList[i] = Candidate;
-        //printf("%d %f\n", This -> PulseList.Frames[i], Candidate);
     }
     
     RCall(_STFTIterlyzer, SetPosition)(This -> Sublyzer0,
