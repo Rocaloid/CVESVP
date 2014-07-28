@@ -38,7 +38,7 @@ RTFunc(int, CSVP_VOTFromWave, void* Sorc, int LBound, int RBound)
         CurrPower = RCall(CDSP2_VMaxElmt, _T1)(Sublyzer.SpecList.Frames[i].Magn,
             LBin, HBin);
         if(CurrPower < - 50.0) CurrPower = - 50.0;
-        Array_Push(_T1, PowerList, CurrPower - 2.0);
+        Array_Push(_T1, PowerList, CurrPower);
     }
     
     _T1 MaxPower = RCall(CDSP2_VMaxElmt, _T1)(PowerList, 0,

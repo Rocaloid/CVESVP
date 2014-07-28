@@ -156,7 +156,7 @@ RTMethod(void, CSVP_HNMItersizer, IterNextTo, int Position)
             & This -> HNMList.Frames[HNext].Hmnc,
             This -> PulseList.Frames[HNext] + This -> HopSize);
     }
-    
+    if(LPrev < 0) LPrev = 0;
     if(LIndex == HIndex) return;
     
     //Dump data into SubsizerS.
