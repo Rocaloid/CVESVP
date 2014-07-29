@@ -3,6 +3,8 @@
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
 #define _HNMContour _C(CSVP_HNMContour, _, _T1)
 #define _PMatch _C(PMatch_, _T1, _, _T1)
+#define _GenPeak _C(CDSP2_GenPeak_, _T1, _, _T1)
+#define _MatchInterp_Linear _C(CDSP2_MatchInterp_Linear_, _T1, _, _T1)
 
 RCtor(_RTClassName)
 {
@@ -89,10 +91,19 @@ RTMethod(static void, CSVP_HNMFrame, _FromSpectrum, _DataFrame* Dest,
     //TODO: Implement SIMD accelerated vector log in RFNL.
     int i;
     for(i = 0; i < DataSize; i ++)
+    {
         This -> Noiz[i] = log(TempReal[i]);
+        if(This -> Noiz[i] < -999) This -> Noiz[i] = -999;
+    }
+    
+    _PMatch Peaks;
+    RCall(_PMatch, Ctor)(& Peaks);
+    _GenPeak(& Peaks, This -> Noiz, 16, DataSize);
+    _MatchInterp_Linear(This -> Noiz, & Peaks, -999, DataSize);
     
     RFree(TempReal);
     RFree(Wind);
+    RCall(_PMatch, Dtor)(& Peaks);
     RCall(_Spectrum, Dtor)(& TempSpec);
     RCall(_Spectrum, FreeConvSpecRO)(Sorc, NewSorc);
 }
@@ -160,6 +171,8 @@ RTMethod(void, CSVP_HNMFrame, FromContourA, _HNMContour* Sorc)
     }
 }
 
+#undef  _GenPeak
+#undef  _MatchInterp_Linear
 #undef  _Sinusoid
 #undef  _DataFrame
 #undef  _Spectrum
