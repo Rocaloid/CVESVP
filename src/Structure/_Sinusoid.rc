@@ -197,6 +197,7 @@ RTMethod(static void, CSVP_Sinusoid, _FromSpectrum, _DataFrame* Dest,
     _T1 Center;
     _T1 LBound, HBound;
     int LInt, HInt;
+    RCall(_DataFrame, Resize)(Dest, This -> Size);
     for(i = 0; i < This -> Size; i ++)
     {
         Center = (i + 1) * F0;
