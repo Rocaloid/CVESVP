@@ -73,7 +73,7 @@ RTMethod(void, CSVP_Sinusoid, InterpFrom, _RTClassName* Sorc1,
     for(i = Sorc1 -> Size; i < This -> Size; i ++)
     {
         This -> Freq[i] = Sorc2 -> Freq[i];
-        This -> Ampl[i] = 0;
+        This -> Ampl[i] = Sorc2 -> Ampl[i];
     }
     for(i = 0; i < Sorc2 -> Size; i ++)
     {
