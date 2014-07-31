@@ -1,7 +1,7 @@
 #include "EndPoint.h"
 #include <RUtil2.h>
 
-#define SIZE_FFT 256
+#define SIZE_FFT 512
 #define SIZE_HOP 64
 #define POWER_STD 15.0f
 
