@@ -18,8 +18,8 @@ RDtor(_RTClassName)
 RTMethod(void, CSVP_HNMContour, CtorSize, int Size)
 {
     This -> Size = Size;
-    This -> Hmnc = RCall(RAlloc, _T1)(Size);
-    This -> Noiz = RCall(RAlloc, _T1)(Size);
+    This -> Hmnc = RCall(RAlloc, _T1)(Size / 2 + 1);
+    This -> Noiz = RCall(RAlloc, _T1)(Size / 2 + 1);
     
     RInit(_RTClassName);
 }
@@ -28,22 +28,23 @@ RTMethod(void, CSVP_HNMContour, Resize, int Size)
 {
     if(Size != This -> Size)
     {
+        int Half = Size / 2 + 1;
         This -> Size = Size;
-        This -> Hmnc = (_T1*)realloc(This -> Hmnc, Size * sizeof(_T1));
-        This -> Noiz = (_T1*)realloc(This -> Noiz, Size * sizeof(_T1));
+        This -> Hmnc = (_T1*)realloc(This -> Hmnc, Half * sizeof(_T1));
+        This -> Noiz = (_T1*)realloc(This -> Noiz, Half * sizeof(_T1));
     }
 }
 
 RTMethod(void, CSVP_HNMContour, From, _RTClassName* Sorc)
 {
     RCall(_RTClassName, Resize)(This, Sorc -> Size);
-    RCall(CDSP2_VCopy, _T1)(This -> Hmnc, Sorc -> Size, Sorc -> Hmnc);
-    RCall(CDSP2_VCopy, _T1)(This -> Noiz, Sorc -> Size, Sorc -> Noiz);
+    RCall(CDSP2_VCopy, _T1)(This -> Hmnc, Sorc -> Hmnc, Sorc -> Size / 2 + 1);
+    RCall(CDSP2_VCopy, _T1)(This -> Noiz, Sorc -> Noiz, Sorc -> Size / 2 + 1);
 }
 
 RTMethod(void, CSVP_HNMContour, Clear)
 {
-    RCall(CDSP2_VSet, _T1)(This -> Hmnc, 0, This -> Size);
-    RCall(CDSP2_VSet, _T1)(This -> Noiz, 0, This -> Size);
+    RCall(CDSP2_VSet, _T1)(This -> Hmnc, 0, This -> Size / 2 + 1);
+    RCall(CDSP2_VSet, _T1)(This -> Noiz, 0, This -> Size / 2 + 1);
 }
 
