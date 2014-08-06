@@ -21,10 +21,10 @@
 #define IWave CDSP2_IWave_Float
 
 #define Stretch 1
-#define Speed 1.5
+#define Speed 1
 #define FFTSIZE 256
 
-int main()
+int main(int argc, char** arg)
 {
     int i, j;
     
@@ -38,7 +38,7 @@ int main()
     
     String Path;
     String_Ctor(& Path);
-    String_SetChars(& Path, "/tmp/test.wav");
+    String_SetChars(& Path, arg[1]);
     RCall(Wave, FromFile)(& XWave, & Path);
     RCall(Wave, Resize)(& YWave, XWave.Size * Stretch + 5000);
     
@@ -73,7 +73,7 @@ int main()
     RCall(HNMIterlyzer, SetUpperFreq)(& HNMIter, 10000);
     RCall(HNMIterlyzer, SetPitch)(& HNMIter, & F0Iter.F0List);
     
-    RCall(HNMIterlyzer, PrevTo)(& HNMIter, VOT);
+    RCall(HNMIterlyzer, PrevTo)(& HNMIter, 0);
     RCall(HNMIterlyzer, IterNextTo)(& HNMIter, XWave.Size);
     
     HNMItersizer HNMSizer;
@@ -93,22 +93,25 @@ int main()
     {
         HNMFrame* OrigHNM = & HNMIter.HNMList.Frames[i];
         
-        float F0 = OrigHNM -> Hmnc.Freq[0] * 1.5;
+        float F0 = OrigHNM -> Hmnc.Freq[0] * 1;
         
         CSVP_PitchConvertHNMFrame_Float(& TempCont, OrigHNM, & PM, F0, 12000,
             XWave.SampleRate);
         RCall(HNMFrame, From)(& TempHNM, OrigHNM);
         RCall(HNMFrame, FromContour)(& TempHNM, & TempCont, F0, 12000);
         
-        if(i % 10 == 0)
+        //if(i % 3 == 0)
+        /*
         {
             float PhaseAdj = CSVP_PitchModel_GetPhseCoh(& PM, F0);
             CSVP_PhaseSyncH_Float(& HNMIter.PhseList.Frames[i], 0);
             CSVP_PhaseContract_Float(& HNMIter.PhseList.Frames[i], PhaseAdj);
             RCall(HNMItersizer, AddPhase)(& HNMSizer,
                 & HNMIter.PhseList.Frames[i], Offset);
-        }
-        
+        }*/
+        RCall(HNMItersizer, AddPhase)(& HNMSizer, & HNMIter.PhseList.Frames[i],
+            HNMIter.PulseList.Frames[i]);
+        CDSP2_VSet_Float(TempHNM.Noiz, -999, 1024);
         // Uncomment to plot the spectral env.
         /*
         if(Offset > 10000)
@@ -126,25 +129,29 @@ int main()
     }
     Last = HNMSizer.PulseList.Frames[i * Stretch - 1];
     RDelete(& TempCont, & TempHNM, & PM);
-        
+    
     RCall(HNMItersizer, SetHopSize)(& HNMSizer, FFTSIZE);
     RCall(HNMItersizer, SetWave)(& HNMSizer, & YWave);
     
     RCall(HNMItersizer, SetPosition)(& HNMSizer,
-        HNMSizer.SubsizerS -> PhseMatch.PulseList.X[5]);
+        HNMSizer.SubsizerS -> PhseMatch.PulseList.X[50]);
     RCall(HNMItersizer, SetInitPhase)(& HNMSizer,
-        & HNMSizer.SubsizerS -> PhseMatch.PhseList.Frames[5]);
-    printf("%f\n", HNMSizer.SubsizerS -> PhseMatch.PulseList.X[5]);
+        & HNMSizer.SubsizerS -> PhseMatch.PhseList.Frames[50]);
+    printf("%f\n", HNMSizer.SubsizerS -> PhseMatch.PulseList.X[50]);
     
-    HNMSizer.Option.PhaseControl = 1;
-        
+    HNMSizer.Option.PhaseControl = CSVP_PhaseFlag_Regen;
+    
     RCall(HNMItersizer, PrevTo    )(& HNMSizer, 0);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 8000);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 1000);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last);
     
     YWave.SampleRate = XWave.SampleRate;
-    String_SetChars(& Path, "/tmp/out.wav");
+    if(argc > 2)
+        String_SetChars(& Path, arg[2]);
+    else
+        String_SetChars(& Path, "/tmp/out.wav");
+    
     RCall(Wave, ToFile)(& YWave, & Path);
     
     RFree(Win);

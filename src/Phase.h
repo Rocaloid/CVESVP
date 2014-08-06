@@ -1,6 +1,7 @@
 #ifndef CSVP_PHASE_H
 #define CSVP_PHASE_H
 
+#include "HNM.h"
 #include <CVEDSP2.h>
 #include <RUtil2.h>
 

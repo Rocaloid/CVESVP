@@ -1,4 +1,5 @@
 #define _DataFrame _C(CDSP2_DataFrame, _, _T1)
+#define _Sinusoid _C(CSVP_Sinusoid, _, _T1)
 
 RTFunc(static _T1, _CSVP_PhaseInterpU, _T1 Sorc1, _T1 Sorc2, _T1 Ratio)
 {
@@ -40,6 +41,40 @@ RTFunc(void, CSVP_PhaseInterp, _DataFrame* Dest, _DataFrame* Sorc1,
         Dest -> Data[i] = Sorc1 -> Data[i];
     for(i = MinSize; i < Sorc2 -> Size; i ++)
         Dest -> Data[i] = Sorc2 -> Data[i];
+}
+
+RTFunc(void, CSVP_FPhaseInterp, _DataFrame* Dest, _DataFrame* Sorc1,
+    _DataFrame* Sorc2, _Sinusoid* Sinu1, _Sinusoid* Sinu2, _T1 Time, _T1 Ratio)
+{
+    _DataFrame Tmp1, Tmp2;
+    RCall(_DataFrame, Ctor)(& Tmp1);
+    RCall(_DataFrame, Ctor)(& Tmp2);
+    
+    int MinSize1 = Sorc1 -> Size < Sinu1 -> Size ?
+        Sorc1 -> Size : Sinu1 -> Size;
+    int MinSize2 = Sorc2 -> Size < Sinu2 -> Size ?
+        Sorc2 -> Size : Sinu2 -> Size;
+    
+    RCall(_DataFrame, Resize)(& Tmp1, MinSize1);
+    RCall(_DataFrame, Resize)(& Tmp2, MinSize2);
+    
+    RCall(CSVP_TPhaseShift, _T1)(& Tmp1, Sorc1, Sinu1 -> Freq, Time * Ratio);
+    RCall(CSVP_TPhaseShift, _T1)(& Tmp2, Sorc2, Sinu2 -> Freq,
+        - Time * (1.0 - Ratio));
+    
+    int i;
+    for(i = 0; i < Tmp1.Size; i ++)
+        Tmp1.Data[i] = fmod(Tmp1.Data[i] + 2.0 * M_PI, 2.0 * M_PI) - M_PI;
+    
+    for(i = 0; i < Tmp2.Size; i ++)
+        Tmp2.Data[i] = fmod(Tmp2.Data[i] + 2.0 * M_PI, 2.0 * M_PI) - M_PI;
+    RCall(CSVP_PhaseInterp, _T1)(Dest, & Tmp1, & Tmp2, Ratio);
+    
+    for(i = 0; i < Dest -> Size; i ++)
+        Dest -> Data[i] += M_PI;
+    
+    RCall(_DataFrame, Dtor)(& Tmp1);
+    RCall(_DataFrame, Dtor)(& Tmp2);
 }
 
 RTFunc(void, CSVP_PhaseSync, _DataFrame* Dest, _T1* Freq, _T1 Phse0)
@@ -86,16 +121,21 @@ RTFunc(void, CSVP_PhaseContract, _DataFrame* Dest, _T1 Ratio)
 RTFunc(void, CSVP_PhaseShift, _DataFrame* Dest, _DataFrame* Sorc, _T1* Freq,
     int DeltaPos, int SampleRate)
 {
+    RCall(CSVP_TPhaseShift, _T1)(Dest, Sorc, Freq, (_T1)DeltaPos / SampleRate);
+}
+
+RTFunc(void, CSVP_TPhaseShift, _DataFrame* Dest, _DataFrame* Sorc, _T1* Freq,
+    _T1 Time)
+{
     int i;
-    _T1 l, F;
+    _T1 F;
     int MinSize = Sorc -> Size;
     if(Dest -> Size < MinSize) MinSize = Dest -> Size;
     
-    l = (_T1)DeltaPos / (_T1)SampleRate;
     for(i = 0; i < MinSize; i ++)
     {
         F = Freq[i];
-        Dest -> Data[i] = Sorc -> Data[i] + 2.0 * M_PI * F * l + 2.0 * M_PI;
+        Dest -> Data[i] = Sorc -> Data[i] + 2.0 * M_PI * F * Time + 2.0 * M_PI;
     }
 }
 
@@ -103,9 +143,18 @@ RTFunc(void, CSVP_PhaseUnwrap, _DataFrame* Dest, _DataFrame* Sorc, _T1* SFreq,
     _T1* DFreq, int DeltaPos, int SampleRate, int Direction)
 {
     _T1 t = (_T1)DeltaPos / (_T1)SampleRate;
-    
     int i;
-    for(i = 0; i < Dest -> Size; i ++)
+    
+    int OldSize = Dest -> Size;
+    RCall(_DataFrame, Resize)(Dest, Sorc -> Size);
+    if(OldSize < Sorc -> Size)
+    {
+        for(i = OldSize; i < Sorc -> Size; i ++)
+            Dest -> Data[i] = 0;
+    }
+    
+    int Minor = OldSize < Dest -> Size ? OldSize : Dest -> Size;
+    for(i = 0; i < Minor; i ++)
     {
         _T1 Phi = Sorc -> Data[i] / 2.0 / M_PI
                 + (SFreq[i] * t + (DFreq[i] - SFreq[i]) / 2.0 * t * t)
@@ -123,4 +172,5 @@ RTFunc(void, CSVP_PhaseWrap, _DataFrame* Dest)
 }
 
 #undef  _DataFrame
+#undef  _Sinusoid
 

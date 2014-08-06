@@ -7,6 +7,7 @@
 #define _DataFrame _C(CDSP2_DataFrame, _, _T1)
 #define _PMatch _C(PMatch_, _T1, _, _T1)
 #define _Transition _C(Transition_, _T1, _, _T1)
+#define _SinusoidIterlyzer _C(CSVP_SinusoidIterlyzer, _, _T1)
 
 #define _CheckMembers() \
     RAssert(This -> Wave, "require wave."); \
@@ -17,7 +18,6 @@ RCtor(_RTClassName)
 {
     RCall(_List_Int, Ctor)(& This -> PulseList);
     RCall(_List_Sinusoid, Ctor)(& This -> SinuList);
-    RCall(_List_DataFrame, Ctor)(& This -> PhseList);
     RCall(_List_DataFrame, Ctor)(& This -> PhseMatch.PhseList);
     RCall(_PMatch, Ctor)(& This -> PhseMatch.PulseList);
     
@@ -41,7 +41,6 @@ RDtor(_RTClassName)
 {
     RCall(_List_Int, Dtor)(& This -> PulseList);
     RCall(_List_Sinusoid, Dtor)(& This -> SinuList);
-    RCall(_List_DataFrame, Dtor)(& This -> PhseList);
     RCall(_List_DataFrame, Dtor)(& This -> PhseMatch.PhseList);
     RCall(_PMatch, Dtor)(& This -> PhseMatch.PulseList);
     
@@ -55,7 +54,8 @@ RTMethod(void, CSVP_SinusoidItersizer, From, _RTClassName* Sorc)
 {
     RCall(_List_Int, From)(& This -> PulseList, & Sorc -> PulseList);
     RCall(_List_Sinusoid, From)(& This -> SinuList, & Sorc -> SinuList);
-    RCall(_List_DataFrame, From)(& This -> PhseList, & Sorc -> PhseList);
+    RCall(_List_DataFrame, From)(& This -> PhseMatch.PhseList,
+        & Sorc -> PhseMatch.PhseList);
     
     This -> Wave = Sorc -> Wave;
     This -> LastPosition = Sorc -> LastPosition;
@@ -67,6 +67,15 @@ RTMethod(void, CSVP_SinusoidItersizer, From, _RTClassName* Sorc)
     RCall(_Sinusoid, From)(& This -> InitSinusoid, & Sorc -> InitSinusoid);
     RCall(_DataFrame, From)(& This -> LastPhse, & Sorc -> LastPhse);
     RCall(_DataFrame, From)(& This -> InitPhse, & Sorc -> InitPhse);
+}
+
+RTMethod(void, CSVP_SinusoidItersizer, FromIterlyzer, _SinusoidIterlyzer* Sorc)
+{
+    RCall(_List_Int, From)(& This -> PulseList, & Sorc -> PulseList);
+    RCall(_List_Sinusoid, From)(& This -> SinuList, & Sorc -> SinuList);
+    RCall(_List_Int, From)(& This -> PhseMatch.PulseList, & Sorc -> PulseList);
+    RCall(_List_DataFrame, From)(& This -> PhseMatch.PhseList,
+        & Sorc -> PhseList);
 }
 
 RTMethod(void, CSVP_SinusoidItersizer, Clear)
@@ -283,7 +292,7 @@ RTMethod(static void, CSVP_SinusoidItersizer, _GenPhase, _DataFrame* Dest,
     _DataFrame DestPhse;
     RCall(_DataFrame, Ctor)(& DestPhse);
     
-    if(This -> Option.PhaseControl)
+    if(This -> Option.PhaseControl == CSVP_PhaseFlag_Control)
     {
         _Transition PTrans = RCall(_PMatch, Query)(
             & This -> PhseMatch.PulseList, This -> PulseList.Frames[DIndex]);
@@ -313,9 +322,16 @@ RTMethod(static void, CSVP_SinusoidItersizer, _GenPhase, _DataFrame* Dest,
             RCall(_DataFrame, Dtor)(& LPhse);
             RCall(_DataFrame, Dtor)(& HPhse);
         }
+    }else if(This -> Option.PhaseControl == CSVP_PhaseFlag_Regen)
+    {
+        int PhaseIndex = RCall(_PMatch, Query)(& This -> PhseMatch.PulseList,
+            This -> PulseList.Frames[DIndex] + 10).LowerIndex;
+        RCall(_DataFrame, From)(Dest, & This -> PhseMatch.PhseList.
+            Frames[PhaseIndex]);
     }else
         RCall(_DataFrame, From)(& DestPhse, & This -> InitPhse);
     
+    if(This -> Option.PhaseControl != CSVP_PhaseFlag_Regen)
     RCall(CSVP_PhaseShift, _T1)(
         /* Dest     */ Dest,
         /* Sorc     */ & DestPhse,
@@ -325,7 +341,7 @@ RTMethod(static void, CSVP_SinusoidItersizer, _GenPhase, _DataFrame* Dest,
     RCall(_DataFrame, Dtor)(& DestPhse);
 }
 
-RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
+RTMethod(void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
     int Direction)
 {
     int i, j, n, k;
@@ -404,28 +420,57 @@ RTMethod(static void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
 
 #define _InsertInterp(LPosition, HPosition) \
     int LLPos = This -> PulseList.Frames[LIndex - 1]; \
-    int LHPos = This -> PulseList.Frames[LIndex]; \
+    int LHPos = This -> PulseList.Frames[LIndex    ]; \
     _T1 LRatio = (_T1)(LPosition - LLPos) / (_T1)(LHPos - LLPos); \
     RCall(_Sinusoid, InterpFrom)(& InterpSinu, \
         & This -> SinuList.Frames[LIndex - 1], \
-        & This -> SinuList.Frames[LIndex], LRatio); \
+        & This -> SinuList.Frames[LIndex    ], LRatio); \
+    if(This -> Option.PhaseControl == CSVP_PhaseFlag_Regen) \
+    { \
+        int LPIndex = RCall(_PMatch, Query)(& This -> PhseMatch.PulseList, \
+            LLPos + 1).LowerIndex; \
+        int HPIndex = RCall(_PMatch, Query)(& This -> PhseMatch.PulseList, \
+            LHPos + 1).LowerIndex; \
+        RCall(CSVP_FPhaseInterp, _T1)(& InterpPhse, \
+            & This -> PhseMatch.PhseList.Frames[LPIndex], \
+            & This -> PhseMatch.PhseList.Frames[HPIndex], \
+            & This -> SinuList.Frames[LIndex - 1], \
+            & This -> SinuList.Frames[LIndex    ], \
+            (_T1)(LHPos - LLPos) / SampleRate, LRatio); \
+        RCall(_RTClassName, AddPhase)(This, & InterpPhse, LPosition); \
+    } \
     /* LIndex <=> LInterp */ \
     RCall(_RTClassName, Add)(This, & InterpSinu, LPosition); \
     \
-    int HLPos = This -> PulseList.Frames[HIndex]; \
+    int HLPos = This -> PulseList.Frames[HIndex    ]; \
     int HHPos = This -> PulseList.Frames[HIndex + 1]; \
     _T1 HRatio = (_T1)(HPosition - HLPos) / (_T1)(HHPos - HLPos); \
     RCall(_Sinusoid, InterpFrom)(& InterpSinu, \
-        & This -> SinuList.Frames[HIndex], \
+        & This -> SinuList.Frames[HIndex    ], \
         & This -> SinuList.Frames[HIndex + 1], HRatio); \
+    if(This -> Option.PhaseControl == CSVP_PhaseFlag_Regen) \
+    { \
+        int LPIndex = RCall(_PMatch, Query)(& This -> PhseMatch.PulseList, \
+            HLPos + 1).LowerIndex; \
+        int HPIndex = RCall(_PMatch, Query)(& This -> PhseMatch.PulseList, \
+            HHPos + 1).LowerIndex; \
+        RCall(CSVP_FPhaseInterp, _T1)(& InterpPhse, \
+            & This -> PhseMatch.PhseList.Frames[LPIndex], \
+            & This -> PhseMatch.PhseList.Frames[HPIndex], \
+            & This -> SinuList.Frames[HIndex    ], \
+            & This -> SinuList.Frames[HIndex + 1], \
+            (_T1)(HHPos - HLPos) / SampleRate, HRatio); \
+        RCall(_RTClassName, AddPhase)(This, & InterpPhse, HPosition); \
+    } \
     /* HIndex <=> HInterp */ \
-    RCall(_RTClassName, Add)(This, & InterpSinu, HPosition);
+    RCall(_RTClassName, Add)(This, & InterpSinu, HPosition)
 
 RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
 {
     _CheckMembers();
     RAssert(Position > This -> LastPosition, "destination position earlier "
         "than source position.");
+    _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     
     int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         This -> LastPosition);
@@ -433,7 +478,9 @@ RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
         Position) + 1;
     
     _Sinusoid InterpSinu;
+    _DataFrame InterpPhse;
     RCall(_Sinusoid, Ctor)(& InterpSinu);
+    RCall(_DataFrame, Ctor)(& InterpPhse);
     _InsertInterp(This -> LastPosition, Position);
     
     RCall(_RTClassName, _Compress)(This);
@@ -451,6 +498,7 @@ RTMethod(void, CSVP_SinusoidItersizer, IterNextTo, int Position)
         RCall(_List_Sinusoid, RemoveRange)(& This -> SinuList, SIndex, DIndex);
     }
     RCall(_Sinusoid, Dtor)(& InterpSinu);
+    RCall(_DataFrame, Dtor)(& InterpPhse);
 }
 
 RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
@@ -458,6 +506,7 @@ RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
     _CheckMembers();
     RAssert(Position < This -> InitPosition, "destination position"
         " later than source position.");
+    _T1 SampleRate = ((_Wave*)This -> Wave) -> SampleRate;
     
     int OrigPosition = This -> LastPosition;
     int OrigPositionP = This -> LastPositionP;
@@ -474,7 +523,9 @@ RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
         Position);
     
     _Sinusoid InterpSinu;
+    _DataFrame InterpPhse;
     RCall(_Sinusoid, Ctor)(& InterpSinu);
+    RCall(_DataFrame, Ctor)(& InterpPhse);
     _InsertInterp(Position, This -> LastPosition);
     
     RCall(_RTClassName, _Compress)(This);
@@ -487,6 +538,7 @@ RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
     
     //Delete
     RCall(_Sinusoid, Dtor)(& InterpSinu);
+    RCall(_DataFrame, Dtor)(& InterpPhse);
     /* These are better removed together as IterNextTo is finished.
     RCall(_List_Int, RemoveRange)(& This -> PulseList, LIndex + 1, HIndex - 1);
     RCall(_List_Sinusoid, RemoveRange)(& This -> SinuList,
@@ -515,4 +567,5 @@ RTMethod(void, CSVP_SinusoidItersizer, AddPhase, _DataFrame* Sorc, int Position)
 #undef  _DataFrame
 #undef  _PMatch
 #undef  _Transition
+#undef  _SinusoidIterlyzer
 
