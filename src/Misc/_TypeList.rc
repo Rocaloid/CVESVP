@@ -10,6 +10,22 @@
 #define _T3 HNMFrame
 #define _CDSP2_NOSIZE
 #include <CVEDSP2/List/_SizeNumList.rc>
+
+#define _Sinusoid _C(CSVP_Sinusoid, _, _T1)
+#define _List_Sinusoid _C(CSVP_List_Sinusoid, _, _T1)
+RTMethod(void, CSVP_List_HNMFrame, ToSinuList, _List_Sinusoid* Dest)
+{
+    int i;
+    int Size = This -> Frames_Index + 1;
+    RCall(_List_Sinusoid, Resize)(Dest, Size);
+    for(i = 0; i < Size; i ++)
+        RCall(_Sinusoid, From)(& Dest -> Frames[i], & This -> Frames[i].Hmnc);
+    Dest -> FrameNum = Size;
+}
+
+#undef  _List_Sinusoid
+#undef  _Sinusoid _C(CSVP_Sinusoid, _, _T1)
+
 #undef  _CDSP2_NOSIZE
 #undef  _T2
 #undef  _T3

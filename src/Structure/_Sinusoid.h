@@ -24,6 +24,12 @@ RTMethod(void, CSVP_Sinusoid, ToSpectrum, _Spectrum* Dest);
 RTMethod(void, CSVP_Sinusoid, FromSpectrum, _Spectrum* Sorc, _T1 F0);
 RTMethod(void, CSVP_Sinusoid, FromSpectrumWithPhase, _DataFrame* Dest,
     _Spectrum* Sorc, _T1 F0);
+RTMethod(void, CSVP_Sinusoid, SFromSpectrum, _Spectrum* Sorc,
+    _RTClassName* Prev, _T1 F0);
+RTMethod(void, CSVP_Sinusoid, SFromSpectrumWithPhase, _DataFrame* Dest,
+    _Spectrum* Sorc, _RTClassName* Prev, _T1 F0);
+
+RTMethod(void, CSVP_Sinusoid, KillDeviatedHarmonics, _T1 Delta);
 
 #undef  _Spectrum
 #undef  _DataFrame

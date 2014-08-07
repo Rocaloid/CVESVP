@@ -10,6 +10,11 @@
 #define _T3 HNMFrame
 #define _CDSP2_NOSIZE
 #include <CVEDSP2/List/_SizeNumList.h>
+
+#define _List_Sinusoid _C(CSVP_List_Sinusoid, _, _T1)
+RTMethod(void, CSVP_List_HNMFrame, ToSinuList, _List_Sinusoid* Dest);
+#undef  _List_Sinusoid
+
 #undef  _CDSP2_NOSIZE
 #undef  _T2
 #undef  _T3

@@ -12,6 +12,7 @@ RClass(_RTClassName)
     
     //Public
     char GenPhase;
+    int LeftBound;
     
     _List_Int       PulseList;
     _List_GnrcFrame _T4;

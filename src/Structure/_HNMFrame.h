@@ -25,6 +25,10 @@ RTMethod(void, CSVP_HNMFrame, FromSpectrum, _Spectrum* Sorc, _T1 F0,
     int SinuNum);
 RTMethod(void, CSVP_HNMFrame, FromSpectrumWithPhase, _DataFrame* Dest,
     _Spectrum* Sorc, _T1 F0, int SinuNum);
+RTMethod(void, CSVP_HNMFrame, SFromSpectrum, _Spectrum* Sorc,
+    _RTClassName* Prev, _T1 F0, int SinuNum);
+RTMethod(void, CSVP_HNMFrame, SFromSpectrumWithPhase, _DataFrame* Dest,
+    _Spectrum* Sorc, _RTClassName* Prev, _T1 F0, int SinuNum);
 
 RTMethod(void, CSVP_HNMFrame, ToContour, _HNMContour* Dest);
 RTMethod(void, CSVP_HNMFrame, FromContour, _HNMContour* Sorc, _T1 Pitch,

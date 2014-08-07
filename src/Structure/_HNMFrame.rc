@@ -59,7 +59,7 @@ RTMethod(void, CSVP_HNMFrame, From, _RTClassName* Sorc)
 }
 
 RTMethod(static void, CSVP_HNMFrame, _FromSpectrum, _DataFrame* Dest,
-    _Spectrum* Sorc, _T1 F0, int SinuNum, int GenPhase)
+    _Spectrum* Sorc, _RTClassName* Prev, _T1 F0, int SinuNum, int GenPhase)
 {
     _Spectrum TempSpec;
     int  Size = Sorc -> Size;
@@ -77,10 +77,21 @@ RTMethod(static void, CSVP_HNMFrame, _FromSpectrum, _DataFrame* Dest,
         (Sorc, CDSP2_LinearMagn);
     TempSpec.MagnType = CDSP2_LinearMagn;
     
-    if(GenPhase)
+    if(Prev)
+    {
+        if(GenPhase)
+        RCall(_Sinusoid, SFromSpectrumWithPhase)(& This -> Hmnc, Dest, Sorc,
+            & Prev -> Hmnc, F0);
+        else
+        RCall(_Sinusoid, SFromSpectrum)(& This -> Hmnc, Sorc, & Prev -> Hmnc,
+            F0);
+    }else
+    {
+        if(GenPhase)
         RCall(_Sinusoid, FromSpectrumWithPhase)(& This -> Hmnc, Dest, Sorc, F0);
-    else
+        else
         RCall(_Sinusoid, FromSpectrum)(& This -> Hmnc, Sorc, F0);
+    }
     RCall(_Sinusoid, ToReal)(& This -> Hmnc, TempReal, Size, SampleRate);
     RCall(_Spectrum, FromRealW)(& TempSpec, TempReal, Wind);
     
@@ -111,13 +122,25 @@ RTMethod(static void, CSVP_HNMFrame, _FromSpectrum, _DataFrame* Dest,
 RTMethod(void, CSVP_HNMFrame, FromSpectrum, _Spectrum* Sorc, _T1 F0,
     int SinuNum)
 {
-    RCall(_RTClassName, _FromSpectrum)(This, NULL, Sorc, F0, SinuNum, 0);
+    RCall(_RTClassName, _FromSpectrum)(This, NULL, Sorc, NULL, F0, SinuNum, 0);
 }
 
 RTMethod(void, CSVP_HNMFrame, FromSpectrumWithPhase, _DataFrame* Dest,
     _Spectrum* Sorc, _T1 F0, int SinuNum)
 {
-    RCall(_RTClassName, _FromSpectrum)(This, Dest, Sorc, F0, SinuNum, 1);
+    RCall(_RTClassName, _FromSpectrum)(This, Dest, Sorc, NULL, F0, SinuNum, 1);
+}
+
+RTMethod(void, CSVP_HNMFrame, SFromSpectrum, _Spectrum* Sorc,
+    _RTClassName* Prev, _T1 F0, int SinuNum)
+{
+    RCall(_RTClassName, _FromSpectrum)(This, NULL, Sorc, Prev, F0, SinuNum, 0);
+}
+
+RTMethod(void, CSVP_HNMFrame, SFromSpectrumWithPhase, _DataFrame* Dest,
+    _Spectrum* Sorc, _RTClassName* Prev, _T1 F0, int SinuNum)
+{
+    RCall(_RTClassName, _FromSpectrum)(This, Dest, Sorc, Prev, F0, SinuNum, 1);
 }
 
 RTMethod(void, CSVP_HNMFrame, ToContour, _HNMContour* Dest)

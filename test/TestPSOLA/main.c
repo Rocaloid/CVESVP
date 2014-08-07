@@ -14,7 +14,7 @@
 #define FWindow_T RFNL_FWindow_Gnrc_Float
 #define FWindow CDSP2_FWindow_Float
 
-int main()
+int main(int argc, char** arg)
 {
     CDSP2_SetArch(CDSP2_Arch_Gnrc);
     
@@ -33,7 +33,7 @@ int main()
     #ifdef __WIN32__
     String_SetChars(& Path, "C:\\xxx.wav");
     #else
-    String_SetChars(& Path, "/tmp/t/te0.wsp");
+    String_SetChars(& Path, arg[1]);
     #endif
     RCall(Wave, FromFile)(& InWave, & Path);
     

@@ -190,7 +190,7 @@ RTFunc(static _XYPair, CSVP_PeakFromSpectrum, _Spectrum* Sorc, int LInt,
 }
 
 RTMethod(static void, CSVP_Sinusoid, _FromSpectrum, _DataFrame* Dest,
-    _Spectrum* Sorc, _T1 F0, int GenPhase)
+    _Spectrum* Sorc, _RTClassName* Prev, _T1 F0, int GenPhase)
 {
     int i;
     
@@ -201,30 +201,71 @@ RTMethod(static void, CSVP_Sinusoid, _FromSpectrum, _DataFrame* Dest,
     for(i = 0; i < This -> Size; i ++)
     {
         Center = (i + 1) * F0;
-        LBound = Center - F0 / 2.0f;
-        HBound = Center + F0 / 2.0f;
-        LInt   = (int)(LBound * Sorc -> Size / Sorc -> SampleRate);
-        HInt   = (int)(HBound * Sorc -> Size / Sorc -> SampleRate);
-        _XYPair TempPair;
-        TempPair = RCall(CSVP_PeakFromSpectrum, _T1)(Sorc, LInt, HInt);
-        This -> Freq[i] = TempPair.X;
-        This -> Ampl[i] = TempPair.Y;
+        if(Prev && i >= Prev -> Size)
+        {
+            This -> Freq[i] = Center;
+            This -> Ampl[i] = 0;
+            if(GenPhase)
+                Dest -> Data[i] = 0;
+            continue;
+        }
         
-        //[-2pi, 2pi]
-        if(GenPhase)
-            Dest -> Data[i] = Sorc -> Phse[TempPair.IntX] + M_PI;
+        if(Prev && Prev -> Ampl[i] == 0)
+        {
+            This -> Freq[i] = Prev -> Freq[i];
+            This -> Ampl[i] = 0;
+            if(GenPhase)
+                Dest -> Data[i] = 0;
+        }else
+        {
+            LBound = Center - F0 / 2.0f;
+            HBound = Center + F0 / 2.0f;
+            LInt   = (int)(LBound * Sorc -> Size / Sorc -> SampleRate);
+            HInt   = (int)(HBound * Sorc -> Size / Sorc -> SampleRate);
+            _XYPair TempPair;
+            TempPair = RCall(CSVP_PeakFromSpectrum, _T1)(Sorc, LInt, HInt);
+            This -> Freq[i] = TempPair.X;
+            This -> Ampl[i] = TempPair.Y;
+            
+            //[0, 2pi]
+            if(GenPhase)
+                Dest -> Data[i] = Sorc -> Phse[TempPair.IntX] + M_PI;
+        }
     }
 }
 
 RTMethod(void, CSVP_Sinusoid, FromSpectrum, _Spectrum* Sorc, _T1 F0)
 {
-    RCall(_RTClassName, _FromSpectrum)(This, NULL, Sorc, F0, 0);
+    RCall(_RTClassName, _FromSpectrum)(This, NULL, Sorc, NULL, F0, 0);
 }
 
 RTMethod(void, CSVP_Sinusoid, FromSpectrumWithPhase, _DataFrame* Dest,
     _Spectrum* Sorc, _T1 F0)
 {
-    RCall(_RTClassName, _FromSpectrum)(This, Dest, Sorc, F0, 1);
+    RCall(_RTClassName, _FromSpectrum)(This, Dest, Sorc, NULL, F0, 1);
+}
+
+RTMethod(void, CSVP_Sinusoid, SFromSpectrum, _Spectrum* Sorc,
+    _RTClassName* Prev, _T1 F0)
+{
+    RCall(_RTClassName, _FromSpectrum)(This, NULL, Sorc, Prev, F0, 0);
+}
+
+RTMethod(void, CSVP_Sinusoid, SFromSpectrumWithPhase, _DataFrame* Dest,
+    _Spectrum* Sorc, _RTClassName* Prev, _T1 F0)
+{
+    RCall(_RTClassName, _FromSpectrum)(This, Dest, Sorc, Prev, F0, 1);
+}
+
+RTMethod(void, CSVP_Sinusoid, KillDeviatedHarmonics, _T1 Delta)
+{
+    int i;
+    for(i = 1; i < This -> Size; i ++)
+    {
+        _T1 Center = (i + 1) * This -> Freq[0];
+        if(fabs(This -> Freq[i] - Center) > Delta)
+            This -> Ampl[i] = 0; //Mark as dead.
+    }
 }
 
 #undef  _DataFrame

@@ -3,6 +3,7 @@
 #include "EndPoint.h"
 #include "Phase.h"
 #include "Spectral/Pitch.h"
+#include "SNT.h"
 #include <CVEDSP2.h>
 #include <RUtil2.h>
 #include <stdlib.h>
@@ -19,6 +20,8 @@
 #define SinusoidItersizer CSVP_SinusoidItersizer_Float
 #define Wave CDSP2_Wave_Float
 #define IWave CDSP2_IWave_Float
+#define List_Sinusoid CSVP_List_Sinusoid_Float
+#define List_HNMFrame CSVP_List_HNMFrame_Float
 
 #define Stretch 1
 #define Speed 1
@@ -66,6 +69,7 @@ int main(int argc, char** arg)
     HNMIterlyzer HNMIter;
     RCall(HNMIterlyzer, CtorSize)(& HNMIter, 2048);
     HNMIter.GenPhase = 1;
+    //HNMIter.LeftBound = VOT;
     
     RCall(HNMIterlyzer, SetHopSize)(& HNMIter, FFTSIZE);
     RCall(HNMIterlyzer, SetWave)(& HNMIter, & XWave);
@@ -93,15 +97,14 @@ int main(int argc, char** arg)
     {
         HNMFrame* OrigHNM = & HNMIter.HNMList.Frames[i];
         
-        float F0 = OrigHNM -> Hmnc.Freq[0] * 1;
+        float F0 = OrigHNM -> Hmnc.Freq[0] * 2;
         
         CSVP_PitchConvertHNMFrame_Float(& TempCont, OrigHNM, & PM, F0, 12000,
             XWave.SampleRate);
         RCall(HNMFrame, From)(& TempHNM, OrigHNM);
-        RCall(HNMFrame, FromContour)(& TempHNM, & TempCont, F0, 12000);
-        
-        //if(i % 3 == 0)
+        //RCall(HNMFrame, FromContour)(& TempHNM, & TempCont, F0, 12000);
         /*
+        if(i % 5 == 0)
         {
             float PhaseAdj = CSVP_PitchModel_GetPhseCoh(& PM, F0);
             CSVP_PhaseSyncH_Float(& HNMIter.PhseList.Frames[i], 0);
@@ -111,7 +114,6 @@ int main(int argc, char** arg)
         }*/
         RCall(HNMItersizer, AddPhase)(& HNMSizer, & HNMIter.PhseList.Frames[i],
             HNMIter.PulseList.Frames[i]);
-        CDSP2_VSet_Float(TempHNM.Noiz, -999, 1024);
         // Uncomment to plot the spectral env.
         /*
         if(Offset > 10000)
@@ -130,6 +132,7 @@ int main(int argc, char** arg)
     Last = HNMSizer.PulseList.Frames[i * Stretch - 1];
     RDelete(& TempCont, & TempHNM, & PM);
     
+    
     RCall(HNMItersizer, SetHopSize)(& HNMSizer, FFTSIZE);
     RCall(HNMItersizer, SetWave)(& HNMSizer, & YWave);
     
@@ -139,12 +142,25 @@ int main(int argc, char** arg)
         & HNMSizer.SubsizerS -> PhseMatch.PhseList.Frames[50]);
     printf("%f\n", HNMSizer.SubsizerS -> PhseMatch.PulseList.X[50]);
     
-    HNMSizer.Option.PhaseControl = CSVP_PhaseFlag_Regen;
-    
+    HNMSizer.Option.PhaseControl = 1;//CSVP_PhaseFlag_Regen;
+    /*
     RCall(HNMItersizer, PrevTo    )(& HNMSizer, 0);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 8000);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last - 1000);
     RCall(HNMItersizer, IterNextTo)(& HNMSizer, Last);
+    */
+    
+    List_Sinusoid SList;
+    RCall(List_Sinusoid, Ctor)(& SList);
+    RCall(List_HNMFrame, ToSinuList)(& HNMIter.HNMList, & SList);
+    
+    CSVP_SinusoidalFromSinuList_Float(& YWave, & HNMIter.PulseList,
+        & SList, & HNMIter.PhseList);
+    /*
+    CSVP_NoiseTurbFromSinuList_Float(& YWave, & XWave, & HNMIter.PulseList,
+        & SList, & HNMIter.PhseList);
+    */
+    RCall(List_Sinusoid, Dtor)(& SList);
     
     YWave.SampleRate = XWave.SampleRate;
     if(argc > 2)
