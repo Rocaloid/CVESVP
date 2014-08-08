@@ -14,6 +14,13 @@ RClass(_RTClassName)
     char GenPhase;
     int LeftBound;
     
+    struct
+    {
+        _T1 Period;
+        _T1 Alpha;
+        int Iteration;
+    } GDOption;
+    
     _List_Int       PulseList;
     _List_GnrcFrame _T4;
     _List_DataFrame PhseList;

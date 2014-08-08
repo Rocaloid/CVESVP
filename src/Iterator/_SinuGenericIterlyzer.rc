@@ -1,4 +1,5 @@
 #define _Wave _C(CDSP2_Wave, _, _T1)
+#define _IWave _C(CDSP2_IWave, _, _T1)
 #define _List_Int CDSP2_List_Int
 #define _List_GnrcFrame _C(CSVP_List_, _T3, _, _T1)
 #define _List_DataFrame _C(CDSP2_List_DataFrame, _, _T1)
@@ -18,6 +19,9 @@ RCtor(_RTClassName)
     RCall(_List_DataFrame, Ctor)(& This -> PhseList);
     This -> GenPhase = 0;
     This -> LeftBound = 0;
+    This -> GDOption.Period = 1.0;
+    This -> GDOption.Alpha  = 0.005;
+    This -> GDOption.Iteration = 100;
     This -> UFreq = 10000.0;
     RInit(_RTClassName);
 }
@@ -38,6 +42,9 @@ RTMethod(void, _T2, CtorSize, int Size)
     RCall(_List_DataFrame, Ctor)(& This -> PhseList);
     This -> GenPhase = 0;
     This -> LeftBound = 0;
+    This -> GDOption.Period = 1.0;
+    This -> GDOption.Alpha  = 0.005;
+    This -> GDOption.Iteration = 100;
     This -> UFreq = 10000.0;
     RInit(_RTClassName);
 }
@@ -52,7 +59,9 @@ RTMethod(void, _T2, From, _RTClassName* Sorc)
     RCall(_SinusoidalBase, From)(_MyBase, (_SinusoidalBase*)Sorc);
     RCall(_List_Int, From)(& This -> PulseList, & Sorc -> PulseList);
     RCall(_List_GnrcFrame, From)(& This -> _T4, & Sorc -> _T4);
+    This -> GenPhase = Sorc -> GenPhase;
     This -> LeftBound = Sorc -> LeftBound;
+    This -> GDOption = Sorc -> GDOption;
 }
 
 RTMethod(void, _T2, Clear)
@@ -106,6 +115,7 @@ RTMethod(static void, _T2, _Analyze, int Direction)
     _DataFrame TempPhse;
     RCall(_GnrcFrame, Ctor)(& TempGnrc);
     RCall(_DataFrame, Ctor)(& TempPhse);
+    _T1* TempWave = NULL;
     
     int i, j;
     int SampleRate = ((_Wave*)This -> _Base.Wave) -> SampleRate;
@@ -123,6 +133,10 @@ RTMethod(static void, _T2, _Analyze, int Direction)
         _T1 F0 = _MyBase -> FreqList[i];
         int N = This -> UFreq / F0;
         int Position = _MyBase -> PulseList.Frames[i];
+        int Period = SampleRate / F0 * This -> GDOption.Period;
+        TempWave = (_T1*)realloc(TempWave, Period * sizeof(_T1));
+        RCall(_IWave, Read)(This -> _Base.Wave, TempWave, Position - Period / 2,
+            Period);
         
         _IfSinu
         (
@@ -131,13 +145,19 @@ RTMethod(static void, _T2, _Analyze, int Direction)
         );
         RCall(_DataFrame, Resize)(& TempPhse, N);
         
-        #define Kill() \
-            _IfSinuE \
-            ( \
-                _T3, \
-                RCall(_Sinusoid, KillDeviatedHarmonics)(& TempGnrc, 30.0), \
-                RCall(_Sinusoid, KillDeviatedHarmonics)(& TempGnrc.Hmnc, 30.0) \
-            )
+        #define GnrcSinu \
+            _IfSinuE(_T3, TempGnrc, TempGnrc.Hmnc)
+        #define GnrcArgP \
+            _IfSinuE(_T3, , N)
+        
+        #define Kill() do {\
+            RCall(_Sinusoid, KillDeviatedHarmonics)(& GnrcSinu, 50.0); \
+            if(fabs(GnrcSinu.Freq[0] - F0) > 20.0) \
+            { \
+                RCall(_Sinusoid, KillDeviatedHarmonics)(& GnrcSinu, 0); \
+                GnrcSinu.Ampl[0] = 0;\
+            } \
+            } while(0)
         
         if(This -> GenPhase)
         {
@@ -146,24 +166,35 @@ RTMethod(static void, _T2, _Analyze, int Direction)
             {
                 _IfSinuE
                 (
-                _T3,
-                RCall(_GnrcFrame, SFromSpectrumWithPhase)(& TempGnrc, & TempPhse,
-                    & _MyBase -> Sublyzer0 -> SpecList.Frames[i],
-                    & This -> _T4.Frames[Index], F0),
-                RCall(_GnrcFrame, SFromSpectrumWithPhase)(& TempGnrc, & TempPhse,
-                    & _MyBase -> Sublyzer0 -> SpecList.Frames[i],
-                    & This -> _T4.Frames[Index], F0, N)
+                    _T3,
+                    RCall(_GnrcFrame, SFromSpectrumWithPhase)(
+                        & TempGnrc,
+                        & TempPhse,
+                        & _MyBase -> Sublyzer0 -> SpecList.Frames[i],
+                        & This -> _T4.Frames[Index], F0),
+                    RCall(_GnrcFrame, SFromSpectrumWithPhase)(
+                        & TempGnrc,
+                        & TempPhse,
+                        & _MyBase -> Sublyzer0 -> SpecList.Frames[i],
+                        & This -> _T4.Frames[Index], F0, N)
                 );
                 Kill();
+                RCall(_Sinusoid, GradientDescentWithPhase)(
+                    & GnrcSinu, & TempPhse, TempWave, Period, SampleRate,
+                    This -> GDOption.Iteration, This -> GDOption.Alpha);
             }else
             {
                 _IfSinuE
                 (
-                _T3,
-                RCall(_GnrcFrame, FromSpectrumWithPhase)(& TempGnrc, & TempPhse,
-                    & _MyBase -> Sublyzer0 -> SpecList.Frames[i], F0),
-                RCall(_GnrcFrame, FromSpectrumWithPhase)(& TempGnrc, & TempPhse,
-                    & _MyBase -> Sublyzer0 -> SpecList.Frames[i], F0, N)
+                    _T3,
+                    RCall(_GnrcFrame, FromSpectrumWithPhase)(
+                        & TempGnrc,
+                        & TempPhse,
+                        & _MyBase -> Sublyzer0 -> SpecList.Frames[i], F0),
+                    RCall(_GnrcFrame, FromSpectrumWithPhase)(
+                        & TempGnrc,
+                        & TempPhse,
+                        & _MyBase -> Sublyzer0 -> SpecList.Frames[i], F0, N)
                 );
             }
         }else
@@ -199,6 +230,7 @@ RTMethod(static void, _T2, _Analyze, int Direction)
         if(This -> GenPhase)
             RCall(_List_DataFrame, Add)(& This -> PhseList, & TempPhse, Index);
     }
+    RFree(TempWave);
     RCall(_GnrcFrame, Dtor)(& TempGnrc);
     RCall(_DataFrame, Dtor)(& TempPhse);
 }
@@ -218,6 +250,7 @@ RTMethod(int , _T2, PrevTo, int Position)
 }
 
 #undef  _Wave
+#undef  _IWave
 #undef  _List_Int
 #undef  _List_GnrcFrame
 #undef  _List_DataFrame
