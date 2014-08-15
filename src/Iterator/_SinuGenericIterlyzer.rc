@@ -208,6 +208,7 @@ RTMethod(int , _T2, IterNextTo, int Position)
     RCall(_SinusoidalBase, IterNextTo)(_MyBase, Position);
     RCall(_RTClassName, _Analyze)(This, 1);
     RCall(_SinusoidalBase, Clear)(_MyBase);
+    return 1;
 }
 
 RTMethod(int , _T2, PrevTo, int Position)
@@ -215,6 +216,7 @@ RTMethod(int , _T2, PrevTo, int Position)
     RCall(_SinusoidalBase, PrevTo)(_MyBase, Position);
     RCall(_RTClassName, _Analyze)(This, -1);
     RCall(_SinusoidalBase, Clear)(_MyBase);
+    return 1;
 }
 
 #undef  _Wave
