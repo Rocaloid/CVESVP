@@ -7,6 +7,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${TopDir}/src -DWITH_ASSERT_ABORT")
 
 add_library(CVESVP SHARED ${SRC_LIST})
 include_directories(CVESVP PUBLIC "${CMAKE_SOURCE_DIR}/src")
+SET_TARGET_PROPERTIES(CVESVP PROPERTIES VERSION 1 SOVERSION 1)
 target_link_libraries(CVESVP CVEDSP2)
 target_link_libraries(CVESVP RFNL)
 target_link_libraries(CVESVP m)
