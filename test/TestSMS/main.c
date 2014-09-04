@@ -25,7 +25,7 @@
 
 #define Stretch 1
 #define Speed 1
-#define FFTSIZE 256
+#define FFTSIZE 128
 
 int main(int argc, char** arg)
 {
@@ -64,16 +64,19 @@ int main(int argc, char** arg)
     CSVP_F0Iterlyzer_Float_PrevTo(& F0Iter, 0);
     
     CSVP_F0PostProcess_Float(& F0Iter.F0List, 4000, 0.15, 100, 700);
-    printf("Got F0.\n");
+    
+    int VOT2 = CSVP_VOTFromF0Match_Float(& F0Iter.F0List, 30, 3, 1000);
+    if(abs(VOT2 - VOT) > 1000)
+        printf("* VOT2: %d\n", VOT2);
     
     HNMIterlyzer HNMIter;
     RCall(HNMIterlyzer, CtorSize)(& HNMIter, 2048);
     HNMIter.GenPhase = 1;
-    //HNMIter.LeftBound = VOT;
+    HNMIter.LeftBound = VOT + 3000;
     
     RCall(HNMIterlyzer, SetHopSize)(& HNMIter, FFTSIZE);
     RCall(HNMIterlyzer, SetWave)(& HNMIter, & XWave);
-    RCall(HNMIterlyzer, SetPosition)(& HNMIter, VOT + 1000);
+    RCall(HNMIterlyzer, SetPosition)(& HNMIter, HNMIter.LeftBound);
     RCall(HNMIterlyzer, SetUpperFreq)(& HNMIter, 10000);
     RCall(HNMIterlyzer, SetPitch)(& HNMIter, & F0Iter.F0List);
     
@@ -154,12 +157,14 @@ int main(int argc, char** arg)
     RCall(List_Sinusoid, Ctor)(& SList);
     RCall(List_HNMFrame, ToSinuList)(& HNMIter.HNMList, & SList);
     
+    /*
     CSVP_SinusoidalFromSinuList_Float(& YWave, & HNMIter.PulseList,
         & SList, & HNMIter.PhseList);
-    /*
+    */
+    
     CSVP_NoiseTurbFromSinuList_Float(& YWave, & XWave, & HNMIter.PulseList,
         & SList, & HNMIter.PhseList);
-    */
+    
     RCall(List_Sinusoid, Dtor)(& SList);
     
     YWave.SampleRate = XWave.SampleRate;

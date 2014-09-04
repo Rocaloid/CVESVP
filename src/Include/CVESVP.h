@@ -13,4 +13,5 @@
 #include <CVESVP/PSOLA.h>
 #include <CVESVP/STFT.h>
 #include <CVESVP/SpecManip.h>
+#include <CVESVP/SNT.h>
 

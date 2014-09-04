@@ -20,6 +20,7 @@ RClass(_RTClassName)
     } Option;
     
     //Private
+    char SeparateNoiz;
     _SinusoidItersizer* SubsizerS;
     _STFTItersizer* SubsizerF;
     int HopSize;
@@ -33,6 +34,7 @@ RTMethod(void, CSVP_HNMItersizer, From, _RTClassName* Sorc);
 RTMethod(void, CSVP_HNMItersizer, Clear);
 
 RTMethod(void, CSVP_HNMItersizer, SetWave, void* Sorc);
+RTMethod(void, CSVP_HNMItersizer, SetNoizWave, void* Sorc);
 RTMethod(void, CSVP_HNMItersizer, SetInitPhase, _DataFrame* Sorc);
 RTMethod(void, CSVP_HNMItersizer, SetPosition, int Position);
 RTMethod(void, CSVP_HNMItersizer, SetHopSize, int HopSize);
