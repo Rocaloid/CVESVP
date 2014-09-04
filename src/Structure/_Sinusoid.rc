@@ -59,7 +59,7 @@ RTMethod(void, CSVP_Sinusoid, From, _RTClassName* Sorc)
 }
 
 RTMethod(void, CSVP_Sinusoid, InterpFrom, _RTClassName* Sorc1,
-    _RTClassName* Sorc2, int Ratio)
+    _RTClassName* Sorc2, _T1 Ratio)
 {
     int MaxSize;
     if(Sorc2 -> Size > Sorc1 -> Size)
@@ -98,7 +98,6 @@ RTMethod(void, CSVP_Sinusoid, ToReal, _T1* Dest, int Size, int SampleRate)
     
     int i, j;
     RCall(CDSP2_VSet, _T1)(Dest, 0, Size);
-    
     
     //For each sinusoid
     for(i = 0; i < N; i ++)
@@ -173,8 +172,7 @@ RTFunc(static _XYPair, CSVP_PeakFromSpectrum, _Spectrum* Sorc, int LInt,
     a2 = c - b - a1;
     x = - a2 / a1 * 0.5;
     
-    if(fabs(x) > 1.0)
-        x = 0;
+    x = (fabs(x) < 1.0) ? x : 0;
     
     Ret.IntX = Max_X;
     Ret.X = ((_T1)Max_X + x) * Sorc -> SampleRate / Sorc -> Size;
@@ -197,7 +195,9 @@ RTMethod(static void, CSVP_Sinusoid, _FromSpectrum, _DataFrame* Dest,
     _T1 Center;
     _T1 LBound, HBound;
     int LInt, HInt;
-    RCall(_DataFrame, Resize)(Dest, This -> Size);
+    if(GenPhase)
+        RCall(_DataFrame, Resize)(Dest, This -> Size);
+    
     for(i = 0; i < This -> Size; i ++)
     {
         Center = (i + 1) * F0;
@@ -266,6 +266,31 @@ RTMethod(void, CSVP_Sinusoid, KillDeviatedHarmonics, _T1 Delta)
         if(fabs(This -> Freq[i] - Center) > Delta)
             This -> Ampl[i] = 0; //Mark as dead.
     }
+}
+
+RTMethod(static void, CSVP_Sinusoid, _GDToReal, _T1* Dest, _DataFrame* Phse,
+    int Size, int SampleRate)
+{
+    _T1 Mult = 2.0 * M_PI / SampleRate;
+    _T1* t = RCall(RAlloc, _T1)(Size);
+    _T1* Tmp1 = RCall(RAlloc, _T1)(Size);
+    int i;
+    for(i = 0; i < Size; i ++)
+        t[i] = i - Size / 2;
+    RCall(CDSP2_VCMul, _T1)(t, t, Mult, Size);
+    
+    RCall(CDSP2_VSet, _T1)(Dest, 0, Size);
+    for(i = 0; i < This -> Size; i ++)
+    {
+        if(This -> Ampl[i] == 0.0) continue;
+        RCall(CDSP2_VCMul, _T1)(Tmp1, t, This -> Freq[i], Size);
+        RCall(CDSP2_VCAdd, _T1)(Tmp1, Tmp1, Phse -> Data[i], Size);
+        RCall(CDSP2_VCos , _T1)(Tmp1, Tmp1, Size);
+        RCall(CDSP2_VFCMA, _T1)(Dest, Tmp1, This -> Ampl[i], Size);
+    }
+    
+    RFree(Tmp1);
+    RFree(t);
 }
 
 #undef  _DataFrame

@@ -1,6 +1,7 @@
 #define _STFTIterlyzer _C(CSVP_STFTIterlyzer, _, _T1)
 #define _Wave _C(CDSP2_Wave, _, _T1)
 #define _Spectrum _C(CDSP2_Spectrum, _, _T1)
+#define _PMatch _C(PMatch_, _T1, _, _T1)
 
 RTFunc(int, CSVP_VOTFromWave, void* Sorc, int LBound, int RBound)
 {
@@ -108,7 +109,33 @@ RTFunc(int, CSVP_OnsetFromWave, void* Sorc, _T1 Threshold, int LBound,
     return i;
 }
 
+RTFunc(int, CSVP_VOTFromF0Match, _PMatch* Sorc, _T1 DeltaFreq, int Num,
+    int Length)
+{
+    if(Sorc -> X_Index < Num)
+        return Sorc -> X[0];
+    
+    int StrokeStart = 0;
+    int StrokeStartPos = (int)Sorc -> X[0];
+    int i;
+    for(i = 0; i <= Sorc -> X_Index - Num; i ++)
+    {
+        if(fabs(Sorc -> Y[i] - Sorc -> Y[StrokeStart]) > DeltaFreq ||
+           (int)Sorc -> X[i] - StrokeStartPos > Length)
+        {
+            StrokeStart = i;
+            StrokeStartPos = (int)Sorc -> X[i];
+        }else if(i - StrokeStart >= Num)
+        {
+            return StrokeStartPos;
+        }
+    }
+    
+    return 0;
+}
+
 #undef  _STFTIterlyzer
 #undef  _Wave
 #undef  _Spectrum
+#undef  _PMatch
 

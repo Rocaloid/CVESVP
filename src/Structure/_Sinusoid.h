@@ -15,7 +15,7 @@ RTMethod(void, CSVP_Sinusoid, CtorSize, int Size);
 RTMethod(void, CSVP_Sinusoid, Resize, int Size);
 RTMethod(void, CSVP_Sinusoid, From, _RTClassName* Sorc);
 RTMethod(void, CSVP_Sinusoid, InterpFrom, _RTClassName* Sorc1,
-    _RTClassName* Sorc2, int Ratio);
+    _RTClassName* Sorc2, _T1 Ratio);
 
 RTMethod(void, CSVP_Sinusoid, Clear);
 

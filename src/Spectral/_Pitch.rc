@@ -45,7 +45,10 @@ RTFunc(void, CSVP_PitchConvertHNMFrame, _HNMContour* Dest, _HNMFrame* Sorc,
     Sum1 = CSVP_EnergyFromHNMFrame_Float(Sorc);
     RCall(_HNMFrame, FromContour)(& TempHNM, Dest, F0, UFreq);
     Sum2 = CSVP_EnergyFromHNMFrame_Float(& TempHNM);
+    
     Ratio = log((1.0 + sqrt(Sum1 / Sum2)) / 2.0);
+    Ratio = Ratio >  4.0 ?  3.0 :
+           (Ratio < -4.0 ? -3.0 : sin(Ratio * M_PI * 0.125) * 3.0);
     
     CSVP_PitchAdjustHNMContour_Float(Dest, Model, F0, SampleRate);
     CDSP2_VCAdd_Float(Dest -> Hmnc, Dest -> Hmnc, Ratio, Dest -> Size / 2 + 1);

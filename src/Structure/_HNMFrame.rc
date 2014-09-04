@@ -159,7 +159,7 @@ RTMethod(void, CSVP_HNMFrame, ToContour, _HNMContour* Dest)
         _T1 Magn = log(This -> Hmnc.Ampl[i]);
         RCall(_PMatch, AddPair)(& BinMatch, Bin, Magn);
     }
-    //Cubie interpolation can be better.
+    //Cubic interpolation can be better.
     _C(CDSP2_MatchInterp_Cosine_, _T1, _, _T1)(Dest -> Hmnc, & BinMatch, -999,
         This -> Size / 2 + 1);
     

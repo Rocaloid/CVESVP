@@ -10,6 +10,7 @@
 RCtor(_RTClassName)
 {
     RCall(_RTClassName, CtorSize)(This, 0);
+    This -> SeparateNoiz = 0;
 }
 
 RDtor(_RTClassName)
@@ -35,6 +36,7 @@ RTMethod(void, CSVP_HNMItersizer, CtorSize, int Size)
     This -> Size = Size;
     This -> InitPosition = 0;
     This -> Option.PhaseControl = 0;
+    This -> SeparateNoiz = 0;
     
     RCall(_SinusoidItersizer, Ctor)(This -> SubsizerS);
     if(Size == 0)
@@ -65,6 +67,7 @@ RTMethod(void, CSVP_HNMItersizer, From, _RTClassName* Sorc)
     This -> HopSize = Sorc -> HopSize;
     This -> InitPosition = Sorc -> InitPosition;
     This -> Option = Sorc -> Option;
+    This -> SeparateNoiz = Sorc -> SeparateNoiz;
 }
 
 RTMethod(void, CSVP_HNMItersizer, Clear)
@@ -78,7 +81,14 @@ RTMethod(void, CSVP_HNMItersizer, Clear)
 RTMethod(void, CSVP_HNMItersizer, SetWave, void* Sorc)
 {
     RCall(_SinusoidItersizer, SetWave)(This -> SubsizerS, Sorc);
-    RCall(_STFTItersizer    , SetWave)(This -> SubsizerF, Sorc);
+    if(! This -> SeparateNoiz)
+        RCall(_STFTItersizer, SetWave)(This -> SubsizerF, Sorc);
+}
+
+RTMethod(void, CSVP_HNMItersizer, SetNoizWave, void* Sorc)
+{
+    RCall(_STFTItersizer, SetWave)(This -> SubsizerF, Sorc);
+    This -> SeparateNoiz = 1;
 }
 
 RTMethod(void, CSVP_HNMItersizer, SetInitPhase, _DataFrame* Sorc)

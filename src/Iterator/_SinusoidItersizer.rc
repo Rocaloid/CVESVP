@@ -126,7 +126,8 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
         { \
             Dest.Data[i] = 2 * M_PI; \
         } \
-    }
+    } else \
+        RCall(_DataFrame, Resize)(& Dest, NewSize)
 
 #define _FillUp(Less, More) \
     do \
@@ -137,9 +138,9 @@ RTMethod(int , CSVP_SinusoidItersizer, GetPosition)
             _C1(Less, Sinu) -> Freq[i] = _C1(More, Sinu) -> Freq[i]; \
             _C1(Less, Sinu) -> Ampl[i] = 0; \
         } \
-        _ExpandPhase(This -> LastPhse, _C1(More, Sinu) -> Size) \
-        _ExpandPhase(TempPhse, _C1(More, Sinu) -> Size) \
-        _ExpandPhase(This -> InitPhse, _C1(More, Sinu) -> Size) \
+        _ExpandPhase(This -> LastPhse, _C1(More, Sinu) -> Size); \
+        _ExpandPhase(TempPhse, _C1(More, Sinu) -> Size); \
+        _ExpandPhase(This -> InitPhse, _C1(More, Sinu) -> Size); \
     } while(0)
 
 #define _Pk4InterpMul(Dest, Sorc1, Sorc2, Mul) \
@@ -331,6 +332,11 @@ RTMethod(static void, CSVP_SinusoidItersizer, _GenPhase, _DataFrame* Dest,
     }else
         RCall(_DataFrame, From)(& DestPhse, & This -> InitPhse);
     
+    if(DestPhse.Size > This -> SinuList.Frames[DIndex].Size)
+    {
+        RCall(_DataFrame, Resize)(& DestPhse,
+            This -> SinuList.Frames[DIndex].Size);
+    }
     if(This -> Option.PhaseControl != CSVP_PhaseFlag_Regen)
     RCall(CSVP_PhaseShift, _T1)(
         /* Dest     */ Dest,
@@ -396,9 +402,9 @@ RTMethod(void, CSVP_SinusoidItersizer, _Full, int SIndex, int DIndex,
             RCall(_RTClassName, _Compress)(This);
         
         if(Direction == 1)
-            RCall(_RTClassName, _GenPhase)(This, & TempPhse, j + 1);
+            RCall(_RTClassName, _GenPhase)(This, & TempPhse, HIndex);
         else
-            RCall(_RTClassName, _GenPhase)(This, & TempPhse, j - 1);
+            RCall(_RTClassName, _GenPhase)(This, & TempPhse, LIndex);
         
         if(Direction == 1)
         {
@@ -517,8 +523,8 @@ RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
     This -> LastPosition = This -> InitPosition;
     This -> LastPositionP = This -> InitPosition;
     
-    int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList,
-        This -> LastPosition) + 1;
+    int HIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
+        This -> LastPosition);
     int LIndex = RCall(_List_Int, IndexAfter)(& This -> PulseList,
         Position);
     
@@ -529,7 +535,7 @@ RTMethod(void, CSVP_SinusoidItersizer, PrevTo, int Position)
     _InsertInterp(Position, This -> LastPosition);
     
     RCall(_RTClassName, _Compress)(This);
-    RCall(_RTClassName, _Full)(This, HIndex, LIndex, -1);
+    RCall(_RTClassName, _Full)(This, HIndex + 1, LIndex, -1);
     
     RCall(_DataFrame, From)(& This -> LastPhse, & OrigPhse);
     This -> LastPosition = OrigPosition;
