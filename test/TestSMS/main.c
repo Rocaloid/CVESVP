@@ -157,14 +157,25 @@ int main(int argc, char** arg)
     RCall(List_Sinusoid, Ctor)(& SList);
     RCall(List_HNMFrame, ToSinuList)(& HNMIter.HNMList, & SList);
     
-    /*
     CSVP_SinusoidalFromSinuList_Float(& YWave, & HNMIter.PulseList,
         & SList, & HNMIter.PhseList);
-    */
     
+    for(i = 0; i <= YWave.Size; i ++)
+    {
+        if(YWave.Data[i] > 0.015)
+            break;
+    }
+    float VOTSelMax = CDSP2_VMaxElmt_Float(YWave.Data, i, i + 1500);
+    int VOTSelDest = i + 1500;
+    for(; i < VOTSelDest; i ++)
+        if(YWave.Data[i] > VOTSelMax / 2)
+            break;
+    
+    printf("Refined VOT: %d\n", i);
+    /*
     CSVP_NoiseTurbFromSinuList_Float(& YWave, & XWave, & HNMIter.PulseList,
         & SList, & HNMIter.PhseList);
-    
+    */
     RCall(List_Sinusoid, Dtor)(& SList);
     
     YWave.SampleRate = XWave.SampleRate;
