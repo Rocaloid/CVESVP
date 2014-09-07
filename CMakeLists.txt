@@ -15,7 +15,7 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES x86_64* OR ${CMAKE_SYSTEM_PROCESSOR} MA
 elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES i686* OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES i386*)
     add_definitions(-march=i686 -mtune=generic -mtune=core2 -mtune=core-avx-i)
 else()
-    message(FATAL_ERROR ${CMAKE_SYSTEM_PROCESSOR}: "Your system is unsupported!")
+    #message(FATAL_ERROR ${CMAKE_SYSTEM_PROCESSOR}: "Your system is unsupported!")
 endif()
 
 
