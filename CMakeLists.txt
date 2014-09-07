@@ -7,17 +7,19 @@ endif()
 
 add_definitions(-std=gnu99 -Wall)
 
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES armv7l)
-    #Make it support armv7 platform
+# RUtil2 should work on any platform.
+if    (${CMAKE_SYSTEM_PROCESSOR} MATCHES armv7l)
     add_definitions(-march=armv7 -mfloat-abi=hard -mfpu=neon)
-elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES x86_64* OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES amd64* OR ${CMAKE_SYSTEM_NAME} MATCHES Darwin*)
+elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES x86_64*
+    OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES amd64*
+    OR ${CMAKE_SYSTEM_NAME}      MATCHES Darwin*)
     add_definitions(-march=x86-64 -mtune=generic -mtune=core2 -mtune=core-avx-i)
-elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES i686* OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES i386*)
+elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES i686*
+    OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES i386*
+    OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES x86*)
     add_definitions(-march=i686 -mtune=generic -mtune=core2 -mtune=core-avx-i)
-else()
-    #message(FATAL_ERROR ${CMAKE_SYSTEM_PROCESSOR}: "Your system is unsupported!")
 endif()
-
+message("-- Detected Supported Platform: " ${CMAKE_SYSTEM_PROCESSOR})
 
 # Because of inline functions, we cannot use -O0 for debug.
 set(CMAKE_C_FLAGS_DEBUG "-O2 -ffast-math -g")
