@@ -58,6 +58,21 @@ RTMethod(void, CSVP_HNMFrame, From, _RTClassName* Sorc)
     This -> SampleRate = Sorc -> SampleRate;
 }
 
+RTMethod(void, CSVP_HNMFrame, InterpFrom, _RTClassName* Sorc1,
+    _RTClassName* Sorc2, _T1 Ratio)
+{
+    RAssert(Sorc1 -> Size == Sorc2 -> Size, "Size of sources does not match.");
+    RCall(_RTClassName, Resize)(This, Sorc1 -> Size, Sorc1 -> Hmnc.Size);
+    RCall(_Sinusoid, InterpFrom)(& This -> Hmnc,
+        & Sorc1 -> Hmnc, & Sorc2 -> Hmnc, Ratio);
+    
+    RCall(CDSP2_VSet,  _T1)(This -> Noiz, 0, This -> Size / 2 + 1);
+    RCall(CDSP2_VFCMA, _T1)(This -> Noiz, Sorc1 -> Noiz, 1.0 - Ratio,
+        This -> Size / 2 + 1);
+    RCall(CDSP2_VFCMA, _T1)(This -> Noiz, Sorc2 -> Noiz, Ratio,
+        This -> Size / 2 + 1);
+}
+
 RTMethod(static void, CSVP_HNMFrame, _FromSpectrum, _DataFrame* Dest,
     _Spectrum* Sorc, _RTClassName* Prev, _T1 F0, int SinuNum, int GenPhase)
 {

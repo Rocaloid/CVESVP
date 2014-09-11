@@ -18,6 +18,8 @@ RClass(_RTClassName)
 RTMethod(void, CSVP_HNMFrame, CtorSize, int Size, int HNum);
 RTMethod(void, CSVP_HNMFrame, Resize, int Size, int HNum);
 RTMethod(void, CSVP_HNMFrame, From, _RTClassName* Sorc);
+RTMethod(void, CSVP_HNMFrame, InterpFrom, _RTClassName* Sorc1,
+    _RTClassName* Sorc2, _T1 Ratio);
 
 RTMethod(void, CSVP_HNMFrame, Clear);
 

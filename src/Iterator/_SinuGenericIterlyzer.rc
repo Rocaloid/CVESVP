@@ -19,6 +19,8 @@ RCtor(_RTClassName)
     RCall(_List_DataFrame, Ctor)(& This -> PhseList);
     This -> GenPhase = 0;
     This -> LeftBound = 0;
+    This -> DThreshold = 50.0;
+    This -> DFThreshold = 20.0;
     This -> UFreq = 10000.0;
     RInit(_RTClassName);
 }
@@ -39,6 +41,8 @@ RTMethod(void, _T2, CtorSize, int Size)
     RCall(_List_DataFrame, Ctor)(& This -> PhseList);
     This -> GenPhase = 0;
     This -> LeftBound = 0;
+    This -> DThreshold = 50.0;
+    This -> DFThreshold = 20.0;
     This -> UFreq = 10000.0;
     RInit(_RTClassName);
 }
@@ -55,6 +59,8 @@ RTMethod(void, _T2, From, _RTClassName* Sorc)
     RCall(_List_GnrcFrame, From)(& This -> _T4, & Sorc -> _T4);
     This -> GenPhase = Sorc -> GenPhase;
     This -> LeftBound = Sorc -> LeftBound;
+    This -> DThreshold = Sorc -> DThreshold;
+    This -> DFThreshold = Sorc -> DFThreshold;
 }
 
 RTMethod(void, _T2, Clear)
@@ -140,8 +146,9 @@ RTMethod(static void, _T2, _Analyze, int Direction)
             _IfSinuE(_T3, , N)
         
         #define Kill() do {\
-            RCall(_Sinusoid, KillDeviatedHarmonics)(& GnrcSinu, 50.0); \
-            if(fabs(GnrcSinu.Freq[0] - F0) > 20.0) \
+            RCall(_Sinusoid, KillDeviatedHarmonics) \
+                (& GnrcSinu, This -> DThreshold); \
+            if(fabs(GnrcSinu.Freq[0] - F0) > This -> DFThreshold) \
             { \
                 RCall(_Sinusoid, KillDeviatedHarmonics)(& GnrcSinu, 0); \
                 GnrcSinu.Ampl[0] = 0;\
