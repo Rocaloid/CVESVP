@@ -216,8 +216,6 @@ RTMethod(void, CSVP_HNMItersizer, PrevTo, int Position)
     int LIndex = RCall(_List_Int, IndexAfter )(& This -> PulseList, End);
     int HIndex = RCall(_List_Int, IndexBefore)(& This -> PulseList, Start);
     
-    if(LIndex == HIndex) return;
-    
     //Dump data into SubsizerS.
     int i;
     for(i = LIndex - 1; i <= HIndex + 1; i ++)
