@@ -28,6 +28,7 @@ RClass(CSVP_PitchModel)
     PMatch_Float_Float PhseCurve; //Phase coherence with Pitch
 };
 
+void CSVP_PitchModel_From(First, CSVP_PitchModel* Sorc);
 void CSVP_PitchModel_SetDefault(First, int Gender);
 
 CSVP_SpectralDecay CSVP_PitchModel_GetDecay(First, float F0);

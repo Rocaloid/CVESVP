@@ -24,6 +24,21 @@ RDtor(CSVP_PitchModel)
     RCall(_PMatch, Dtor)(& This -> PhseCurve);
 }
 
+void CSVP_PitchModel_From(First, CSVP_PitchModel* Sorc)
+{
+    This -> LDecay_F0 = Sorc -> LDecay_F0;
+    This -> LDecay_Sensitivity = Sorc -> LDecay_Sensitivity;
+    This -> LDecay_Center = Sorc -> LDecay_Center;
+    This -> LDecay_Bound = Sorc -> LDecay_Bound;
+    This -> HDecay_F0 = Sorc -> HDecay_F0;
+    This -> HDecay_Sensitivity = Sorc -> HDecay_Sensitivity;
+    This -> HDecay_Center = Sorc -> HDecay_Center;
+    This -> HDecay_Bound = Sorc -> HDecay_Bound;
+    RCall(_PMatch, From)(& This -> HmncCurve, & Sorc -> HmncCurve);
+    RCall(_PMatch, From)(& This -> NoizCurve, & Sorc -> NoizCurve);
+    RCall(_PMatch, From)(& This -> PhseCurve, & Sorc -> PhseCurve);
+}
+
 void CSVP_PitchModel_SetDefault(First, int Gender)
 {
     //Currently Gender option is neglected.
