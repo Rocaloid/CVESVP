@@ -37,6 +37,7 @@ RTMethod(void, CSVP_HNMContour, Resize, int Size)
 
 RTMethod(void, CSVP_HNMContour, From, _RTClassName* Sorc)
 {
+    if(Sorc -> Size <= 0) return;
     RCall(_RTClassName, Resize)(This, Sorc -> Size);
     RCall(CDSP2_VCopy, _T1)(This -> Hmnc, Sorc -> Hmnc, Sorc -> Size / 2 + 1);
     RCall(CDSP2_VCopy, _T1)(This -> Noiz, Sorc -> Noiz, Sorc -> Size / 2 + 1);
@@ -44,6 +45,7 @@ RTMethod(void, CSVP_HNMContour, From, _RTClassName* Sorc)
 
 RTMethod(void, CSVP_HNMContour, Clear)
 {
+    if(This -> Size <= 0) return;
     RCall(CDSP2_VSet, _T1)(This -> Hmnc, 0, This -> Size / 2 + 1);
     RCall(CDSP2_VSet, _T1)(This -> Noiz, 0, This -> Size / 2 + 1);
 }
