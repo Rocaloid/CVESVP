@@ -293,6 +293,100 @@ RTMethod(static void, CSVP_Sinusoid, _GDToReal, _T1* Dest, _DataFrame* Phse,
     RFree(t);
 }
 
+#define GDUpperBound 5
+RTMethod(void, CSVP_Sinusoid, GradientDescentWithPhase, _DataFrame* Phse,
+    _T1* Sorc, int Size, int SampleRate, int Iteration, _T1 Alpha)
+{
+    _T1 Mult = 2.0 * M_PI / SampleRate;
+    _T1* t = RCall(RAlloc, _T1)(Size);
+    _T1* Tmp1 = RCall(RAlloc, _T1)(Size);
+    _T1* Tmp2 = RCall(RAlloc, _T1)(Size);
+    _T1 Err;
+    int i, n;
+    for(i = 0; i < Size; i ++)
+        t[i] = i - Size / 2;
+    RCall(CDSP2_VCMul, _T1)(t, t, Mult, Size);
+    
+    #define EstSub(DestTmp) \
+        RCall(_RTClassName, _GDToReal)(This, DestTmp, Phse, Size, SampleRate); \
+        RCall(CDSP2_VSub, _T1)(Tmp1, Sorc, DestTmp, Size)
+    
+    _T1* dAmpl = RCall(RAlloc, _T1)(This -> Size);
+    _T1* dPhse = RCall(RAlloc, _T1)(This -> Size);
+    _T1* OAmpl = RCall(RAlloc, _T1)(This -> Size);
+    _T1* OPhse = RCall(RAlloc, _T1)(This -> Size);
+    RCall(CDSP2_VCopy, _T1)(OAmpl, This -> Ampl, This -> Size);
+    RCall(CDSP2_VCopy, _T1)(OPhse, Phse -> Data, This -> Size);
+    
+    for(i = 0; i < This -> Size; i ++)
+        Phse -> Data[i] += M_PI;
+    
+    EstSub(Tmp1);
+    RCall(CDSP2_VMul, _T1)(Tmp2, Tmp1, Tmp1, Size);
+    _T1 OErr = RCall(CDSP2_VSum, _T1)(Tmp2, 0, Size);
+    
+    for(n = 0; n < Iteration; n ++)
+    {
+        EstSub(Tmp1);
+        
+        //Gradient of Ampl
+        for(i = 0; i < GDUpperBound; i ++)
+        {
+            if(This -> Ampl[i] == 0.0)
+            {
+                dAmpl[i] = 0;
+                continue;
+            }
+            RCall(CDSP2_VCMul, _T1)(Tmp2, t, This -> Freq[i], Size);
+            RCall(CDSP2_VCAdd, _T1)(Tmp2, Tmp2, Phse -> Data[i], Size);
+            RCall(CDSP2_VCos , _T1)(Tmp2, Tmp2, Size);
+            RCall(CDSP2_VMul , _T1)(Tmp2, Tmp1, Tmp2, Size);
+            dAmpl[i] = -2 * RCall(CDSP2_VSum ,_T1)(Tmp2, 0, Size) * Alpha;
+        }
+        
+        //Gradient of Phse
+        for(i = 0; i < GDUpperBound; i ++)
+        {
+            if(This -> Ampl[i] == 0.0)
+            {
+                dPhse[i] = 0;
+                continue;
+            }
+            RCall(CDSP2_VCMul, _T1)(Tmp2, t, This -> Freq[i], Size);
+            RCall(CDSP2_VCAdd, _T1)(Tmp2, Tmp2, Phse -> Data[i], Size);
+            RCall(CDSP2_VSin , _T1)(Tmp2, Tmp2, Size);
+            RCall(CDSP2_VMul , _T1)(Tmp2, Tmp1, Tmp2, Size);
+            dPhse[i] = 2 * RCall(CDSP2_VSum ,_T1)(Tmp2, 0, Size)
+                     * This -> Ampl[i] * Alpha;
+        }
+        
+        RCall(CDSP2_VSub, _T1)(This -> Ampl, This -> Ampl, dAmpl, GDUpperBound);
+        RCall(CDSP2_VSub, _T1)(Phse -> Data, Phse -> Data, dPhse, GDUpperBound);
+    }
+    
+    for(i = 0; i < This -> Size; i ++)
+        Phse -> Data[i] -= M_PI;
+    
+    RCall(CDSP2_VMul, _T1)(Tmp2, Tmp1, Tmp1, Size);
+    Err = RCall(CDSP2_VSum, _T1)(Tmp2, 0, Size);
+    
+    if(Err > OErr)
+    {
+        //Training failed.
+        RCall(CDSP2_VCopy, _T1)(This -> Ampl, OAmpl, This -> Size);
+        RCall(CDSP2_VCopy, _T1)(Phse -> Data, OPhse, This -> Size);
+    }
+    
+    RFree(OAmpl);
+    RFree(OPhse);
+    RFree(dAmpl);
+    RFree(dPhse);
+    RFree(t);
+    RFree(Tmp1);
+    RFree(Tmp2);
+}
+
+
 #undef  _DataFrame
 #undef  _Spectrum
 #undef  _XYPair

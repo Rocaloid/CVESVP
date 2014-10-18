@@ -21,6 +21,9 @@ RCtor(_RTClassName)
     This -> LeftBound = 0;
     This -> DThreshold = 50.0;
     This -> DFThreshold = 20.0;
+    This -> GDOption.Period = 1.0;
+    This -> GDOption.Alpha  = 0.005;
+    This -> GDOption.Iteration = 100;
     This -> UFreq = 10000.0;
     RInit(_RTClassName);
 }
@@ -43,6 +46,9 @@ RTMethod(void, _T2, CtorSize, int Size)
     This -> LeftBound = 0;
     This -> DThreshold = 50.0;
     This -> DFThreshold = 20.0;
+    This -> GDOption.Period = 1.0;
+    This -> GDOption.Alpha  = 0.005;
+    This -> GDOption.Iteration = 100;
     This -> UFreq = 10000.0;
     RInit(_RTClassName);
 }
@@ -61,6 +67,8 @@ RTMethod(void, _T2, From, _RTClassName* Sorc)
     This -> LeftBound = Sorc -> LeftBound;
     This -> DThreshold = Sorc -> DThreshold;
     This -> DFThreshold = Sorc -> DFThreshold;
+    This -> GDOption = Sorc -> GDOption;
+    This -> UFreq = Sorc -> UFreq;
 }
 
 RTMethod(void, _T2, Clear)
@@ -133,6 +141,11 @@ RTMethod(static void, _T2, _Analyze, int Direction)
         int N = This -> UFreq / F0;
         int Position = _MyBase -> PulseList.Frames[i];
         
+        int Period = SampleRate / F0 * This -> GDOption.Period;
+        TempWave = (_T1*)realloc(TempWave, Period * sizeof(_T1));
+        RCall(_IWave, Read)(This -> _Base.Wave, TempWave, Position - Period / 2,
+            Period);
+        
         _IfSinu
         (
             _T3,
@@ -175,6 +188,9 @@ RTMethod(static void, _T2, _Analyze, int Direction)
                         & This -> _T4.Frames[Index], F0, N)
                 );
                 Kill();
+                RCall(_Sinusoid, GradientDescentWithPhase)(
+                    & GnrcSinu, & TempPhse, TempWave, Period, SampleRate,
+                    This -> GDOption.Iteration, This -> GDOption.Alpha);
             }else
             {
                 _IfSinuE
@@ -223,6 +239,7 @@ RTMethod(static void, _T2, _Analyze, int Direction)
         if(This -> GenPhase)
             RCall(_List_DataFrame, Add)(& This -> PhseList, & TempPhse, Index);
     }
+    RFree(TempWave);
     RCall(_GnrcFrame, Dtor)(& TempGnrc);
     RCall(_DataFrame, Dtor)(& TempPhse);
 }
