@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(CVESVP)
+project(RFNL)
 
-if(TARGET CVESVP)
+if(TARGET RFNL)
     return()
 endif()
 
@@ -13,27 +13,25 @@ else()
 endif()
 
 file(GLOB_RECURSE SRC_SOURCES "src/*.c")
-add_library(CVESVP STATIC ${SRC_SOURCES})
-set_target_properties(CVESVP PROPERTIES
+add_library(RFNL STATIC ${SRC_SOURCES})
+set_target_properties(RFNL PROPERTIES
     C_STANDARD 99
     POSITION_INDEPENDENT_CODE ON
 )
-target_include_directories(CVESVP PRIVATE "src")
-target_link_libraries(CVESVP m)
+target_include_directories(RFNL PRIVATE "src")
+target_link_libraries(RFNL m)
 
 add_subdirectory(external/RUtil2)
-add_subdirectory(external/RFNL)
-add_subdirectory(external/CVEDSP2)
-target_link_libraries(CVESVP RUtil2 RFNL CVEDSP2)
+target_link_libraries(RFNL RUtil2)
 
 # Arrange header files for external use
-add_custom_command(TARGET CVESVP POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "include/CVESVP")
-add_custom_command(TARGET CVESVP POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/src/Include/CVESVP.h" "include/CVESVP.h")
+add_custom_command(TARGET RFNL POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "include/RFNL")
+add_custom_command(TARGET RFNL POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/src/Include/RFNL.h" "include/RFNL.h")
 file(GLOB_RECURSE SRC_HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src" "src/*.h")
 foreach(SRC_HEADER ${SRC_HEADERS})
-    add_custom_command(TARGET CVESVP POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/src/${SRC_HEADER}" "include/CVESVP/${SRC_HEADER}")
+    add_custom_command(TARGET RFNL POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/src/${SRC_HEADER}" "include/RFNL/${SRC_HEADER}")
 endforeach()
-target_include_directories(CVESVP INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/include")
+target_include_directories(RFNL INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")  # Test subproject
     include(CTest)
